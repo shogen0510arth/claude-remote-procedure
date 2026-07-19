@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Claude CodeのCLI・IDE・Macアプリ・iPhoneアプリの違いと、各機能で具体的にできること、今回の運用でのおすすめ構成をまとめたガイド。">
+<title>Claude Code プラットフォーム比較と機能ガイド</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+<style>
+:root{
+  --bg:#faf9f7;
+  --bg-elev:#ffffff;
+  --bg-sunken:#f2f0ed;
+  --text:#1f1e1d;
+  --text-muted:#6b6862;
+  --text-faint:#918d85;
+  --border:#e5e1db;
+  --border-strong:#d6d1c9;
+  --accent:#c4552f;
+  --accent-soft:#fdf1ec;
+  --accent-border:#f0c9b8;
+  --warn:#a8620a;
+  --warn-soft:#fdf4e7;
+  --warn-border:#f0dcb8;
+  --info:#2b6a8f;
+  --info-soft:#eaf3f8;
+  --info-border:#c2ddeb;
+  --code-bg:#282521;
+  --code-text:#e8e3db;
+  --code-inline-bg:#f0ede8;
+  --code-inline-text:#a8442a;
+  --shadow-sm:0 1px 2px rgba(31,30,29,.05);
+  --shadow-md:0 4px 16px -4px rgba(31,30,29,.10),0 2px 4px rgba(31,30,29,.04);
+  --shadow-lg:0 16px 48px -12px rgba(31,30,29,.24);
+  --radius:14px;
+  --radius-sm:9px;
+  --font:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --header-h:56px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1917;
+    --bg-elev:#232120;
+    --bg-sunken:#141312;
+    --text:#eeebe6;
+    --text-muted:#a5a099;
+    --text-faint:#7d7871;
+    --border:#35322e;
+    --border-strong:#474340;
+    --accent:#e2825c;
+    --accent-soft:#2e211b;
+    --accent-border:#5a3d2e;
+    --warn:#d6a05a;
+    --warn-soft:#2b2317;
+    --warn-border:#54432a;
+    --info:#7db8d8;
+    --info-soft:#182630;
+    --info-border:#2f4a5c;
+    --code-bg:#121110;
+    --code-text:#ded9d1;
+    --code-inline-bg:#2c2926;
+    --code-inline-text:#e9a184;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+    --shadow-md:0 4px 16px -4px rgba(0,0,0,.5);
+    --shadow-lg:0 16px 48px -12px rgba(0,0,0,.7);
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 16px);-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.85;
+  font-size:16px;
+  letter-spacing:.01em;
+  -webkit-font-smoothing:antialiased;
+  overflow-wrap:break-word;
+  word-break:normal;
+  line-break:strict;
+}
+body.nav-open{overflow:hidden}
+
+/* ---------- progress ---------- */
+#progress{
+  position:fixed;top:0;left:0;height:2.5px;width:0;
+  background:linear-gradient(90deg,var(--accent),#e0a06f);
+  z-index:60;transition:width .1s linear;
+}
+
+/* ---------- header ---------- */
+header{
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  padding-top:env(safe-area-inset-top);
+  height:calc(var(--header-h) + env(safe-area-inset-top));
+  background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:saturate(180%) blur(14px);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--border);
+  z-index:50;
+  display:flex;align-items:center;gap:12px;
+  padding-left:max(16px,env(safe-area-inset-left));
+  padding-right:max(16px,env(safe-area-inset-right));
+}
+.header-inner{display:flex;align-items:center;gap:12px;width:100%;max-width:1200px;margin:0 auto;height:var(--header-h)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;letter-spacing:.02em;min-width:0}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.brand span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu-btn{
+  margin-left:auto;flex:none;
+  width:38px;height:38px;border-radius:10px;
+  border:1px solid var(--border-strong);background:var(--bg-elev);
+  color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.menu-btn:active{transform:scale(.94)}
+.menu-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round}
+
+/* ---------- layout ---------- */
+.wrap{
+  max-width:1200px;margin:0 auto;
+  padding:calc(var(--header-h) + env(safe-area-inset-top)) max(18px,env(safe-area-inset-left)) 0 max(18px,env(safe-area-inset-right));
+  display:block;
+}
+main{min-width:0;padding-bottom:64px}
+
+/* ---------- hero ---------- */
+.hero{padding:40px 0 30px;border-bottom:1px solid var(--border);margin-bottom:34px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;letter-spacing:.09em;
+  color:var(--accent);background:var(--accent-soft);
+  border:1px solid var(--accent-border);
+  padding:5px 11px;border-radius:999px;margin-bottom:16px;
+}
+.hero h1{
+  font-size:clamp(27px,7.6vw,44px);
+  line-height:1.32;font-weight:800;letter-spacing:-.01em;
+  margin-bottom:14px;
+}
+.hero p.lead{font-size:15px;color:var(--text-muted);line-height:1.8;margin-bottom:20px}
+.hero p.lead b{color:var(--text)}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-size:11.5px;font-weight:600;
+  background:var(--bg-elev);border:1px solid var(--border);
+  color:var(--text-muted);
+  padding:5px 10px;border-radius:8px;white-space:nowrap;
+}
+.chip b{color:var(--text);font-weight:700}
+.chip.link{color:var(--accent);border-color:var(--accent-border);background:var(--accent-soft);text-decoration:none}
+.chip.link:active{opacity:.6}
+
+/* ---------- toc card (mobile inline) ---------- */
+.toc-card{
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px 16px;margin-bottom:38px;
+  box-shadow:var(--shadow-sm);
+}
+.toc-card h2{font-size:12px;letter-spacing:.1em;color:var(--text-faint);font-weight:700;margin-bottom:12px}
+.toc-card ol{list-style:none;display:flex;flex-direction:column;gap:2px}
+.toc-card a{
+  display:flex;align-items:center;gap:11px;
+  padding:9px 8px;border-radius:9px;
+  color:var(--text);text-decoration:none;font-size:14.5px;font-weight:600;
+  -webkit-tap-highlight-color:transparent;
+}
+.toc-card a:active{background:var(--bg-sunken)}
+.toc-card .num{
+  flex:none;width:24px;height:24px;border-radius:7px;
+  background:var(--accent-soft);border:1px solid var(--accent-border);
+  color:var(--accent);font-size:11.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- sections ---------- */
+.chapter{margin-bottom:52px;scroll-margin-top:calc(var(--header-h) + 20px)}
+.chapter-head{
+  display:flex;align-items:center;gap:13px;
+  padding-bottom:14px;margin-bottom:26px;
+  border-bottom:2px solid var(--accent);
+}
+.chapter-head .badge{
+  flex:none;
+  min-width:34px;height:34px;padding:0 8px;border-radius:9px;
+  background:var(--accent);color:#fff;
+  font-size:15px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+  box-shadow:0 2px 8px -2px color-mix(in srgb,var(--accent) 60%,transparent);
+}
+.chapter-head h2{font-size:clamp(20px,5.4vw,27px);font-weight:800;letter-spacing:-.005em;line-height:1.4}
+
+h3{
+  font-size:clamp(17px,4.5vw,20px);font-weight:700;
+  margin:38px 0 14px;line-height:1.5;
+  scroll-margin-top:calc(var(--header-h) + 20px);
+  padding-left:13px;border-left:3.5px solid var(--accent);
+}
+h3:first-of-type{margin-top:0}
+h4{
+  font-size:15px;font-weight:700;color:var(--text);
+  margin:26px 0 10px;
+  display:flex;align-items:center;gap:8px;
+}
+h4::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--text-faint);flex:none}
+
+p{margin:0 0 14px}
+p:last-child{margin-bottom:0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-border)}
+a:active{opacity:.6}
+
+/* ---------- lists ---------- */
+ul.bullets,ol.steps{margin:0 0 16px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.bullets li{position:relative;padding-left:19px;line-height:1.8}
+ul.bullets li::before{
+  content:"";position:absolute;left:3px;top:.72em;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);opacity:.55;
+}
+ol.steps{counter-reset:s}
+ol.steps li{position:relative;padding-left:34px;counter-increment:s;line-height:1.8;min-height:24px}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:.28em;
+  width:23px;height:23px;border-radius:7px;
+  background:var(--bg-sunken);border:1px solid var(--border-strong);
+  color:var(--text-muted);
+  font-size:11.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- code ---------- */
+.code{
+  position:relative;
+  background:var(--code-bg);border-radius:var(--radius-sm);
+  margin:0 0 18px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:var(--shadow-sm);
+}
+.code-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 8px 0 13px;height:34px;
+  background:rgba(255,255,255,.04);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.code-lang{
+  font-family:var(--mono);font-size:10.5px;font-weight:600;
+  color:#a09a90;letter-spacing:.07em;
+}
+.copy{
+  font-family:var(--font);font-size:11px;font-weight:600;
+  background:transparent;border:1px solid rgba(255,255,255,.15);
+  color:#cec8bf;padding:4px 9px;border-radius:6px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.copy:active{transform:scale(.94)}
+.copy.done{color:#7fca8f;border-color:#3f6b48}
+.code pre{
+  margin:0;padding:14px 13px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  font-family:var(--mono);font-size:12.5px;line-height:1.75;
+  color:var(--code-text);
+  tab-size:2;
+}
+.code pre code{white-space:pre;font-family:inherit}
+code:not(pre code){
+  font-family:var(--mono);font-size:.855em;
+  background:var(--code-inline-bg);color:var(--code-inline-text);
+  padding:2px 5px;border-radius:5px;
+  border:1px solid var(--border);
+  white-space:nowrap;
+}
+
+/* prompt template variant */
+.code.prompt{background:var(--bg-sunken);border:1px solid var(--border-strong)}
+.code.prompt .code-head{background:transparent;border-bottom:1px dashed var(--border-strong)}
+.code.prompt .code-lang{color:var(--accent)}
+.code.prompt .copy{border-color:var(--border-strong);color:var(--text-muted)}
+.code.prompt pre{color:var(--text);font-size:13px;white-space:pre-wrap;word-break:break-word;line-break:strict}
+.code.prompt pre code{white-space:pre-wrap}
+
+/* ---------- callouts ---------- */
+.note{
+  border-radius:var(--radius-sm);
+  padding:14px 15px;margin:0 0 18px;
+  border:1px solid;font-size:14.5px;line-height:1.78;
+}
+.note .note-title{
+  display:flex;align-items:center;gap:7px;
+  font-weight:700;font-size:12.5px;letter-spacing:.03em;
+  margin-bottom:7px;
+}
+.note .note-title svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.note.warn{background:var(--warn-soft);border-color:var(--warn-border)}
+.note.warn .note-title{color:var(--warn)}
+.note.info{background:var(--info-soft);border-color:var(--info-border)}
+.note.info .note-title{color:var(--info)}
+.note.tip{background:var(--accent-soft);border-color:var(--accent-border)}
+.note.tip .note-title{color:var(--accent)}
+.note p:last-child{margin-bottom:0}
+.note code:not(pre code){background:color-mix(in srgb,var(--bg-elev) 70%,transparent)}
+
+/* ---------- table ---------- */
+.table-scroll{
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  margin:0 0 18px;
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--bg-elev);box-shadow:var(--shadow-sm);
+}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:440px}
+table.wide{min-width:640px}
+thead th{
+  background:var(--bg-sunken);
+  text-align:left;font-weight:700;font-size:11.5px;letter-spacing:.06em;
+  color:var(--text-faint);
+  padding:11px 14px;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.7}
+tbody tr:last-child td{border-bottom:none}
+tbody td:first-child{white-space:nowrap;font-weight:600}
+
+/* ---------- tree ---------- */
+.tree{
+  background:var(--bg-sunken);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 13px;margin:0 0 18px;
+  font-family:var(--mono);font-size:12.5px;line-height:1.85;
+  color:var(--text-muted);overflow-x:auto;white-space:pre;
+}
+.tree b{color:var(--text);font-weight:600}
+
+/* ---------- divider ---------- */
+.rule{height:1px;background:var(--border);border:none;margin:44px 0}
+
+/* ---------- links section ---------- */
+.link-list{display:flex;flex-direction:column;gap:9px;margin-bottom:8px}
+.link-card{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px;
+  text-decoration:none;color:var(--text);box-shadow:var(--shadow-sm);
+  -webkit-tap-highlight-color:transparent;
+}
+.link-card:active{background:var(--bg-sunken);transform:scale(.99)}
+.link-card .lc-body{min-width:0;flex:1}
+.link-card .lc-title{font-size:14.5px;font-weight:700;line-height:1.5}
+.link-card .lc-url{font-size:11.5px;color:var(--text-faint);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.link-card .lc-arrow{flex:none;color:var(--text-faint)}
+.link-card .lc-arrow svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- footer ---------- */
+footer{
+  border-top:1px solid var(--border);
+  padding:26px 0 calc(34px + env(safe-area-inset-bottom));
+  color:var(--text-faint);font-size:12.5px;line-height:1.8;
+}
+footer a{color:var(--text-muted)}
+
+/* ---------- drawer nav (mobile) ---------- */
+.scrim{
+  position:fixed;inset:0;background:rgba(20,19,18,.42);
+  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:70;
+}
+body.nav-open .scrim{opacity:1;pointer-events:auto}
+nav.drawer{
+  position:fixed;top:0;right:0;bottom:0;
+  width:min(84vw,330px);
+  background:var(--bg-elev);
+  border-left:1px solid var(--border);
+  box-shadow:var(--shadow-lg);
+  transform:translateX(100%);
+  transition:transform .26s cubic-bezier(.32,.72,0,1);
+  z-index:80;
+  display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+body.nav-open nav.drawer{transform:translateX(0)}
+.drawer-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 14px 12px 18px;border-bottom:1px solid var(--border);flex:none;
+}
+.drawer-head span{font-size:12px;font-weight:700;letter-spacing:.09em;color:var(--text-faint)}
+.drawer-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 24px;flex:1}
+.drawer-body a{
+  display:block;padding:9px 12px;border-radius:8px;
+  color:var(--text-muted);text-decoration:none;border:none;
+  font-size:14px;line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+}
+.drawer-body a.lv1{font-weight:800;color:var(--text);font-size:14.5px;margin-top:10px}
+.drawer-body a.lv1:first-child{margin-top:0}
+.drawer-body a.lv2{padding-left:22px;font-size:13.5px}
+.drawer-body a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.drawer-body a:active{background:var(--bg-sunken)}
+
+/* ---------- back to top ---------- */
+#top-btn{
+  position:fixed;
+  right:max(16px,env(safe-area-inset-right));
+  bottom:calc(16px + env(safe-area-inset-bottom));
+  width:44px;height:44px;border-radius:50%;
+  background:var(--bg-elev);border:1px solid var(--border-strong);
+  box-shadow:var(--shadow-md);color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:40;
+  opacity:0;pointer-events:none;transform:translateY(8px);
+  transition:opacity .2s,transform .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+#top-btn.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+#top-btn:active{transform:scale(.92)}
+#top-btn svg{width:17px;height:17px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- desktop ---------- */
+@media (min-width:900px){
+  :root{--header-h:60px}
+  body{font-size:16.5px}
+  .wrap{display:grid;grid-template-columns:250px minmax(0,1fr);gap:52px;padding-left:32px;padding-right:32px}
+  .menu-btn{display:none}
+  .toc-card{display:none}
+  aside.sidebar{
+    position:sticky;
+    top:calc(var(--header-h) + env(safe-area-inset-top));
+    height:calc(100vh - var(--header-h) - env(safe-area-inset-top));
+    overflow-y:auto;
+    padding:34px 0 40px;
+    border-right:1px solid var(--border);
+    margin-right:-24px;padding-right:20px;
+  }
+  aside.sidebar .side-label{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--text-faint);margin-bottom:12px;padding-left:12px}
+  aside.sidebar a{
+    display:block;padding:6px 12px;border-radius:7px;
+    color:var(--text-muted);text-decoration:none;border:none;
+    font-size:13.5px;line-height:1.6;
+  }
+  aside.sidebar a.lv1{font-weight:800;color:var(--text);margin-top:12px;font-size:14px}
+  aside.sidebar a.lv1:first-of-type{margin-top:0}
+  aside.sidebar a.lv2{padding-left:22px;font-size:13px}
+  aside.sidebar a:hover{background:var(--bg-sunken);color:var(--text)}
+  aside.sidebar a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  main{padding-top:14px;padding-bottom:80px;max-width:780px}
+  .hero{padding-top:34px}
+  .copy:hover{background:rgba(255,255,255,.09)}
+  .code.prompt .copy:hover{background:var(--border)}
+  .link-card:hover{border-color:var(--accent-border);box-shadow:var(--shadow-md);transform:translateY(-1px);transition:.15s}
+  a:hover{border-bottom-color:var(--accent)}
+  #top-btn{right:32px;bottom:32px}
+}
+@media (max-width:899px){aside.sidebar{display:none}}
+@media (min-width:900px){nav.drawer,.scrim{display:none}}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="brand"><i class="dot"></i><span>Claude Code プラットフォーム比較</span></div>
+    <button class="menu-btn" id="menuBtn" aria-label="目次を開く" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="scrim" id="scrim"></div>
+<nav class="drawer" id="drawer" aria-label="目次">
+  <div class="drawer-head">
+    <span>目次</span>
+    <button class="menu-btn" id="closeBtn" style="display:flex" aria-label="目次を閉じる">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawerNav"></div>
+</nav>
+
+<div class="wrap">
+
+  <aside class="sidebar">
+    <div class="side-label">目次</div>
+    <div id="sideNav"></div>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <div class="eyebrow">プラットフォーム比較</div>
+      <h1>Claude Code<br>プラットフォーム比較と機能ガイド</h1>
+      <p class="lead">根本のClaude Codeエンジンは同じだが、操作画面と一部機能が異なる。大まかには、<b>CLIが最も高機能、IDEがコード確認・修正に強く、Macアプリが最も初心者向け、iPhoneアプリは遠隔操作用</b>。</p>
+      <div class="meta">
+        <span class="chip">CLI版</span>
+        <span class="chip">IDE版</span>
+        <span class="chip">Macアプリ版</span>
+        <span class="chip">iPhoneアプリ</span>
+        <a class="chip link" href="/">← リモート運用手順へ</a>
+        <a class="chip link" href="/ota-agent">OTA設定AIエージェント →</a>
+        <a class="chip link" href="/ppt-excel">PPT/Excel作成ガイド →</a>
+      </div>
+    </div>
+
+    <div class="toc-card">
+      <h2>目次</h2>
+      <ol id="tocCardList"></ol>
+    </div>
+
+    <!-- ============ intro ============ -->
+    <section class="chapter" id="intro">
+      <div class="chapter-head">
+        <div class="badge">◎</div>
+        <h2>概要</h2>
+      </div>
+      <p>Claude Codeには複数の操作画面（プラットフォーム）がある。動いている根本のエンジンは同じだが、それぞれ得意分野が異なる。まず全体像を1文でまとめると次のとおり。</p>
+      <ul class="bullets">
+        <li><b>CLI版</b>：最も高機能。設定・自動化・サーバー運用に強い。</li>
+        <li><b>IDE版</b>（VS Code等）：コード確認・修正に強い。</li>
+        <li><b>Macアプリ版</b>：最も初心者向け。GUIで総合的に開発できる。</li>
+        <li><b>iPhoneアプリ</b>：遠隔操作用。指示・確認・承認が中心。</li>
+      </ul>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>公式リファレンス</div>
+        <p>各プラットフォームの違いは <a href="https://code.claude.com/docs/en/platforms" target="_blank" rel="noopener">公式のプラットフォーム比較</a> にもまとまっている。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 1 ============ -->
+    <section class="chapter" id="ch1">
+      <div class="chapter-head">
+        <div class="badge">1</div>
+        <h2>プラットフォーム比較</h2>
+      </div>
+      <div class="table-scroll">
+        <table class="wide">
+          <thead><tr><th>項目</th><th>CLI版</th><th>IDE版（VS Code等）</th><th>Macアプリ版</th><th>iPhoneアプリ</th></tr></thead>
+          <tbody>
+            <tr><td>主な用途</td><td>設定・自動化・サーバー運用</td><td>コードを見ながら開発</td><td>GUIで総合的に開発</td><td>遠隔指示・確認・承認</td></tr>
+            <tr><td>操作方法</td><td>ターミナル</td><td>エディタ＋チャット</td><td>GUI中心</td><td>GUI中心</td></tr>
+            <tr><td>コードの直接編集</td><td>可能だが見づらい</td><td>最も得意</td><td>簡単な編集が可能</td><td>基本的には不向き</td></tr>
+            <tr><td>変更差分の確認</td><td>可能</td><td>行単位で見やすい</td><td>ビジュアル表示で見やすい</td><td>簡易的</td></tr>
+            <tr><td>アプリのプレビュー</td><td>別途ブラウザ等</td><td>ブラウザ連携</td><td>内蔵Browserペイン</td><td>URLを開いて確認</td></tr>
+            <tr><td>複数セッション</td><td>複数ターミナル・サーバーモード</td><td>タブ・ウインドウ</td><td>サイドバーで管理</td><td>セッション一覧から操作</td></tr>
+            <tr><td>ファイル添付</td><td>基本的にパス指定</td><td>ファイル・行範囲を指定</td><td>ドラッグ＆ドロップ可能</td><td>画像・ファイルを送信可能</td></tr>
+            <tr><td>MCP・プラグイン</td><td>全機能</td><td>一部設定はCLIが必要</td><td>GUIで管理可能なものが多い</td><td>Mac mini側の設定を利用</td></tr>
+            <tr><td>スクリプト・自動化</td><td>最も強い</td><td>CLI併用で可能</td><td>不向き</td><td>不可</td></tr>
+            <tr><td>Agent SDK</td><td>利用可能</td><td>CLI併用</td><td>不可</td><td>不可</td></tr>
+            <tr><td>Remote Control</td><td>サーバーモードを含め全機能</td><td><code>/remote-control</code>対応</td><td>Remote Control・Dispatch対応</td><td>接続・操作する側</td></tr>
+            <tr><td>難易度</td><td>高め</td><td>中程度</td><td>最も始めやすい</td><td>簡単</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 2 ============ -->
+    <section class="chapter" id="ch2">
+      <div class="chapter-head">
+        <div class="badge">2</div>
+        <h2>CLI版</h2>
+      </div>
+      <p>最も機能が揃っている。</p>
+      <h4>できること</h4>
+      <ul class="bullets">
+        <li><code>claude remote-control --capacity 3</code>などのサーバー起動</li>
+        <li><code>claude -c</code>、<code>claude --resume</code>によるセッション復旧</li>
+        <li>MCPサーバーの追加・設定</li>
+        <li>すべてのスラッシュコマンドと設定</li>
+        <li>シェルスクリプトや定期実行</li>
+        <li>Agent SDKを使った独自システムへの組み込み</li>
+        <li>Git worktreeを使った高度な並列開発</li>
+        <li>詳細なログ確認とトラブルシューティング</li>
+      </ul>
+      <p>一方、コードや差分を目で確認するにはあまり向かない。</p>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>今回の運用でのCLIの役割</div>
+        <p>CLIは日常的なプロンプト入力ではなく、次のためだけに使えば十分。</p>
+      </div>
+      <ul class="bullets">
+        <li>Mac miniでRemote Controlを起動する</li>
+        <li>プロジェクト別サーバーを起動する</li>
+        <li>終了したセッションを復旧する</li>
+        <li>初期設定やトラブル対応を行う</li>
+      </ul>
+      <p>CLIはスクリプト・Agent SDKを含む最も完全な操作面である。<a href="https://code.claude.com/docs/en/cli-reference" target="_blank" rel="noopener">Claude Code CLI公式リファレンス</a></p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 3 ============ -->
+    <section class="chapter" id="ch3">
+      <div class="chapter-head">
+        <div class="badge">3</div>
+        <h2>IDE版</h2>
+      </div>
+      <p>主にVS Code、Cursor、JetBrains系IDEで使う形。強みは、<b>コードを自分でも見たり編集したりしながらClaudeを使えること</b>。</p>
+      <ul class="bullets">
+        <li>選択した行をそのままClaudeへ渡せる</li>
+        <li>変更前後の差分を横並びで確認できる</li>
+        <li>Claudeの修正案を一部変更してから承認できる</li>
+        <li>計画書へ行単位でコメントできる</li>
+        <li>エラーや警告をClaudeと共有できる</li>
+        <li>ターミナルの出力をコピーせず参照できる</li>
+        <li>複数セッションをタブで開ける</li>
+      </ul>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>利用できるコマンドはCLIの一部</div>
+        <p>IDE版で利用できるコマンドはCLIの一部である。MCPの新規追加などは、VS Code内のターミナルでCLIを併用する必要がある。CLIとVS Code拡張は設定やローカルの会話履歴を共有できる。</p>
+      </div>
+      <h4>向いている場面</h4>
+      <ul class="bullets">
+        <li>Claudeが変更したコードを細かく確認したい</li>
+        <li>自分でも少しコードを直したい</li>
+        <li>特定のファイル・行について質問したい</li>
+        <li>エラー箇所を目で見ながら修正したい</li>
+      </ul>
+      <p>プログラミング初心者でも、開発が進んでから「どこを変えたのか確認したい」と思うようになった段階で導入すると便利。<a href="https://code.claude.com/docs/en/vs-code" target="_blank" rel="noopener">VS Code版公式ドキュメント</a></p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 4 ============ -->
+    <section class="chapter" id="ch4">
+      <div class="chapter-head">
+        <div class="badge">4</div>
+        <h2>Macアプリ版</h2>
+      </div>
+      <p>Claude Desktopの「Code」タブ。現在はかなり高機能で、単なるチャット画面ではない。</p>
+      <ul class="bullets">
+        <li>複数セッションをサイドバーで管理</li>
+        <li>チャット、差分、ブラウザ、ターミナル、ファイルを並べて表示</li>
+        <li>アプリのプレビュー</li>
+        <li>ファイルの簡単な直接編集</li>
+        <li>画像・PDF等のドラッグ＆ドロップ</li>
+        <li>Gitの差分確認</li>
+        <li>PRの進捗確認</li>
+        <li>MCP・コネクタ・プラグイン管理</li>
+        <li>複数セッションの自動Git分離</li>
+        <li>スマホから作業を送るDispatch</li>
+        <li>Remote Control</li>
+        <li>ローカル、クラウド、SSH環境の選択</li>
+      </ul>
+      <h4>一方、次はCLIの方が優れている</h4>
+      <ul class="bullets">
+        <li>スクリプトによる自動化</li>
+        <li>Agent SDK</li>
+        <li>すべてのCLIフラグ</li>
+        <li>一部の高度なコマンド</li>
+        <li>Agent Teams</li>
+        <li>詳細なサーバーモード設定</li>
+      </ul>
+      <p>Desktopには統合ターミナルもあるが、ターミナルを使わずGUIだけで大部分の作業ができる。<a href="https://code.claude.com/docs/en/desktop" target="_blank" rel="noopener">Claude Desktop Code公式ドキュメント</a></p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 5 ============ -->
+    <section class="chapter" id="ch5">
+      <div class="chapter-head">
+        <div class="badge">5</div>
+        <h2>iPhoneアプリ版</h2>
+      </div>
+      <p>iPhoneアプリは、Mac miniで動いているClaude Codeを操作する「リモコン」に近いもの。</p>
+      <h4>できること</h4>
+      <ul class="bullets">
+        <li>プロンプトを送る</li>
+        <li>作業の進捗を見る</li>
+        <li>ファイル編集やコマンド実行を承認する</li>
+        <li>画像やファイルを添付する</li>
+        <li>完了通知や承認依頼を受け取る</li>
+        <li>セッション名を変更する</li>
+        <li><code>/compact</code>、<code>/clear</code>、<code>/exit</code>等を実行する</li>
+        <li>クラウドセッションを新しく開始する</li>
+      </ul>
+      <h4>不得意・できないこと</h4>
+      <ul class="bullets">
+        <li>コード全体をエディタとして閲覧・編集する</li>
+        <li>対話式の<code>/resume</code>選択画面を使う</li>
+        <li>Remote Controlサーバーを起動する</li>
+        <li>CLIの詳細設定</li>
+        <li>MCPやプラグインの初期構築</li>
+        <li>終了済みローカルセッションを確実に復旧する</li>
+      </ul>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>実行はMac mini上で行われる</div>
+        <p>Remote Control利用中は、iPhoneで操作していても、コードの実行とファイル操作はMac mini上で行われる。<a href="https://code.claude.com/docs/en/remote-control" target="_blank" rel="noopener">Remote Control公式ドキュメント</a></p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 6 ============ -->
+    <section class="chapter" id="ch6">
+      <div class="chapter-head">
+        <div class="badge">6</div>
+        <h2>今回のおすすめ構成</h2>
+      </div>
+      <p>1つに統一する必要はない。役割分担が最も使いやすい。</p>
+
+      <h3 id="ch6-1">Mac mini</h3>
+      <ul class="bullets">
+        <li>CLI：Remote Controlサーバーの起動と復旧専用</li>
+        <li>Claude Desktop：必要に応じて差分確認やプレビュー</li>
+        <li>実際のコードとGitを保存する本体</li>
+      </ul>
+
+      <h3 id="ch6-2">MacBook Air</h3>
+      <ul class="bullets">
+        <li>普段はClaude DesktopまたはWeb版</li>
+        <li>Mac miniのプロジェクト別Remote Control環境を選択</li>
+        <li>コードを細かく確認したくなったらVS Codeを使用</li>
+        <li>MacBook Airのローカル環境を誤って選ばない</li>
+      </ul>
+
+      <h3 id="ch6-3">iPhone</h3>
+      <ul class="bullets">
+        <li>Remote Controlで進捗確認</li>
+        <li>指示、承認、方向修正</li>
+        <li>作業終了時の<code>STATUS.md</code>更新指示</li>
+        <li>長時間処理の完了通知を受信</li>
+      </ul>
+
+      <p>つまり、現状の最適解は次の構成。</p>
+      <div class="tree">CLI
+＝裏側のサーバー・保守
+
+Claude Desktop／Web
+＝普段のメイン操作画面
+
+IDE
+＝コードを細かく確認・手直しするとき
+
+iPhoneアプリ
+＝外出先からの指示・確認・承認</div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>結論</div>
+        <p>ターミナルを日常的に使いたくないという希望を考えると、<b>普段はMacBook AirのClaude Desktop＋iPhoneアプリ、Mac miniのCLIはサーバー起動時だけ</b>が最も合っている。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 7 ============ -->
+    <section class="chapter" id="ch7">
+      <div class="chapter-head">
+        <div class="badge">7</div>
+        <h2>内蔵ターミナルでCLIは使えるか</h2>
+      </div>
+      <p><b>IDEやClaude Desktopの「内蔵ターミナル」で、スタンドアロン版Claude Code CLIがインストールされていれば、基本的に通常のターミナルと同じCLI機能を使える。</b>ただし、2点重要な注意がある。</p>
+
+      <h3 id="ch7-1">内蔵ターミナルとチャット画面は別物</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>操作場所</th><th>CLIと同じ機能</th></tr></thead>
+          <tbody>
+            <tr><td>VS CodeのClaudeチャットパネル</td><td>一部のみ</td></tr>
+            <tr><td>VS Codeの内蔵ターミナルで<code>claude</code>を実行</td><td>ほぼ全部</td></tr>
+            <tr><td>Claude DesktopのCodeチャット画面</td><td>一部はGUIに置き換え、一部非対応</td></tr>
+            <tr><td>Claude Desktopの内蔵ターミナルで<code>claude</code>を実行</td><td>ほぼ全部</td></tr>
+            <tr><td>iPhone／WebのRemote Control画面</td><td>モバイル対応コマンドのみ</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>VS Code拡張には内部用のClaude Codeが含まれるが、内蔵ターミナルで<code>claude</code>を実行するには、スタンドアロンCLIのインストールが必要。<a href="https://code.claude.com/docs/en/vs-code" target="_blank" rel="noopener">VS Code版公式ドキュメント</a></p>
+      <p>確認方法は次のとおり。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>which claude
+claude --version</code></pre></div>
+      <p>結果が表示されれば、その内蔵ターミナルからCLI版を使用できる。</p>
+
+      <h3 id="ch7-2">「どのMacで動いているターミナルか」に注意</h3>
+      <p>内蔵ターミナルで実行した処理は、原則としてそのアプリを開いているMacで動く。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>操作</th><th>実行場所</th></tr></thead>
+          <tbody>
+            <tr><td>Mac miniのClaude Desktop内蔵ターミナル</td><td>Mac mini</td></tr>
+            <tr><td>Mac miniのVS Code内蔵ターミナル</td><td>Mac mini</td></tr>
+            <tr><td>MacBook AirのVS Code内蔵ターミナル</td><td>MacBook Air</td></tr>
+            <tr><td>MacBook AirのClaude Desktop内蔵ターミナル</td><td>MacBook Air</td></tr>
+            <tr><td>VS CodeでRemote SSH接続したMac miniのターミナル</td><td>Mac mini</td></tr>
+            <tr><td>iPhoneからMac miniのRemote Controlを操作</td><td>Mac mini</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>MacBook AirのClaude DesktopでMac miniのRemote Controlセッションを見ていても、MacBook Airのローカルターミナルが自動的にMac miniのターミナルになるわけではない。</p>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>常時稼働サーバーは通常のターミナルで</div>
+        <p>24時間稼働させるRemote Controlサーバーは、IDEやDesktopを終了すると内蔵ターミナルも終了する可能性がある。したがって、Mac miniの常時稼働サーバーは、当面は通常のターミナルか、将来的にはLaunchAgentによる自動起動が適している。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 8 ============ -->
+    <section class="chapter" id="ch8">
+      <div class="chapter-head">
+        <div class="badge">8</div>
+        <h2>各機能で具体的にできること</h2>
+      </div>
+
+      <h3 id="ch8-1">1. <code>claude remote-control --capacity 3</code></h3>
+      <p>これは、Mac miniをClaude Codeの遠隔作業サーバーとして待機させる機能。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/hotel-app
+claude remote-control \
+  --name "hotel-app-main" \
+  --spawn same-dir \
+  --capacity 3 \
+  --sandbox</code></pre></div>
+      <h4>実現できること</h4>
+      <ul class="bullets">
+        <li>iPhoneからMac mini上のコードを変更する</li>
+        <li>MacBook AirのWeb／アプリから指示する</li>
+        <li>Mac mini上でテスト、ビルド、Git操作を実行する</li>
+        <li>最大3つのClaude Codeセッションを同時に保持する</li>
+        <li>Mac miniに設定したMCPや開発ツールを遠隔利用する</li>
+        <li>各端末で同じ会話・進捗を見る</li>
+      </ul>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><code>3</code>の意味</div>
+        <p>ここでいう<code>3</code>は、端末数やタスク数ではなく、<b>Mac miniで同時に保持できるClaude Codeセッション数</b>。今回の運用では、最も重要なCLI機能。<a href="https://code.claude.com/docs/en/remote-control" target="_blank" rel="noopener">Remote Control公式ドキュメント</a></p>
+      </div>
+
+      <h3 id="ch8-2">2. <code>claude -c</code>と<code>claude --resume</code></h3>
+      <p>終了・切断したセッションを復旧する機能。</p>
+      <h4>直近のセッションを再開</h4>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/hotel-app
+claude -c</code></pre></div>
+      <p>例えば、次の場合に使う。</p>
+      <ul class="bullets">
+        <li>Mac miniを再起動した</li>
+        <li>Claude Codeを終了した</li>
+        <li>ターミナルを閉じてしまった</li>
+        <li>前日の作業を再開したい</li>
+      </ul>
+      <h4>履歴一覧から選ぶ</h4>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/hotel-app
+claude --resume</code></pre></div>
+      <p>表示された履歴から、再開したいセッションを選ぶ。</p>
+      <h4>名前で直接再開</h4>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>claude --resume hotel-app__main</code></pre></div>
+      <h4>実現できること</h4>
+      <ul class="bullets">
+        <li>過去の会話を維持したまま作業再開</li>
+        <li>Claudeが以前読んだファイルや決定事項を引き継ぐ</li>
+        <li>以前のRemote Controlへ再接続</li>
+        <li>プロジェクトごとに履歴を絞って探す</li>
+      </ul>
+      <p>これはMac miniの復旧操作として重要。</p>
+
+      <h3 id="ch8-3">3. MCPサーバーの追加・設定</h3>
+      <p>MCPは、Claude Codeに外部サービスを操作するための「専用アダプター」を追加する仕組み。通常のClaude Codeは、主にローカルファイルやターミナルを扱う。MCPを追加すると、外部サービスまで操作範囲を広げられる。</p>
+      <h4>GitHub MCP</h4>
+      <ul class="bullets">
+        <li>Issueを読む</li>
+        <li>Pull Requestを作る</li>
+        <li>PRのレビューコメントを確認する</li>
+        <li>CIの失敗結果を取得する</li>
+      </ul>
+      <h4>データベースMCP</h4>
+      <ul class="bullets">
+        <li>SupabaseやPostgreSQLのテーブル構成を確認する</li>
+        <li>SQLを実行する</li>
+        <li>データの不整合を調査する</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>本番データベース</div>
+        <p>本番データベースには、原則として読み取り専用権限から始める。</p>
+      </div>
+      <h4>Sentry等のエラー監視MCP</h4>
+      <ul class="bullets">
+        <li>本番環境のエラーを取得する</li>
+        <li>エラーが発生したコードを特定する</li>
+        <li>修正案を作る</li>
+      </ul>
+      <h4>Figma等のデザインMCP</h4>
+      <ul class="bullets">
+        <li>デザイン情報を読み取る</li>
+        <li>色、余白、画面構成をコードへ反映する</li>
+      </ul>
+      <h4>社内サービス</h4>
+      <ul class="bullets">
+        <li>Notionの仕様書を読む</li>
+        <li>Google Driveの資料を確認する</li>
+        <li>Slackの障害報告を取得する</li>
+      </ul>
+      <p>MCPの初期追加はCLIが最も確実。追加後は、CLI、IDE、Desktopのローカルセッションで設定を共有できる。初心者の場合、最初に導入するならGitHub MCPが候補。データベースや外部送信を伴うMCPは、権限範囲を理解してから導入する。</p>
+
+      <h3 id="ch8-4">4. スラッシュコマンドと設定</h3>
+      <p>スラッシュコマンドは、Claudeへの質問ではなく、Claude Code自体を操作する命令。よく使うものは次のとおり。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>コマンド</th><th>できること</th></tr></thead>
+          <tbody>
+            <tr><td><code>/rename</code></td><td>セッションへ名前を付ける</td></tr>
+            <tr><td><code>/resume</code></td><td>過去のセッションへ切り替える</td></tr>
+            <tr><td><code>/compact</code></td><td>長い会話を要約して継続する</td></tr>
+            <tr><td><code>/context</code></td><td>会話容量の使用状況を確認する</td></tr>
+            <tr><td><code>/model</code></td><td>使用モデルを変更する</td></tr>
+            <tr><td><code>/permissions</code></td><td>Claudeに許可する操作を設定する</td></tr>
+            <tr><td><code>/diff</code></td><td>Claudeが変更したコードを確認する</td></tr>
+            <tr><td><code>/rewind</code></td><td>会話やコードを以前の状態へ戻す</td></tr>
+            <tr><td><code>/branch</code></td><td>現在の会話から別案を分岐する</td></tr>
+            <tr><td><code>/mcp</code></td><td>MCPの接続状態を確認する</td></tr>
+            <tr><td><code>/plugin</code></td><td>プラグインを管理する</td></tr>
+            <tr><td><code>/doctor</code></td><td>Claude Codeの設定・不具合を診断する</td></tr>
+            <tr><td><code>/remote-control</code></td><td>現在のセッションを遠隔操作可能にする</td></tr>
+            <tr><td><code>/export</code></td><td>会話内容をファイルへ出力する</td></tr>
+            <tr><td><code>/exit</code></td><td>セッションを終了する</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>CLIでは原則としてすべて利用できる。VS Codeのチャットパネルは一部のみ、Desktopでは一部がボタンや設定画面に置き換えられている。例えばDesktopで<code>/config</code>を実行すると、テキスト設定ではなく設定画面が開く。</p>
+      <p>初心者が最初に覚えるべきものは、次の6つ。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">最初に覚える6つ</span><button class="copy">コピー</button></div><pre><code>/rename
+/compact
+/context
+/diff
+/doctor
+/exit</code></pre></div>
+
+      <h3 id="ch8-5">5. シェルスクリプト</h3>
+      <p>シェルスクリプトは、複数のターミナル操作を「決められた手順」として保存するもの。例えば、通常は毎回次の操作が必要だとする。</p>
+      <div class="tree">1. プロジェクトフォルダへ移動
+2. 最新コードを取得
+3. パッケージをインストール
+4. テストを実行
+5. 結果を保存</div>
+      <p>これを1つのスクリプトにすると、1回の実行で順番に処理できる。</p>
+      <h4>実現例</h4>
+      <ul class="bullets">
+        <li>すべてのテストを実行する</li>
+        <li>アプリをビルドする</li>
+        <li>データベースをバックアップする</li>
+        <li>Gitの状態を記録する</li>
+        <li>ログファイルを整理する</li>
+        <li>Remote Controlを決まった設定で起動する</li>
+        <li>Claude Codeへ分析を依頼する</li>
+      </ul>
+      <p>シェルスクリプトは、決められた操作を毎回同じように実行するのが得意。一方、状況を判断して対応を変える部分にはClaudeを組み合わせる。</p>
+
+      <h3 id="ch8-6">6. 定期実行</h3>
+      <p>Claude Codeには複数の定期実行方法がある。</p>
+      <h4>/loop</h4>
+      <p>現在のセッション内で、一定間隔ごとに確認させる。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">コマンド</span><button class="copy">コピー</button></div><pre><code>/loop 5m デプロイが完了したか確認してください</code></pre></div>
+      <ul class="bullets">
+        <li>デプロイ完了を5分ごとに確認</li>
+        <li>CIの結果を定期確認</li>
+        <li>長時間ビルドの終了を監視</li>
+        <li>PRに新しいコメントが付いたか確認</li>
+      </ul>
+      <p>セッションが動いている間の短期監視向け。</p>
+      <h4>Claude DesktopのScheduled Tasks</h4>
+      <p>GUIから設定できる。例えば：</p>
+      <ul class="bullets">
+        <li>毎朝9時にプロジェクトのエラーを確認</li>
+        <li>毎週月曜に依存パッケージを確認</li>
+        <li>毎日、未コミット変更を報告</li>
+        <li>毎晩テストを実行して結果をまとめる</li>
+      </ul>
+      <p>ローカルタスクはMacが起動し、Claude Desktopが開いている必要がある。ローカルファイルや未コミット変更を扱える。<a href="https://code.claude.com/docs/en/desktop-scheduled-tasks" target="_blank" rel="noopener">Desktop定期実行公式ドキュメント</a></p>
+      <h4>クラウドRoutines</h4>
+      <p>Anthropicのクラウド上で実行する。</p>
+      <ul class="bullets">
+        <li>Mac miniがオフでも動く</li>
+        <li>毎朝GitHubリポジトリを確認する</li>
+        <li>定期的にPRレビューを実行する</li>
+        <li>GitHubイベントをきっかけに処理する</li>
+      </ul>
+      <p>ただし、Mac miniだけにある未コミットファイルにはアクセスできない。</p>
+
+      <h3 id="ch8-7">7. Agent SDK</h3>
+      <p>Agent SDKは、<b>Claude Codeのように自律的に作業するAIを、自分のアプリへ組み込むための開発キット</b>。PythonまたはTypeScriptから利用する。通常のClaude APIは、質問を送って回答を受け取るのが中心。Agent SDKでは、Claudeに以下を行わせられる。</p>
+      <ul class="bullets">
+        <li>ファイルを読む</li>
+        <li>コードを書く</li>
+        <li>コマンドを実行する</li>
+        <li>Web検索する</li>
+        <li>MCPを使う</li>
+        <li>複数ステップの作業を自律的に進める</li>
+        <li>承認を求める</li>
+        <li>結果を決められたJSON形式で返す</li>
+      </ul>
+      <h4>バグ修正エージェント</h4>
+      <p>社内画面にエラー内容を入力すると、次まで行う。</p>
+      <ol class="steps">
+        <li>関係するコードを探す</li>
+        <li>原因を調べる</li>
+        <li>修正する</li>
+        <li>テストする</li>
+        <li>Pull Requestを作る</li>
+      </ol>
+      <h4>自動コードレビュー</h4>
+      <p>GitHubへコードがpushされたら、次を行う。</p>
+      <ol class="steps">
+        <li>変更内容を読む</li>
+        <li>セキュリティ上の問題を確認</li>
+        <li>バグの可能性を指摘</li>
+        <li>レビュー結果をPRへ投稿する</li>
+      </ol>
+      <h4>社内業務エージェント</h4>
+      <p>例えば宿泊施設向けアプリに、次の機能を組み込める。</p>
+      <ul class="bullets">
+        <li>問い合わせ内容を分類する</li>
+        <li>過去の対応履歴を調べる</li>
+        <li>返信案を作る</li>
+        <li>担当部署を判定する</li>
+        <li>人間の承認後に送信する</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>上級者向け</div>
+        <p>Agent SDKは上級者向け。PythonまたはTypeScriptの実装が必要、API利用料が発生、実行環境の用意が必要、ファイル・外部送信・データベース権限の設計が必要、暴走防止と承認フローが必要。現時点では使わなくても問題ない。<a href="https://code.claude.com/docs/en/agent-sdk/overview" target="_blank" rel="noopener">Agent SDK公式概要</a></p>
+      </div>
+
+      <h3 id="ch8-8">8. スクリプトによるClaudeの自動化</h3>
+      <p>これは、対話画面を開かずにClaudeへ1回の仕事を依頼する機能。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>claude -p "テストを実行し、失敗原因をまとめてください。ファイルは変更しないでください"</code></pre></div>
+      <p><code>-p</code>は「質問を実行し、結果を出力して終了する」という意味。</p>
+      <h4>実現例</h4>
+      <ul class="bullets">
+        <li>テスト失敗を自動分析</li>
+        <li>Git差分を毎日要約</li>
+        <li>リリースノートを自動作成</li>
+        <li>複数のREADMEをまとめて更新</li>
+        <li>CIでPull Requestを自動レビュー</li>
+        <li>エラーログを読み、原因候補をJSONで返す</li>
+        <li>定型的なコード修正を自動実行</li>
+      </ul>
+      <p>使用できる道具を限定することもできる。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>claude -p \
+  "テストを実行し、失敗原因をまとめてください。変更はしないでください" \
+  --allowedTools "Read,Bash"</code></pre></div>
+      <p>この場合、ファイルの読み取りとコマンド実行だけを許可し、編集は許可しない。シェルスクリプトとの違いは次のとおり。</p>
+      <ul class="bullets">
+        <li>シェルスクリプト：決められた処理をそのまま実行</li>
+        <li>Claude自動化：状況を読んで判断し、結果を変える</li>
+      </ul>
+      <p><a href="https://code.claude.com/docs/en/headless" target="_blank" rel="noopener">プログラムからClaude Codeを実行する公式説明</a></p>
+
+      <h3 id="ch8-9">9. CLIフラグ</h3>
+      <p>CLIフラグは、Claude Codeを起動するときに付ける追加条件。代表例：</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>フラグ</th><th>実現できること</th></tr></thead>
+          <tbody>
+            <tr><td><code>--name</code></td><td>セッション名を指定</td></tr>
+            <tr><td><code>--continue</code></td><td>直近セッションを継続</td></tr>
+            <tr><td><code>--resume</code></td><td>セッションを指定して再開</td></tr>
+            <tr><td><code>--remote-control</code></td><td>遠隔操作を有効化</td></tr>
+            <tr><td><code>--model</code></td><td>使用モデルを指定</td></tr>
+            <tr><td><code>--permission-mode plan</code></td><td>計画だけ作り、承認まで編集させない</td></tr>
+            <tr><td><code>--allowedTools</code></td><td>使用を許可する道具を限定</td></tr>
+            <tr><td><code>--disallowedTools</code></td><td>使用禁止の道具を指定</td></tr>
+            <tr><td><code>--worktree</code></td><td>別の作業用Gitフォルダで安全に並行作業</td></tr>
+            <tr><td><code>--fork-session</code></td><td>会話を複製して別案へ分岐</td></tr>
+            <tr><td><code>--max-turns</code></td><td>自律的に進める回数を制限</td></tr>
+            <tr><td><code>--output-format json</code></td><td>結果をプログラムが読める形式で出力</td></tr>
+            <tr><td><code>--mcp-config</code></td><td>使用するMCP設定を指定</td></tr>
+            <tr><td><code>--add-dir</code></td><td>別フォルダへのアクセスを追加</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>例えば、安全に調査だけさせる場合：</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>claude \
+  --permission-mode plan \
+  --name "hotel-app-investigation"</code></pre></div>
+      <p>GUIにもモデル選択やPermission Modeはあるが、すべての細かい起動条件を組み合わせられるのはCLI。</p>
+
+      <h3 id="ch8-10">10. 一部の高度なコマンド</h3>
+      <p>代表的なものは次のとおり。</p>
+      <h4>/rewind</h4>
+      <p>Claudeが変更する前の状態へ戻す。</p>
+      <div class="tree">誤った修正を行った
+→ /rewind
+→ 戻したい時点を選ぶ</div>
+      <h4>/branch</h4>
+      <p>現在の会話履歴を残したまま、別の方針を試す。</p>
+      <div class="tree">現在の方式は残したい
+別の技術でも試したい
+→ /branch</div>
+      <h4>claude agents</h4>
+      <p>複数のバックグラウンドセッションを一覧管理する。作業中／入力待ち／完了／停止済みを1画面で確認できる。</p>
+      <h4>/teleport</h4>
+      <p>クラウドで作ったセッションをローカルCLIへ取り込む。</p>
+      <h4>/export</h4>
+      <p>会話履歴をテキストファイルとして保存する。</p>
+      <h4>/doctor</h4>
+      <p>インストール、ログイン、設定、接続の問題を診断する。</p>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>初心者がまず覚えるなら</div>
+        <p>初心者の場合、まず覚えるなら<code>/doctor</code>、<code>/diff</code>、<code>/rewind</code>の3つが有用。</p>
+      </div>
+
+      <h3 id="ch8-11">11. Agent Teams</h3>
+      <p>Agent Teamsは、<b>複数のClaude Codeをチームとして働かせる機能</b>。例えば1つのWebアプリ開発を、次のように分担できる。</p>
+      <div class="tree">リーダーClaude
+├── フロントエンド担当Claude
+├── バックエンド担当Claude
+├── テスト担当Claude
+└── セキュリティレビュー担当Claude</div>
+      <p>リーダーが仕事を分割し、各Claudeへ割り振る。担当Claude同士もメッセージを送り、共有タスクリストを使って調整する。</p>
+      <h4>実現できること</h4>
+      <ul class="bullets">
+        <li>フロントエンド・バックエンド・テストを並行開発</li>
+        <li>複数の原因仮説を同時に調査</li>
+        <li>実装担当とレビュー担当を分離</li>
+        <li>大規模なコード調査を分担</li>
+        <li>各担当の結果をリーダーが統合</li>
+      </ul>
+      <p>ただし、現在は実験的機能で、初期状態では無効。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">JSON</span><button class="copy">コピー</button></div><pre><code>{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}</code></pre></div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>注意点</div>
+        <p>通常の1セッションより大幅にトークンを使う／同じファイルを編集すると競合する／タスクの分割方法が悪いと逆に遅くなる／セッション復旧や終了処理に既知の制約がある／DesktopではなくCLI中心の機能／Git、テスト、worktreeの理解が必要。</p>
+      </div>
+      <p>Agent Teamsが向いているのは、フロントエンド、バックエンド、テストのように、作業範囲を明確に分けられる場合。同じファイルを順番に直す仕事には向かない。<a href="https://code.claude.com/docs/en/agent-teams" target="_blank" rel="noopener">Agent Teams公式ドキュメント</a></p>
+      <p>現段階では、Agent Teamsよりも、まず1つのメインセッションと必要に応じたSubagentの利用をおすすめする。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 9 ============ -->
+    <section class="chapter" id="ch9">
+      <div class="chapter-head">
+        <div class="badge">9</div>
+        <h2>あなたの運用での優先順位</h2>
+      </div>
+
+      <h3 id="ch9-1">今すぐ使う</h3>
+      <ol class="steps">
+        <li><code>claude remote-control</code></li>
+        <li><code>claude -c</code></li>
+        <li><code>claude --resume</code></li>
+        <li><code>/rename</code></li>
+        <li><code>/compact</code></li>
+        <li><code>/diff</code></li>
+        <li><code>/doctor</code></li>
+        <li>プロジェクト別フォルダ管理</li>
+        <li><code>STATUS.md</code></li>
+        <li>GitとGitHub</li>
+      </ol>
+
+      <h3 id="ch9-2">アプリがある程度できたら使う</h3>
+      <ol class="steps">
+        <li>GitHub MCP</li>
+        <li>VS Codeの差分確認</li>
+        <li><code>/rewind</code></li>
+        <li>Desktop Scheduled Tasks</li>
+        <li><code>claude -p</code>によるテスト・レビュー自動化</li>
+        <li>Git worktree</li>
+      </ol>
+
+      <h3 id="ch9-3">さらに高度な自動化が必要になったら使う</h3>
+      <ol class="steps">
+        <li>シェルスクリプト</li>
+        <li>Hooks</li>
+        <li>Agent SDK</li>
+        <li>Agent Teams</li>
+        <li>CI/CDへのClaude組み込み</li>
+      </ol>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>まとめ</div>
+        <p>現状は、<b>IDE／Desktopの内蔵ターミナルを使っても構わないが、Mac miniの24時間Remote Controlサーバーだけは通常のターミナルまたは将来の自動起動設定で維持する</b>のが安定する。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ links ============ -->
+    <section class="chapter" id="links">
+      <div class="chapter-head">
+        <div class="badge">＃</div>
+        <h2>参考リンク</h2>
+      </div>
+      <div class="link-list">
+        <a class="link-card" href="https://code.claude.com/docs/en/platforms" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">プラットフォーム比較</div><div class="lc-url">code.claude.com/docs/en/platforms</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/cli-reference" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude Code CLI Reference</div><div class="lc-url">code.claude.com/docs/en/cli-reference</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/vs-code" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude Code for VS Code</div><div class="lc-url">code.claude.com/docs/en/vs-code</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/desktop" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude Desktop Code</div><div class="lc-url">code.claude.com/docs/en/desktop</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/remote-control" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude Code Remote Control</div><div class="lc-url">code.claude.com/docs/en/remote-control</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/desktop-scheduled-tasks" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Desktop Scheduled Tasks</div><div class="lc-url">code.claude.com/docs/en/desktop-scheduled-tasks</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/agent-sdk/overview" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Agent SDK Overview</div><div class="lc-url">code.claude.com/docs/en/agent-sdk/overview</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/headless" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Headless（プログラムから実行）</div><div class="lc-url">code.claude.com/docs/en/headless</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/agent-teams" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Agent Teams</div><div class="lc-url">code.claude.com/docs/en/agent-teams</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="/">
+          <div class="lc-body"><div class="lc-title">Claude Code Remote Control 運用手順（当サイト）</div><div class="lc-url">/（リモート運用手順トップ）</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      Claude Code プラットフォーム比較と機能ガイド<br>
+      関連：<a href="/">リモート運用手順</a>
+    </footer>
+
+  </main>
+</div>
+
+<button id="top-btn" aria-label="ページ先頭へ戻る">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---- build nav from headings ---- */
+  var NAV = [
+    {id:"intro", label:"概要", num:"◎", children:[]},
+    {id:"ch1", label:"プラットフォーム比較", num:"1", children:[]},
+    {id:"ch2", label:"CLI版", num:"2", children:[]},
+    {id:"ch3", label:"IDE版", num:"3", children:[]},
+    {id:"ch4", label:"Macアプリ版", num:"4", children:[]},
+    {id:"ch5", label:"iPhoneアプリ版", num:"5", children:[]},
+    {id:"ch6", label:"今回のおすすめ構成", num:"6", children:[
+      {id:"ch6-1", label:"Mac mini"},
+      {id:"ch6-2", label:"MacBook Air"},
+      {id:"ch6-3", label:"iPhone"}
+    ]},
+    {id:"ch7", label:"内蔵ターミナルでCLIは使えるか", num:"7", children:[
+      {id:"ch7-1", label:"内蔵ターミナルとチャットは別物"},
+      {id:"ch7-2", label:"どのMacで動くターミナルか"}
+    ]},
+    {id:"ch8", label:"各機能でできること", num:"8", children:[
+      {id:"ch8-1", label:"1. remote-control"},
+      {id:"ch8-2", label:"2. -c / --resume"},
+      {id:"ch8-3", label:"3. MCPサーバー"},
+      {id:"ch8-4", label:"4. スラッシュコマンド"},
+      {id:"ch8-5", label:"5. シェルスクリプト"},
+      {id:"ch8-6", label:"6. 定期実行"},
+      {id:"ch8-7", label:"7. Agent SDK"},
+      {id:"ch8-8", label:"8. スクリプトで自動化"},
+      {id:"ch8-9", label:"9. CLIフラグ"},
+      {id:"ch8-10", label:"10. 高度なコマンド"},
+      {id:"ch8-11", label:"11. Agent Teams"}
+    ]},
+    {id:"ch9", label:"運用での優先順位", num:"9", children:[
+      {id:"ch9-1", label:"今すぐ使う"},
+      {id:"ch9-2", label:"ある程度できたら"},
+      {id:"ch9-3", label:"さらに高度な自動化"}
+    ]},
+    {id:"links", label:"参考リンク", num:"＃", children:[]}
+  ];
+
+  function buildNav(host){
+    var frag = document.createDocumentFragment();
+    NAV.forEach(function(sec){
+      var a = document.createElement("a");
+      a.href = "#" + sec.id; a.className = "lv1"; a.textContent = sec.label;
+      a.dataset.target = sec.id;
+      frag.appendChild(a);
+      sec.children.forEach(function(c){
+        var b = document.createElement("a");
+        b.href = "#" + c.id; b.className = "lv2"; b.textContent = c.label;
+        b.dataset.target = c.id;
+        frag.appendChild(b);
+      });
+    });
+    host.appendChild(frag);
+  }
+  buildNav(document.getElementById("sideNav"));
+  buildNav(document.getElementById("drawerNav"));
+
+  var tocList = document.getElementById("tocCardList");
+  NAV.forEach(function(sec){
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = "#" + sec.id;
+    a.innerHTML = '<span class="num">' + sec.num + "</span>";
+    var t = document.createElement("span");
+    t.textContent = sec.label;
+    a.appendChild(t);
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  /* ---- drawer ---- */
+  var body = document.body;
+  var menuBtn = document.getElementById("menuBtn");
+  var closeBtn = document.getElementById("closeBtn");
+  var scrim = document.getElementById("scrim");
+  function openNav(){ body.classList.add("nav-open"); menuBtn.setAttribute("aria-expanded","true"); }
+  function closeNav(){ body.classList.remove("nav-open"); menuBtn.setAttribute("aria-expanded","false"); }
+  menuBtn.addEventListener("click", openNav);
+  closeBtn.addEventListener("click", closeNav);
+  scrim.addEventListener("click", closeNav);
+  document.getElementById("drawerNav").addEventListener("click", function(e){
+    if (e.target.closest("a")) closeNav();
+  });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeNav(); });
+
+  /* ---- copy buttons ---- */
+  document.querySelectorAll(".copy").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var code = btn.closest(".code").querySelector("code");
+      var text = code.innerText;
+      var done = function(){
+        btn.textContent = "コピー済み";
+        btn.classList.add("done");
+        setTimeout(function(){ btn.textContent = "コピー"; btn.classList.remove("done"); }, 1600);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else { fallback(); }
+      function fallback(){
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch(err){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  /* ---- scrollspy + progress + top button ---- */
+  var links = Array.prototype.slice.call(document.querySelectorAll("#sideNav a, #drawerNav a"));
+  var targets = links.map(function(a){ return document.getElementById(a.dataset.target); });
+  var progress = document.getElementById("progress");
+  var topBtn = document.getElementById("top-btn");
+  var ticking = false;
+  var headerH = 0;
+
+  function measure(){
+    headerH = document.querySelector("header").offsetHeight;
+  }
+  measure();
+  window.addEventListener("resize", measure);
+
+  function update(){
+    ticking = false;
+    var y = window.scrollY || window.pageYOffset;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (max > 0 ? Math.min(100, (y / max) * 100) : 0) + "%";
+    topBtn.classList.toggle("show", y > 500);
+
+    var line = y + headerH + 40;
+    var activeIdx = -1;
+    for (var i = 0; i < targets.length; i++){
+      var el = targets[i];
+      if (el && el.getBoundingClientRect().top + y <= line) activeIdx = i;
+    }
+    links.forEach(function(a, i){ a.classList.toggle("active", i === activeIdx); });
+
+    if (activeIdx > -1){
+      var act = links[activeIdx];
+      if (act.closest("#sideNav")){
+        var side = document.querySelector("aside.sidebar");
+        if (side && side.offsetParent !== null){
+          var r = act.getBoundingClientRect(), sr = side.getBoundingClientRect();
+          if (r.top < sr.top + 8 || r.bottom > sr.bottom - 8){
+            side.scrollTop += r.top - sr.top - side.clientHeight / 2;
+          }
+        }
+      }
+    }
+  }
+  window.addEventListener("scroll", function(){
+    if (!ticking){ ticking = true; requestAnimationFrame(update); }
+  }, {passive:true});
+  update();
+
+  topBtn.addEventListener("click", function(){
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+})();
+</script>
+</body>
+</html>

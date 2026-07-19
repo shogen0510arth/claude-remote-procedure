@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Mac miniを常時稼働のClaude Code実行環境とし、MacBook Air／iPhoneから画面共有なしでアプリ開発を継続するためのRemote Control運用手順。">
+<title>Claude Code Remote Control 運用手順</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖥️</text></svg>">
+<style>
+:root{
+  --bg:#faf9f7;
+  --bg-elev:#ffffff;
+  --bg-sunken:#f2f0ed;
+  --text:#1f1e1d;
+  --text-muted:#6b6862;
+  --text-faint:#918d85;
+  --border:#e5e1db;
+  --border-strong:#d6d1c9;
+  --accent:#c4552f;
+  --accent-soft:#fdf1ec;
+  --accent-border:#f0c9b8;
+  --warn:#a8620a;
+  --warn-soft:#fdf4e7;
+  --warn-border:#f0dcb8;
+  --info:#2b6a8f;
+  --info-soft:#eaf3f8;
+  --info-border:#c2ddeb;
+  --code-bg:#282521;
+  --code-text:#e8e3db;
+  --code-inline-bg:#f0ede8;
+  --code-inline-text:#a8442a;
+  --shadow-sm:0 1px 2px rgba(31,30,29,.05);
+  --shadow-md:0 4px 16px -4px rgba(31,30,29,.10),0 2px 4px rgba(31,30,29,.04);
+  --shadow-lg:0 16px 48px -12px rgba(31,30,29,.24);
+  --radius:14px;
+  --radius-sm:9px;
+  --font:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --header-h:56px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1917;
+    --bg-elev:#232120;
+    --bg-sunken:#141312;
+    --text:#eeebe6;
+    --text-muted:#a5a099;
+    --text-faint:#7d7871;
+    --border:#35322e;
+    --border-strong:#474340;
+    --accent:#e2825c;
+    --accent-soft:#2e211b;
+    --accent-border:#5a3d2e;
+    --warn:#d6a05a;
+    --warn-soft:#2b2317;
+    --warn-border:#54432a;
+    --info:#7db8d8;
+    --info-soft:#182630;
+    --info-border:#2f4a5c;
+    --code-bg:#121110;
+    --code-text:#ded9d1;
+    --code-inline-bg:#2c2926;
+    --code-inline-text:#e9a184;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+    --shadow-md:0 4px 16px -4px rgba(0,0,0,.5);
+    --shadow-lg:0 16px 48px -12px rgba(0,0,0,.7);
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 16px);-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.85;
+  font-size:16px;
+  letter-spacing:.01em;
+  -webkit-font-smoothing:antialiased;
+  overflow-wrap:break-word;
+  word-break:normal;
+  line-break:strict;
+}
+body.nav-open{overflow:hidden}
+
+/* ---------- progress ---------- */
+#progress{
+  position:fixed;top:0;left:0;height:2.5px;width:0;
+  background:linear-gradient(90deg,var(--accent),#e0a06f);
+  z-index:60;transition:width .1s linear;
+}
+
+/* ---------- header ---------- */
+header{
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  padding-top:env(safe-area-inset-top);
+  height:calc(var(--header-h) + env(safe-area-inset-top));
+  background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:saturate(180%) blur(14px);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--border);
+  z-index:50;
+  display:flex;align-items:center;gap:12px;
+  padding-left:max(16px,env(safe-area-inset-left));
+  padding-right:max(16px,env(safe-area-inset-right));
+}
+.header-inner{display:flex;align-items:center;gap:12px;width:100%;max-width:1200px;margin:0 auto;height:var(--header-h)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;letter-spacing:.02em;min-width:0}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.brand span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu-btn{
+  margin-left:auto;flex:none;
+  width:38px;height:38px;border-radius:10px;
+  border:1px solid var(--border-strong);background:var(--bg-elev);
+  color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.menu-btn:active{transform:scale(.94)}
+.menu-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round}
+
+/* ---------- layout ---------- */
+.wrap{
+  max-width:1200px;margin:0 auto;
+  padding:calc(var(--header-h) + env(safe-area-inset-top)) max(18px,env(safe-area-inset-left)) 0 max(18px,env(safe-area-inset-right));
+  display:block;
+}
+main{min-width:0;padding-bottom:64px}
+
+/* ---------- hero ---------- */
+.hero{padding:40px 0 30px;border-bottom:1px solid var(--border);margin-bottom:34px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;letter-spacing:.09em;
+  color:var(--accent);background:var(--accent-soft);
+  border:1px solid var(--accent-border);
+  padding:5px 11px;border-radius:999px;margin-bottom:16px;
+}
+.hero h1{
+  font-size:clamp(27px,7.6vw,44px);
+  line-height:1.32;font-weight:800;letter-spacing:-.01em;
+  margin-bottom:14px;
+}
+.hero p.lead{font-size:15px;color:var(--text-muted);line-height:1.8;margin-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-size:11.5px;font-weight:600;
+  background:var(--bg-elev);border:1px solid var(--border);
+  color:var(--text-muted);
+  padding:5px 10px;border-radius:8px;white-space:nowrap;
+}
+.chip b{color:var(--text);font-weight:700}
+.chip.link{color:var(--accent);border-color:var(--accent-border);background:var(--accent-soft);text-decoration:none}
+.chip.link:active{opacity:.6}
+
+/* ---------- toc card (mobile inline) ---------- */
+.toc-card{
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px 16px;margin-bottom:38px;
+  box-shadow:var(--shadow-sm);
+}
+.toc-card h2{font-size:12px;letter-spacing:.1em;color:var(--text-faint);font-weight:700;margin-bottom:12px}
+.toc-card ol{list-style:none;display:flex;flex-direction:column;gap:2px}
+.toc-card a{
+  display:flex;align-items:center;gap:11px;
+  padding:9px 8px;border-radius:9px;
+  color:var(--text);text-decoration:none;font-size:14.5px;font-weight:600;
+  -webkit-tap-highlight-color:transparent;
+}
+.toc-card a:active{background:var(--bg-sunken)}
+.toc-card .num{
+  flex:none;width:24px;height:24px;border-radius:7px;
+  background:var(--accent-soft);border:1px solid var(--accent-border);
+  color:var(--accent);font-size:11.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- sections ---------- */
+.chapter{margin-bottom:52px;scroll-margin-top:calc(var(--header-h) + 20px)}
+.chapter-head{
+  display:flex;align-items:center;gap:13px;
+  padding-bottom:14px;margin-bottom:26px;
+  border-bottom:2px solid var(--accent);
+}
+.chapter-head .badge{
+  flex:none;
+  min-width:34px;height:34px;padding:0 8px;border-radius:9px;
+  background:var(--accent);color:#fff;
+  font-size:15px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+  box-shadow:0 2px 8px -2px color-mix(in srgb,var(--accent) 60%,transparent);
+}
+.chapter-head h2{font-size:clamp(20px,5.4vw,27px);font-weight:800;letter-spacing:-.005em;line-height:1.4}
+
+h3{
+  font-size:clamp(17px,4.5vw,20px);font-weight:700;
+  margin:38px 0 14px;line-height:1.5;
+  scroll-margin-top:calc(var(--header-h) + 20px);
+  padding-left:13px;border-left:3.5px solid var(--accent);
+}
+h3:first-of-type{margin-top:0}
+h4{
+  font-size:15px;font-weight:700;color:var(--text);
+  margin:26px 0 10px;
+  display:flex;align-items:center;gap:8px;
+}
+h4::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--text-faint);flex:none}
+
+p{margin:0 0 14px}
+p:last-child{margin-bottom:0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-border)}
+a:active{opacity:.6}
+
+/* ---------- lists ---------- */
+ul.bullets,ol.steps{margin:0 0 16px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.bullets li{position:relative;padding-left:19px;line-height:1.8}
+ul.bullets li::before{
+  content:"";position:absolute;left:3px;top:.72em;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);opacity:.55;
+}
+ol.steps{counter-reset:s}
+ol.steps li{position:relative;padding-left:34px;counter-increment:s;line-height:1.8;min-height:24px}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:.28em;
+  width:23px;height:23px;border-radius:7px;
+  background:var(--bg-sunken);border:1px solid var(--border-strong);
+  color:var(--text-muted);
+  font-size:11.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- code ---------- */
+.code{
+  position:relative;
+  background:var(--code-bg);border-radius:var(--radius-sm);
+  margin:0 0 18px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:var(--shadow-sm);
+}
+.code-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 8px 0 13px;height:34px;
+  background:rgba(255,255,255,.04);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.code-lang{
+  font-family:var(--mono);font-size:10.5px;font-weight:600;
+  color:#a09a90;letter-spacing:.07em;
+}
+.copy{
+  font-family:var(--font);font-size:11px;font-weight:600;
+  background:transparent;border:1px solid rgba(255,255,255,.15);
+  color:#cec8bf;padding:4px 9px;border-radius:6px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.copy:active{transform:scale(.94)}
+.copy.done{color:#7fca8f;border-color:#3f6b48}
+.code pre{
+  margin:0;padding:14px 13px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  font-family:var(--mono);font-size:12.5px;line-height:1.75;
+  color:var(--code-text);
+  tab-size:2;
+}
+.code pre code{white-space:pre;font-family:inherit}
+code:not(pre code){
+  font-family:var(--mono);font-size:.855em;
+  background:var(--code-inline-bg);color:var(--code-inline-text);
+  padding:2px 5px;border-radius:5px;
+  border:1px solid var(--border);
+  white-space:nowrap;
+}
+
+/* prompt template variant */
+.code.prompt{background:var(--bg-sunken);border:1px solid var(--border-strong)}
+.code.prompt .code-head{background:transparent;border-bottom:1px dashed var(--border-strong)}
+.code.prompt .code-lang{color:var(--accent)}
+.code.prompt .copy{border-color:var(--border-strong);color:var(--text-muted)}
+.code.prompt pre{color:var(--text);font-size:13px;white-space:pre-wrap;word-break:break-word;line-break:strict}
+.code.prompt pre code{white-space:pre-wrap}
+
+/* ---------- callouts ---------- */
+.note{
+  border-radius:var(--radius-sm);
+  padding:14px 15px;margin:0 0 18px;
+  border:1px solid;font-size:14.5px;line-height:1.78;
+}
+.note .note-title{
+  display:flex;align-items:center;gap:7px;
+  font-weight:700;font-size:12.5px;letter-spacing:.03em;
+  margin-bottom:7px;
+}
+.note .note-title svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.note.warn{background:var(--warn-soft);border-color:var(--warn-border)}
+.note.warn .note-title{color:var(--warn)}
+.note.info{background:var(--info-soft);border-color:var(--info-border)}
+.note.info .note-title{color:var(--info)}
+.note.tip{background:var(--accent-soft);border-color:var(--accent-border)}
+.note.tip .note-title{color:var(--accent)}
+.note p:last-child{margin-bottom:0}
+.note code:not(pre code){background:color-mix(in srgb,var(--bg-elev) 70%,transparent)}
+
+/* ---------- table ---------- */
+.table-scroll{
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  margin:0 0 18px;
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--bg-elev);box-shadow:var(--shadow-sm);
+}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:440px}
+thead th{
+  background:var(--bg-sunken);
+  text-align:left;font-weight:700;font-size:11.5px;letter-spacing:.06em;
+  color:var(--text-faint);
+  padding:11px 14px;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.7}
+tbody tr:last-child td{border-bottom:none}
+tbody td:first-child{white-space:nowrap;font-weight:600}
+
+/* ---------- checklist / tree ---------- */
+.tree{
+  background:var(--bg-sunken);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 13px;margin:0 0 18px;
+  font-family:var(--mono);font-size:12.5px;line-height:1.85;
+  color:var(--text-muted);overflow-x:auto;white-space:pre;
+}
+.tree b{color:var(--text);font-weight:600}
+
+.status-grid{display:flex;flex-direction:column;gap:7px;margin:0 0 18px}
+.status-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:9px;padding:10px 12px;
+  font-family:var(--mono);font-size:12.5px;color:var(--text);
+}
+.status-item .ok{
+  flex:none;width:16px;height:16px;border-radius:50%;
+  background:#2f9e5a;display:flex;align-items:center;justify-content:center;
+}
+.status-item .ok svg{width:9px;height:9px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* path comparison */
+.path-cmp{display:flex;flex-direction:column;gap:8px;margin:0 0 18px}
+.path-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:9px;border:1px solid;
+  font-family:var(--mono);font-size:13px;
+}
+.path-row .tag{font-family:var(--font);font-size:11px;font-weight:800;flex:none;padding:2px 7px;border-radius:5px}
+.path-row.good{background:#eef7f0;border-color:#c6e3ce;color:#1e6b3c}
+.path-row.good .tag{background:#2f9e5a;color:#fff}
+.path-row.bad{background:#fdefee;border-color:#f2cdc9;color:#96382f}
+.path-row.bad .tag{background:#c0392b;color:#fff}
+@media (prefers-color-scheme:dark){
+  .path-row.good{background:#16261c;border-color:#2c4a36;color:#8ed6a6}
+  .path-row.bad{background:#2a1917;border-color:#4f2c28;color:#e59a91}
+}
+
+/* ---------- divider ---------- */
+.rule{height:1px;background:var(--border);border:none;margin:44px 0}
+
+/* ---------- links section ---------- */
+.link-list{display:flex;flex-direction:column;gap:9px;margin-bottom:8px}
+.link-card{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px;
+  text-decoration:none;color:var(--text);box-shadow:var(--shadow-sm);
+  -webkit-tap-highlight-color:transparent;
+}
+.link-card:active{background:var(--bg-sunken);transform:scale(.99)}
+.link-card .lc-body{min-width:0;flex:1}
+.link-card .lc-title{font-size:14.5px;font-weight:700;line-height:1.5}
+.link-card .lc-url{font-size:11.5px;color:var(--text-faint);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.link-card .lc-arrow{flex:none;color:var(--text-faint)}
+.link-card .lc-arrow svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- footer ---------- */
+footer{
+  border-top:1px solid var(--border);
+  padding:26px 0 calc(34px + env(safe-area-inset-bottom));
+  color:var(--text-faint);font-size:12.5px;line-height:1.8;
+}
+
+/* ---------- drawer nav (mobile) ---------- */
+.scrim{
+  position:fixed;inset:0;background:rgba(20,19,18,.42);
+  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:70;
+}
+body.nav-open .scrim{opacity:1;pointer-events:auto}
+nav.drawer{
+  position:fixed;top:0;right:0;bottom:0;
+  width:min(84vw,330px);
+  background:var(--bg-elev);
+  border-left:1px solid var(--border);
+  box-shadow:var(--shadow-lg);
+  transform:translateX(100%);
+  transition:transform .26s cubic-bezier(.32,.72,0,1);
+  z-index:80;
+  display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+body.nav-open nav.drawer{transform:translateX(0)}
+.drawer-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 14px 12px 18px;border-bottom:1px solid var(--border);flex:none;
+}
+.drawer-head span{font-size:12px;font-weight:700;letter-spacing:.09em;color:var(--text-faint)}
+.drawer-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 24px;flex:1}
+.drawer-body a{
+  display:block;padding:9px 12px;border-radius:8px;
+  color:var(--text-muted);text-decoration:none;border:none;
+  font-size:14px;line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+}
+.drawer-body a.lv1{font-weight:800;color:var(--text);font-size:14.5px;margin-top:10px}
+.drawer-body a.lv1:first-child{margin-top:0}
+.drawer-body a.lv2{padding-left:22px;font-size:13.5px}
+.drawer-body a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.drawer-body a:active{background:var(--bg-sunken)}
+
+/* ---------- back to top ---------- */
+#top-btn{
+  position:fixed;
+  right:max(16px,env(safe-area-inset-right));
+  bottom:calc(16px + env(safe-area-inset-bottom));
+  width:44px;height:44px;border-radius:50%;
+  background:var(--bg-elev);border:1px solid var(--border-strong);
+  box-shadow:var(--shadow-md);color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:40;
+  opacity:0;pointer-events:none;transform:translateY(8px);
+  transition:opacity .2s,transform .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+#top-btn.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+#top-btn:active{transform:scale(.92)}
+#top-btn svg{width:17px;height:17px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- desktop ---------- */
+@media (min-width:900px){
+  :root{--header-h:60px}
+  body{font-size:16.5px}
+  .wrap{display:grid;grid-template-columns:250px minmax(0,1fr);gap:52px;padding-left:32px;padding-right:32px}
+  .menu-btn{display:none}
+  .toc-card{display:none}
+  aside.sidebar{
+    position:sticky;
+    top:calc(var(--header-h) + env(safe-area-inset-top));
+    height:calc(100vh - var(--header-h) - env(safe-area-inset-top));
+    overflow-y:auto;
+    padding:34px 0 40px;
+    border-right:1px solid var(--border);
+    margin-right:-24px;padding-right:20px;
+  }
+  aside.sidebar .side-label{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--text-faint);margin-bottom:12px;padding-left:12px}
+  aside.sidebar a{
+    display:block;padding:6px 12px;border-radius:7px;
+    color:var(--text-muted);text-decoration:none;border:none;
+    font-size:13.5px;line-height:1.6;
+  }
+  aside.sidebar a.lv1{font-weight:800;color:var(--text);margin-top:12px;font-size:14px}
+  aside.sidebar a.lv1:first-of-type{margin-top:0}
+  aside.sidebar a.lv2{padding-left:22px;font-size:13px}
+  aside.sidebar a:hover{background:var(--bg-sunken);color:var(--text)}
+  aside.sidebar a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  main{padding-top:14px;padding-bottom:80px;max-width:780px}
+  .hero{padding-top:34px}
+  .copy:hover{background:rgba(255,255,255,.09)}
+  .code.prompt .copy:hover{background:var(--border)}
+  .link-card:hover{border-color:var(--accent-border);box-shadow:var(--shadow-md);transform:translateY(-1px);transition:.15s}
+  a:hover{border-bottom-color:var(--accent)}
+  #top-btn{right:32px;bottom:32px}
+}
+@media (max-width:899px){aside.sidebar{display:none}}
+@media (min-width:900px){nav.drawer,.scrim{display:none}}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="brand"><i class="dot"></i><span>Claude Code Remote Control 運用手順</span></div>
+    <button class="menu-btn" id="menuBtn" aria-label="目次を開く" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="scrim" id="scrim"></div>
+<nav class="drawer" id="drawer" aria-label="目次">
+  <div class="drawer-head">
+    <span>目次</span>
+    <button class="menu-btn" id="closeBtn" style="display:flex" aria-label="目次を閉じる">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawerNav"></div>
+</nav>
+
+<div class="wrap">
+
+  <aside class="sidebar">
+    <div class="side-label">目次</div>
+    <div id="sideNav"></div>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <div class="eyebrow">運用ドキュメント</div>
+      <h1>Claude Code<br>Remote Control 運用手順</h1>
+      <p class="lead">オフィスのMac miniをClaude Codeの常時稼働環境として使用し、MacBook AirまたはiPhoneから、画面共有を使わずにアプリ開発を継続する。</p>
+      <div class="meta">
+        <span class="chip">更新日：<b>2026年7月18日</b></span>
+        <span class="chip">Mac mini <b>M4</b></span>
+        <span class="chip">MacBook Air <b>M5</b></span>
+        <span class="chip">iPhone <b>15 Pro</b></span>
+        <a class="chip link" href="/platforms">プラットフォーム比較 →</a>
+        <a class="chip link" href="/ota-agent">OTA設定AIエージェント →</a>
+        <a class="chip link" href="/ppt-excel">PPT/Excel作成ガイド →</a>
+      </div>
+    </div>
+
+    <div class="toc-card">
+      <h2>目次</h2>
+      <ol id="tocCardList"></ol>
+    </div>
+
+    <!-- ============ intro ============ -->
+    <section class="chapter" id="intro">
+      <div class="chapter-head">
+        <div class="badge">◎</div>
+        <h2>この手順書の目的</h2>
+      </div>
+      <p>オフィスのMac miniをClaude Codeの常時稼働環境として使用し、MacBook AirまたはiPhoneから、画面共有を使わずにアプリ開発を継続する。</p>
+      <ul class="bullets">
+        <li>コードの実行・ファイルの保存：<b>Mac mini</b></li>
+        <li>指示・進捗確認・承認：<b>MacBook AirまたはiPhone</b></li>
+        <li>会話・作業ログ：ClaudeのWeb／アプリで確認</li>
+        <li>ソースコードの履歴・バックアップ：<b>GitとGitHub</b></li>
+      </ul>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>対象者</div>
+        <p>プログラミング初心者を含む、ターミナルを日常操作に使いたくない利用者を想定している。対象端末はMac mini M4／MacBook Air M5／iPhone 15 Pro。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 0 ============ -->
+    <section class="chapter" id="ch0">
+      <div class="chapter-head">
+        <div class="badge">0</div>
+        <h2>最初に覚える3つの原則</h2>
+      </div>
+
+      <h3 id="ch0-1">原則1：アプリ本体は「フォルダ」、セッションは「作業の会話」</h3>
+      <p>例えば、次のフォルダがアプリ本体である。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">PATH</span><button class="copy">コピー</button></div><pre><code>~/Developer/hotel-app/</code></pre></div>
+      <p>Claude Codeのセッションは、そのアプリについてClaudeと行う個別の会話・作業記録である。セッションが複数に分かれても、同じフォルダを対象にしていれば、コードやファイルは同じアプリに保存される。</p>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>同時編集に注意</div>
+        <p>複数セッションが同じファイルを同時に編集すると上書きや矛盾が発生する可能性がある。原則として、1つのアプリにつき同時に編集するメインセッションは1つにする。</p>
+      </div>
+
+      <h3 id="ch0-2">原則2：継続開発は必ずプロジェクトフォルダから始める</h3>
+      <p>継続中のアプリを扱うときは、Mac miniで必ずそのアプリのフォルダへ移動してからClaude CodeまたはRemote Controlを起動する。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/hotel-app
+claude</code></pre></div>
+      <p>Claude Codeのセッション履歴はプロジェクトディレクトリに紐づく。そのため、プロジェクトごとに<code>cd</code>してから起動すると、<code>claude --resume</code>で表示される履歴が原則としてそのプロジェクト関連に絞られ、別アプリの履歴によるノイズが減る。</p>
+
+      <h3 id="ch0-3">原則3：会話履歴だけに頼らず、重要情報をアプリの中へ残す</h3>
+      <p>各アプリには、最低限次のファイルを用意する。</p>
+      <div class="tree">~/Developer/hotel-app/
+├── <b>.git/</b>
+├── <b>CLAUDE.md</b>
+├── <b>README.md</b>
+├── <b>STATUS.md</b>
+├── docs/
+│   └── <b>DECISIONS.md</b>
+└── src/</div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>ファイル</th><th>役割</th></tr></thead>
+          <tbody>
+            <tr><td><code>CLAUDE.md</code></td><td>Claudeが毎回守るルール、対象範囲、禁止事項</td></tr>
+            <tr><td><code>README.md</code></td><td>アプリの目的、構成、起動方法</td></tr>
+            <tr><td><code>STATUS.md</code></td><td>現在の実装状況、未解決事項、次に行う作業</td></tr>
+            <tr><td><code>docs/DECISIONS.md</code></td><td>重要な設計判断と、その理由</td></tr>
+            <tr><td><code>.git/</code></td><td>コードの変更履歴と復旧手段</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>考え方</div>
+        <p>セッションは「会議」、上記ファイルとGitは「正式な議事録・成果物」と考える。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 1 ============ -->
+    <section class="chapter" id="ch1">
+      <div class="chapter-head">
+        <div class="badge">1</div>
+        <h2>履歴に関する正しい理解</h2>
+      </div>
+
+      <h3 id="ch1-1">1-1. <code>claude history</code>について</h3>
+      <p>2026年7月時点のClaude Code標準CLIには、<code>claude history</code>という公式コマンドはない。環境によって実行できる場合は、独自のalias、スクリプト、プラグイン等である可能性がある。</p>
+      <p>標準機能で履歴を確認・再開するときは、次を使用する。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>操作</th><th>コマンド</th></tr></thead>
+          <tbody>
+            <tr><td>現在のプロジェクトの直近セッションを再開</td><td><code>claude -c</code>または<code>claude --continue</code></td></tr>
+            <tr><td>現在のプロジェクトの履歴一覧を開く</td><td><code>claude --resume</code></td></tr>
+            <tr><td>名前を指定して再開</td><td><code>claude --resume hotel-app-main</code></td></tr>
+            <tr><td>Claude Code起動中に履歴一覧を開く</td><td><code>/resume</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="ch1-2">1-2. なぜプロジェクトごとに履歴が絞られるのか</h3>
+      <p>Claude Codeのセッションは、開始したプロジェクトディレクトリごとに保存される。例えば次のように分けて起動する。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/hotel-app
+claude</code></pre></div>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/corporate-site
+claude</code></pre></div>
+      <p>この場合、<code>hotel-app</code>で<code>claude --resume</code>を実行すると、通常は<code>hotel-app</code>のセッションが中心に表示される。</p>
+      <p>セッション選択画面では、必要に応じて表示範囲を広げられる。</p>
+      <ul class="bullets">
+        <li><code>Ctrl + A</code>：Mac mini内のすべてのプロジェクトを表示</li>
+        <li><code>Ctrl + W</code>：同じGitリポジトリのすべてのworktreeを表示</li>
+        <li><code>Ctrl + B</code>：現在のGitブランチに絞る</li>
+      </ul>
+
+      <h3 id="ch1-3">1-3. 現在の「Developer開発ハブ」方式の注意点</h3>
+      <p>次のように<code>~/Developer</code>でサーバーを起動し、<code>--spawn same-dir</code>を使用すると、そこで作られたセッションの開始地点はすべて<code>~/Developer</code>になる。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer
+
+claude remote-control \
+  --name "Mac mini 開発ハブ" \
+  --spawn same-dir \
+  --capacity 10 \
+  --sandbox</code></pre></div>
+      <p>プロンプトで<code>~/Developer/hotel-app</code>へ移動させても、セッション履歴の分類は最初に起動したディレクトリの影響を受ける。そのため、すべてを<code>Developer</code>ハブから継続開発すると、複数アプリの履歴が同じ場所に集まりやすい。</p>
+      <p>今後は次のように役割を分ける。</p>
+      <ul class="bullets">
+        <li><b>Developer開発ハブ</b>：新しいアプリのフォルダ作成、短い調査、臨時作業</li>
+        <li><b>プロジェクト別Remote Control</b>：既存アプリの継続的な開発</li>
+      </ul>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 2 ============ -->
+    <section class="chapter" id="ch2">
+      <div class="chapter-head">
+        <div class="badge">2</div>
+        <h2>推奨する全体構成</h2>
+      </div>
+      <div class="tree">Mac mini
+│
+├── <b>Developer開発ハブ</b>
+│   └── 新規アプリの作成・臨時作業
+│
+├── <b>~/Developer/hotel-app/</b>
+│   └── hotel-app専用Remote Control
+│
+├── <b>~/Developer/corporate-site/</b>
+│   └── corporate-site専用Remote Control
+│
+└── <b>~/Developer/reservation-system/</b>
+    └── reservation-system専用Remote Control</div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>常時起動は必須ではない</div>
+        <p>すべてのプロジェクトサーバーを常時起動する必要はない。頻繁に使用するアプリだけ常時起動し、それ以外は必要なときにMac miniで起動する。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 3 ============ -->
+    <section class="chapter" id="ch3">
+      <div class="chapter-head">
+        <div class="badge">3</div>
+        <h2>初期設定</h2>
+      </div>
+
+      <h3 id="ch3-1">3-1. Mac mini</h3>
+
+      <h4>macOSの設定</h4>
+      <ul class="bullets">
+        <li>Mac本体をスリープさせない。</li>
+        <li>ディスプレイは消灯してよい。</li>
+        <li>ログインしたまま画面をロックする。</li>
+        <li>インターネット接続を維持する。</li>
+        <li>可能であればUPSを使用する。</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>FileVaultについて</div>
+        <p>FileVaultが有効な場合、再起動後は利用者が一度Mac miniへログインするまでRemote Controlを起動できない。セキュリティ上、FileVaultを無効にするより、再起動時だけ手動ログインする運用を推奨する。</p>
+      </div>
+
+      <h4>開発用親フォルダ</h4>
+      <div class="code"><div class="code-head"><span class="code-lang">PATH</span><button class="copy">コピー</button></div><pre><code>~/Developer/</code></pre></div>
+      <p><code>~/Developer</code>はアプリを格納する親フォルダであり、各アプリはその直下に個別のフォルダを持つ。</p>
+
+      <h4>Claude Codeのログイン</h4>
+      <p>初回のみ次を実行し、MacBook Air・iPhoneと同じClaudeアカウントでログインする。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer
+claude</code></pre></div>
+      <p>表示されたログインとWorkspace Trustを完了する。</p>
+
+      <h4>新規作成用Developerハブ</h4>
+      <p>新しいアプリの作成場所を用意するため、次を起動しておく。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer
+
+claude remote-control \
+  --name "Mac mini 開発ハブ" \
+  --spawn same-dir \
+  --capacity 3 \
+  --sandbox</code></pre></div>
+      <p>DeveloperハブのCapacityは、新規作成と臨時作業が中心なので、通常は<b>3程度</b>で十分である。既存アプリの継続開発は、後述するプロジェクト別環境を使用する。</p>
+
+      <h4>プロジェクト別Remote Control</h4>
+      <p>既存アプリを継続開発するときは、別のターミナルウインドウを開き、アプリのルートフォルダでサーバーを起動する。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/hotel-app
+
+claude remote-control \
+  --name "hotel-app-main" \
+  --spawn same-dir \
+  --capacity 3 \
+  --sandbox</code></pre></div>
+      <p>これにより、Web／アプリから作成するセッションは<code>~/Developer/hotel-app</code>から始まり、履歴もこのプロジェクトに紐づきやすくなる。</p>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>ターミナルは閉じない</div>
+        <p><code>Control + C</code>、ターミナル終了、Macのログアウト・再起動、Claude Codeプロセスの終了が発生するとRemote Controlも終了する。</p>
+      </div>
+
+      <h3 id="ch3-2">3-2. MacBook Air</h3>
+      <ol class="steps">
+        <li><a href="https://claude.ai/code" target="_blank" rel="noopener">claude.ai/code</a>を開く。</li>
+        <li>Mac miniと同じClaudeアカウントでログインする。</li>
+        <li>新規作成時は<code>Remote Control → Developer</code>を選ぶ。</li>
+        <li>既存アプリの開発時は、対象プロジェクト名が表示されたRemote Control環境を選ぶ。</li>
+        <li>コンピューターアイコンと緑色の接続表示を確認する。</li>
+      </ol>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><code>Default</code>との違い</div>
+        <p><code>Default</code>はAnthropicのクラウド環境であり、Mac miniのローカルファイルを直接操作する環境ではない。</p>
+      </div>
+
+      <h3 id="ch3-3">3-3. iPhone</h3>
+      <ol class="steps">
+        <li>Claude公式アプリを最新版にする。</li>
+        <li>Mac miniと同じClaudeアカウントでログインする。</li>
+        <li>iOSの「設定 → 通知 → Claude」で通知を許可する。</li>
+        <li>Claudeアプリの「Code」を開く。</li>
+        <li>対象アプリのRemote Control環境を選ぶ。</li>
+      </ol>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>iPhoneでの使い分け</div>
+        <p>iPhoneでは、長いコードを直接編集するより、要件追加、進捗確認、承認、方向修正を中心に行う。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 4 ============ -->
+    <section class="chapter" id="ch4">
+      <div class="chapter-head">
+        <div class="badge">4</div>
+        <h2>新しいアプリを作る</h2>
+      </div>
+
+      <h3 id="ch4-1">4-1. MacBook AirまたはiPhoneから新規作成する</h3>
+      <ol class="steps">
+        <li>ClaudeのWeb／アプリで新規セッションを作る。</li>
+        <li><code>Remote Control → Developer</code>を選ぶ。</li>
+        <li>次のプロンプトを送る。</li>
+      </ol>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプトテンプレート</span><button class="copy">コピー</button></div><pre><code>Mac miniのローカル環境で作業してください。
+
+~/Developer直下に「hotel-app」という新しいフォルダを作成してください。
+このアプリに関するファイルは、すべて
+~/Developer/hotel-app
+の中だけに作成してください。
+
+最初に以下を行ってください。
+
+1. フォルダを作成
+2. Gitを初期化
+3. CLAUDE.mdを作成
+4. README.mdを作成
+5. STATUS.mdを作成
+6. docs/DECISIONS.mdを作成
+
+実装前に、要件と実装方針を提示してください。
+私の承認を受けるまで本格的な実装は開始しないでください。</code></pre></div>
+
+      <h3 id="ch4-2">4-2. 作成後にプロジェクト専用環境へ切り替える</h3>
+      <p>アプリのフォルダができたら、Mac miniでプロジェクト専用Remote Controlを起動する。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/hotel-app
+
+claude remote-control \
+  --name "hotel-app-main" \
+  --spawn same-dir \
+  --capacity 3 \
+  --sandbox</code></pre></div>
+      <p>以後、<code>hotel-app</code>の開発ではDeveloperハブではなく、<code>hotel-app</code>のRemote Control環境を選ぶ。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 5 ============ -->
+    <section class="chapter" id="ch5">
+      <div class="chapter-head">
+        <div class="badge">5</div>
+        <h2>セッションの作り方</h2>
+      </div>
+
+      <h3 id="ch5-1">5-1. 基本方針</h3>
+      <p>1つのプロジェクトにつき、まずメインセッションを1つ作る。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">コマンド</span><button class="copy">コピー</button></div><pre><code>/rename hotel-app-main</code></pre></div>
+      <p>新しいセッションを作るのは、次の場合に限定する。</p>
+      <ul class="bullets">
+        <li>メインセッションが終了して復旧できない。</li>
+        <li>完全に別の機能を並行して検討する。</li>
+        <li>調査だけを分離したい。</li>
+        <li>Git worktreeや別ブランチで安全に並行作業する。</li>
+      </ul>
+      <p>会話が長くなっただけなら、新しいセッションを作らず<code>/compact</code>を使う。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプトテンプレート</span><button class="copy">コピー</button></div><pre><code>/compact 今後の開発に必要な仕様、設計判断、現在の実装状況、未完了作業を優先して整理してください</code></pre></div>
+
+      <h3 id="ch5-2">5-2. 新規セッション開始時のプロンプト</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプトテンプレート</span><button class="copy">コピー</button></div><pre><code>このセッションでは、現在のプロジェクトフォルダだけを対象にしてください。
+ほかのプロジェクトやディレクトリは変更しないでください。
+
+最初に以下を確認してください。
+
+- 現在の作業ディレクトリ
+- CLAUDE.md
+- README.md
+- STATUS.md
+- docs/DECISIONS.md
+- git status
+- 直近のgit log
+
+現在の実装状況、未解決事項、次に行うべき作業を報告してください。
+私が確認するまでファイルを変更しないでください。</code></pre></div>
+
+      <h3 id="ch5-3">5-3. セッション名の付け方</h3>
+      <div class="code"><div class="code-head"><span class="code-lang">形式</span><button class="copy">コピー</button></div><pre><code>プロジェクト名__役割</code></pre></div>
+      <p>例：</p>
+      <div class="code"><div class="code-head"><span class="code-lang">例</span><button class="copy">コピー</button></div><pre><code>hotel-app__main
+hotel-app__login-fix
+hotel-app__payment-research</code></pre></div>
+      <p>セッション内で次を実行する。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">コマンド</span><button class="copy">コピー</button></div><pre><code>/rename hotel-app__main</code></pre></div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 6 ============ -->
+    <section class="chapter" id="ch6">
+      <div class="chapter-head">
+        <div class="badge">6</div>
+        <h2>既存セッションを継続する</h2>
+      </div>
+
+      <h3 id="ch6-1">6-1. Web／iPhoneでセッションがオンラインの場合</h3>
+      <p>新規セッションを作らず、セッション一覧から既存のメインセッションを開く。</p>
+      <ul class="bullets">
+        <li>コンピューターアイコンがある。</li>
+        <li>緑色の接続表示がある。</li>
+        <li>セッション名が<code>hotel-app__main</code>等になっている。</li>
+      </ul>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>自動再接続</div>
+        <p>スマホアプリを閉じた、ブラウザを閉じた、一時的に通信が切れた、というだけなら新規セッションは不要である。Remote Controlは短時間の通信中断から自動再接続する。</p>
+      </div>
+
+      <h3 id="ch6-2">6-2. Mac miniで直近セッションを再開する</h3>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/hotel-app
+claude -c</code></pre></div>
+      <p><code>claude -c</code>は、現在のプロジェクトディレクトリで直近に使用したセッションを再開する。</p>
+
+      <h3 id="ch6-3">6-3. 履歴一覧から選んで再開する</h3>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/hotel-app
+claude --resume</code></pre></div>
+      <p>一覧から対象セッションを選ぶ。名前が分かる場合は直接指定できる。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/hotel-app
+claude --resume hotel-app__main</code></pre></div>
+      <p>再開時、Claude Codeは以前のRemote Controlへの再接続を試みる。再接続できない場合は、セッション内で次を実行する。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">コマンド</span><button class="copy">コピー</button></div><pre><code>/remote-control</code></pre></div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><code>/resume</code>はローカルCLI専用</div>
+        <p><code>/resume</code>は対話式の選択画面を開くため、Web版やiPhoneアプリではなくMac miniのローカルCLIで使用する。</p>
+      </div>
+
+      <h3 id="ch6-4">6-4. Remote Controlサーバーとして直近セッションを継続する</h3>
+      <p>Claude Code v2.1.200以降では、プロジェクトフォルダから次を実行できる。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/hotel-app
+claude remote-control --continue --sandbox</code></pre></div>
+      <p>これは、そのディレクトリから開始された直近のRemote Controlセッションを再開する。</p>
+      <p>ただし、<code>--continue</code>は次のオプションと同時に使用できない。</p>
+      <ul class="bullets">
+        <li><code>--spawn</code></li>
+        <li><code>--capacity</code></li>
+        <li><code>--create-session-in-dir</code></li>
+        <li><code>--session-id</code></li>
+      </ul>
+      <p>したがって、<code>--continue</code>は「特定の1セッションを継続する運用」、<code>--spawn same-dir --capacity 3</code>は「そのプロジェクトで複数セッションを作れるサーバー運用」と考える。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 7 ============ -->
+    <section class="chapter" id="ch7">
+      <div class="chapter-head">
+        <div class="badge">7</div>
+        <h2>通常の運用</h2>
+      </div>
+
+      <h3 id="ch7-1">7-1. Mac mini</h3>
+      <ul class="bullets">
+        <li>電源を入れたままにする。</li>
+        <li>Mac本体をスリープさせない。</li>
+        <li>使用中プロジェクトのRemote Controlターミナルを閉じない。</li>
+        <li>画面はロックまたは消灯してよい。</li>
+        <li>インターネット接続を維持する。</li>
+      </ul>
+
+      <h3 id="ch7-2">7-2. MacBook Air</h3>
+      <ol class="steps">
+        <li><a href="https://claude.ai/code" target="_blank" rel="noopener">claude.ai/code</a>を開く。</li>
+        <li>対象プロジェクトのRemote Control環境を選ぶ。</li>
+        <li>既存のメインセッションを開く。</li>
+        <li>Claudeの計画、差分、コマンドを確認する。</li>
+        <li>実装後にテスト結果とGitの状態を確認する。</li>
+      </ol>
+
+      <h3 id="ch7-3">7-3. iPhone</h3>
+      <ol class="steps">
+        <li>Claudeアプリの「Code」を開く。</li>
+        <li>対象プロジェクトのメインセッションを開く。</li>
+        <li>進捗確認、追加指示、承認を行う。</li>
+        <li>作業終了時に、後述のまとめプロンプトを送る。</li>
+      </ol>
+
+      <h3 id="ch7-4">7-4. 1回の作業の標準的な流れ</h3>
+      <ol class="steps">
+        <li>対象プロジェクトの既存メインセッションを開く。</li>
+        <li><code>STATUS.md</code>とGitの状態を確認させる。</li>
+        <li>実装計画を提示させる。</li>
+        <li>計画を確認して実装を承認する。</li>
+        <li>テストを実行させる。</li>
+        <li>変更ファイルと差分を確認する。</li>
+        <li><code>STATUS.md</code>等を更新させる。</li>
+        <li>必要に応じてGitへコミットする。</li>
+        <li>GitHubの非公開リポジトリへpushする。</li>
+      </ol>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 8 ============ -->
+    <section class="chapter" id="ch8">
+      <div class="chapter-head">
+        <div class="badge">8</div>
+        <h2>作業終了時のまとめ方</h2>
+      </div>
+
+      <h3 id="ch8-1">8-1. 一時的に離れるだけの場合</h3>
+      <p><code>/exit</code>せず、次のプロンプトを送って作業状況を整理する。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプトテンプレート</span><button class="copy">コピー</button></div><pre><code>ここで一旦作業を止めます。
+
+現在の状況を確認し、STATUS.mdを更新してください。
+
+以下を記載してください。
+
+1. 今回完了した内容
+2. 変更したファイル
+3. 実行したテストと結果
+4. 未解決の問題
+5. 次に行う作業
+6. 再開時に注意すること
+
+最後にgit statusを確認し、未コミットの変更を報告してください。
+私の承認なしにコミット、push、本番公開は行わないでください。</code></pre></div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>アイドル中の消費</div>
+        <p>アイドル状態でClaudeがタスクを実行していなければ、トークンを継続的に消費しない。ただし、起動中セッションとしてCapacityとMac miniのメモリを使用する。</p>
+      </div>
+
+      <h3 id="ch8-2">8-2. 会話が長くなった場合</h3>
+      <p>新しいセッションを作る前に、次を実行する。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプトテンプレート</span><button class="copy">コピー</button></div><pre><code>/compact 今後必要な仕様、設計判断、変更済みファイル、未解決事項、次の作業を優先して要約してください</code></pre></div>
+
+      <h3 id="ch8-3">8-3. その日の作業を完全に終了する場合</h3>
+      <p>次の順で確認する。</p>
+      <ol class="steps">
+        <li><code>STATUS.md</code>が更新されている。</li>
+        <li><code>docs/DECISIONS.md</code>に重要な判断が残っている。</li>
+        <li>テストが完了している。</li>
+        <li><code>git status</code>と<code>git diff</code>を確認した。</li>
+        <li>必要な変更をコミットした。</li>
+        <li>GitHubへpushした。</li>
+        <li>セッションを終了してよいと判断した。</li>
+      </ol>
+      <p>終了する場合：</p>
+      <div class="code"><div class="code-head"><span class="code-lang">コマンド</span><button class="copy">コピー</button></div><pre><code>/exit</code></pre></div>
+      <p>後日、Mac miniでプロジェクトフォルダへ<code>cd</code>してから<code>claude -c</code>または<code>claude --resume</code>で再開する。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 9 ============ -->
+    <section class="chapter" id="ch9">
+      <div class="chapter-head">
+        <div class="badge">9</div>
+        <h2>複数セッションに分かれた場合</h2>
+      </div>
+      <p>2つのセッションの会話履歴を、標準機能で1本の履歴へ直接結合することはできない。ただし、作業内容はメインセッションへ引き継げる。</p>
+
+      <h3 id="ch9-1">9-1. メインセッションを決める</h3>
+      <div class="code"><div class="code-head"><span class="code-lang">コマンド</span><button class="copy">コピー</button></div><pre><code>/rename hotel-app__main</code></pre></div>
+      <p>もう一方は次のようにする。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">コマンド</span><button class="copy">コピー</button></div><pre><code>/rename hotel-app__old</code></pre></div>
+
+      <h3 id="ch9-2">9-2. 古いセッションで引き継ぎ書を作る</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプトテンプレート</span><button class="copy">コピー</button></div><pre><code>このセッションの内容をメインセッションへ引き継ぎます。
+
+docs/SESSION_HANDOFF.mdを作成し、以下を記載してください。
+
+1. 決定した要件
+2. 設計判断と理由
+3. 実装した内容
+4. 変更したファイル
+5. 未完了の作業
+6. 問題点
+7. テスト結果
+8. 次に行う作業
+
+最後にgit statusとgit diffも確認してください。
+新しい実装は行わず、引き継ぎ情報の整理だけをしてください。</code></pre></div>
+
+      <h3 id="ch9-3">9-3. メインセッションで統合する</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプトテンプレート</span><button class="copy">コピー</button></div><pre><code>docs/SESSION_HANDOFF.md、STATUS.md、CLAUDE.md、README.md、
+git status、git diff、直近のgit logを確認してください。
+
+別セッションの変更による矛盾、上書き、未完成の実装がないか確認し、
+今後の作業方針を報告してください。
+確認が終わるまで新しい実装は行わないでください。</code></pre></div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>統合が終わるまで<code>/exit</code>しない</div>
+        <p>統合確認が終わるまで古いセッションを<code>/exit</code>しない。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 10 ============ -->
+    <section class="chapter" id="ch10">
+      <div class="chapter-head">
+        <div class="badge">10</div>
+        <h2>Capacityの考え方</h2>
+      </div>
+      <p><code>Capacity: 1/3</code>は、そのRemote Controlサーバーが最大3セッションを扱え、現在1セッションが起動していることを意味する。</p>
+      <p>Capacityは次の上限ではない。</p>
+      <ul class="bullets">
+        <li>トークンを消費中のタスク数</li>
+        <li>接続しているiPhoneやMacBook Airの台数</li>
+        <li>会話履歴の保存件数</li>
+      </ul>
+      <p>Capacityは、そのサーバーが同時に保持するClaude Codeセッション数の上限である。</p>
+      <p>プロジェクト別環境では、通常<code>3</code>程度から始める。</p>
+      <ul class="bullets">
+        <li>メインセッション：1</li>
+        <li>調査・修正用：1</li>
+        <li>予備：1</li>
+      </ul>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>満杯になったら</div>
+        <p><code>Capacity: 3/3</code>になった場合は、完全に終了してよいセッションだけを整理する。後でスマホから続けたい重要なセッションは、むやみに<code>/exit</code>しない。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 11 ============ -->
+    <section class="chapter" id="ch11">
+      <div class="chapter-head">
+        <div class="badge">11</div>
+        <h2>トラブルシューティング</h2>
+      </div>
+
+      <h3 id="ch11-1">11-1. プロジェクトの履歴に別アプリが大量に表示される</h3>
+      <p>原因として、<code>~/Developer</code>のような共通親フォルダからすべてのセッションを起動している可能性がある。</p>
+      <p>Mac miniで対象アプリへ移動してから履歴を開く。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/hotel-app
+claude --resume</code></pre></div>
+      <p>今後は、そのアプリ専用のRemote Controlサーバーをアプリのルートフォルダから起動する。</p>
+
+      <h3 id="ch11-2">11-2. <code>Developer</code>しか表示されない</h3>
+      <p>プロジェクト専用Remote Controlがまだ起動していない。Mac miniで別ターミナルを開き、対象フォルダから起動する。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/hotel-app
+
+claude remote-control \
+  --name "hotel-app-main" \
+  --spawn same-dir \
+  --capacity 3 \
+  --sandbox</code></pre></div>
+
+      <h3 id="ch11-3">11-3. Mac miniのファイルが見つからない</h3>
+      <p>実行環境が<code>クラウド → Default</code>になっていないか確認する。Mac miniのファイルを扱う場合は、コンピューターアイコンのあるRemote Control環境を選ぶ。</p>
+
+      <h3 id="ch11-4">11-4. 意図しないフォルダを変更した</h3>
+      <p>次を確認する。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプトテンプレート</span><button class="copy">コピー</button></div><pre><code>現在の作業ディレクトリを絶対パスで報告してください。
+git statusとgit diffを表示してください。
+これ以上ファイルを変更しないでください。</code></pre></div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>確認前に自動修正させない</div>
+        <p>ユーザーが差分を確認するまで、広範囲な削除や自動修正を行わせない。</p>
+      </div>
+
+      <h3 id="ch11-5">11-5. Remote Controlが切れた</h3>
+      <ul class="bullets">
+        <li>iPhoneアプリやブラウザだけを閉じた：既存セッションを開く。</li>
+        <li>短時間の通信切断：自動再接続を待つ。</li>
+        <li>Mac miniのClaudeプロセスが終了：プロジェクトフォルダから<code>claude -c</code>または<code>claude --resume</code>を実行する。</li>
+        <li>Mac miniが起動している状態で約10分以上ネットワークへ接続できない：プロセスが終了することがあるため再起動する。</li>
+      </ul>
+
+      <h3 id="ch11-6">11-6. <code>/exit</code>したセッションをスマホだけで復旧したい</h3>
+      <p>同じローカルセッションを確実に指定して復旧する<code>/resume</code>はMac miniのローカルCLI専用である。</p>
+      <p>Mac miniを操作できない場合は、対象プロジェクトのRemote Control環境で新規セッションを作り、次を送る。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプトテンプレート</span><button class="copy">コピー</button></div><pre><code>CLAUDE.md、README.md、STATUS.md、docs/DECISIONS.md、
+git status、git diff、直近のgit logを確認してください。
+
+現在の実装状況と次に行う作業を報告してください。
+確認が終わるまでファイルを変更しないでください。</code></pre></div>
+
+      <h3 id="ch11-7">11-7. 複数セッションが同じファイルを変更した</h3>
+      <p>すべてのセッションで作業を停止し、メインセッションに次を依頼する。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプトテンプレート</span><button class="copy">コピー</button></div><pre><code>git statusとgit diffを確認してください。
+変更を自動修正せず、競合・矛盾・未完成の箇所を報告してください。</code></pre></div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>並行作業が必要なとき</div>
+        <p>並行作業が必要な場合は、Gitブランチとworktreeを使用する。初心者のうちは、同じアプリを複数セッションで同時編集しない。</p>
+      </div>
+
+      <h3 id="ch11-8">11-8. 緊急停止</h3>
+      <ol class="steps">
+        <li>Web／アプリの停止ボタンを押す。</li>
+        <li>Mac miniの該当Remote Control画面で<code>Control + C</code>を押す。</li>
+        <li><code>git status</code>と<code>git diff</code>を確認する。</li>
+        <li>意図しない外部送信があれば、関連サービスの認証情報を無効化する。</li>
+      </ol>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 12 ============ -->
+    <section class="chapter" id="ch12">
+      <div class="chapter-head">
+        <div class="badge">12</div>
+        <h2>コマンド早見表</h2>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>目的</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr><td>プロジェクトへ移動</td><td><code>cd ~/Developer/hotel-app</code></td></tr>
+            <tr><td>新規の通常セッション</td><td><code>claude</code></td></tr>
+            <tr><td>直近セッションを継続</td><td><code>claude -c</code></td></tr>
+            <tr><td>履歴一覧から再開</td><td><code>claude --resume</code></td></tr>
+            <tr><td>名前で再開</td><td><code>claude --resume hotel-app__main</code></td></tr>
+            <tr><td>起動中にセッションを切り替える</td><td><code>/resume</code></td></tr>
+            <tr><td>セッション名を付ける</td><td><code>/rename hotel-app__main</code></td></tr>
+            <tr><td>会話を要約して継続</td><td><code>/compact 指示</code></td></tr>
+            <tr><td>Remote Controlを再接続</td><td><code>/remote-control</code></td></tr>
+            <tr><td>セッションを終了</td><td><code>/exit</code></td></tr>
+            <tr><td>現在の作業場所を確認</td><td><code>pwd</code></td></tr>
+            <tr><td>ファイルの変更状況を確認</td><td><code>git status</code></td></tr>
+            <tr><td>変更内容を確認</td><td><code>git diff</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ links ============ -->
+    <section class="chapter" id="links">
+      <div class="chapter-head">
+        <div class="badge">＃</div>
+        <h2>参考リンク</h2>
+      </div>
+      <div class="link-list">
+        <a class="link-card" href="https://code.claude.com/docs/en/remote-control" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude Code Remote Control</div><div class="lc-url">code.claude.com/docs/en/remote-control</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/sessions" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude Code Sessions</div><div class="lc-url">code.claude.com/docs/en/sessions</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/cli-reference" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude Code CLI Reference</div><div class="lc-url">code.claude.com/docs/en/cli-reference</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/how-claude-code-works" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">How Claude Code Works</div><div class="lc-url">code.claude.com/docs/en/how-claude-code-works</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/desktop" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude Code Desktop</div><div class="lc-url">code.claude.com/docs/en/desktop</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/claude-code-on-the-web" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude Code on the Web</div><div class="lc-url">code.claude.com/docs/en/claude-code-on-the-web</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://support.apple.com/guide/mac-help/change-energy-settings-mchlp1168/mac" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Apple：Macデスクトップコンピュータのエネルギー設定</div><div class="lc-url">support.apple.com/guide/mac-help/...</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      Claude Code Remote Control 運用手順 ／ 更新日：2026年7月18日<br>
+      対象端末：Mac mini M4・MacBook Air M5・iPhone 15 Pro
+    </footer>
+
+  </main>
+</div>
+
+<button id="top-btn" aria-label="ページ先頭へ戻る">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---- build nav from headings ---- */
+  var NAV = [
+    {id:"intro", label:"この手順書の目的", num:"◎", children:[]},
+    {id:"ch0", label:"最初に覚える3つの原則", num:"0", children:[
+      {id:"ch0-1", label:"原則1：フォルダとセッション"},
+      {id:"ch0-2", label:"原則2：フォルダから始める"},
+      {id:"ch0-3", label:"原則3：情報をアプリに残す"}
+    ]},
+    {id:"ch1", label:"履歴の正しい理解", num:"1", children:[
+      {id:"ch1-1", label:"1-1. claude historyについて"},
+      {id:"ch1-2", label:"1-2. 履歴が絞られる理由"},
+      {id:"ch1-3", label:"1-3. 開発ハブ方式の注意点"}
+    ]},
+    {id:"ch2", label:"推奨する全体構成", num:"2", children:[]},
+    {id:"ch3", label:"初期設定", num:"3", children:[
+      {id:"ch3-1", label:"3-1. Mac mini"},
+      {id:"ch3-2", label:"3-2. MacBook Air"},
+      {id:"ch3-3", label:"3-3. iPhone"}
+    ]},
+    {id:"ch4", label:"新しいアプリを作る", num:"4", children:[
+      {id:"ch4-1", label:"4-1. 新規作成する"},
+      {id:"ch4-2", label:"4-2. 専用環境へ切り替える"}
+    ]},
+    {id:"ch5", label:"セッションの作り方", num:"5", children:[
+      {id:"ch5-1", label:"5-1. 基本方針"},
+      {id:"ch5-2", label:"5-2. 開始時のプロンプト"},
+      {id:"ch5-3", label:"5-3. セッション名の付け方"}
+    ]},
+    {id:"ch6", label:"既存セッションを継続する", num:"6", children:[
+      {id:"ch6-1", label:"6-1. オンラインの場合"},
+      {id:"ch6-2", label:"6-2. 直近セッションを再開"},
+      {id:"ch6-3", label:"6-3. 履歴一覧から再開"},
+      {id:"ch6-4", label:"6-4. サーバーとして継続"}
+    ]},
+    {id:"ch7", label:"通常の運用", num:"7", children:[
+      {id:"ch7-1", label:"7-1. Mac mini"},
+      {id:"ch7-2", label:"7-2. MacBook Air"},
+      {id:"ch7-3", label:"7-3. iPhone"},
+      {id:"ch7-4", label:"7-4. 標準的な流れ"}
+    ]},
+    {id:"ch8", label:"作業終了時のまとめ方", num:"8", children:[
+      {id:"ch8-1", label:"8-1. 一時的に離れる場合"},
+      {id:"ch8-2", label:"8-2. 会話が長くなった場合"},
+      {id:"ch8-3", label:"8-3. 完全に終了する場合"}
+    ]},
+    {id:"ch9", label:"複数セッションに分かれた場合", num:"9", children:[
+      {id:"ch9-1", label:"9-1. メインを決める"},
+      {id:"ch9-2", label:"9-2. 引き継ぎ書を作る"},
+      {id:"ch9-3", label:"9-3. 統合する"}
+    ]},
+    {id:"ch10", label:"Capacityの考え方", num:"10", children:[]},
+    {id:"ch11", label:"トラブルシューティング", num:"11", children:[
+      {id:"ch11-1", label:"11-1. 別アプリの履歴が大量"},
+      {id:"ch11-2", label:"11-2. Developerしか出ない"},
+      {id:"ch11-3", label:"11-3. ファイルが見つからない"},
+      {id:"ch11-4", label:"11-4. 意図しないフォルダ変更"},
+      {id:"ch11-5", label:"11-5. Remote Controlが切れた"},
+      {id:"ch11-6", label:"11-6. スマホだけで復旧"},
+      {id:"ch11-7", label:"11-7. 変更の競合"},
+      {id:"ch11-8", label:"11-8. 緊急停止"}
+    ]},
+    {id:"ch12", label:"コマンド早見表", num:"12", children:[]},
+    {id:"links", label:"参考リンク", num:"＃", children:[]}
+  ];
+
+  function buildNav(host){
+    var frag = document.createDocumentFragment();
+    NAV.forEach(function(sec){
+      var a = document.createElement("a");
+      a.href = "#" + sec.id; a.className = "lv1"; a.textContent = sec.label;
+      a.dataset.target = sec.id;
+      frag.appendChild(a);
+      sec.children.forEach(function(c){
+        var b = document.createElement("a");
+        b.href = "#" + c.id; b.className = "lv2"; b.textContent = c.label;
+        b.dataset.target = c.id;
+        frag.appendChild(b);
+      });
+    });
+    host.appendChild(frag);
+  }
+  buildNav(document.getElementById("sideNav"));
+  buildNav(document.getElementById("drawerNav"));
+
+  var tocList = document.getElementById("tocCardList");
+  NAV.forEach(function(sec){
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = "#" + sec.id;
+    a.innerHTML = '<span class="num">' + sec.num + "</span>";
+    var t = document.createElement("span");
+    t.textContent = sec.label;
+    a.appendChild(t);
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  /* ---- drawer ---- */
+  var body = document.body;
+  var menuBtn = document.getElementById("menuBtn");
+  var closeBtn = document.getElementById("closeBtn");
+  var scrim = document.getElementById("scrim");
+  function openNav(){ body.classList.add("nav-open"); menuBtn.setAttribute("aria-expanded","true"); }
+  function closeNav(){ body.classList.remove("nav-open"); menuBtn.setAttribute("aria-expanded","false"); }
+  menuBtn.addEventListener("click", openNav);
+  closeBtn.addEventListener("click", closeNav);
+  scrim.addEventListener("click", closeNav);
+  document.getElementById("drawerNav").addEventListener("click", function(e){
+    if (e.target.closest("a")) closeNav();
+  });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeNav(); });
+
+  /* ---- copy buttons ---- */
+  document.querySelectorAll(".copy").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var code = btn.closest(".code").querySelector("code");
+      var text = code.innerText;
+      var done = function(){
+        btn.textContent = "コピー済み";
+        btn.classList.add("done");
+        setTimeout(function(){ btn.textContent = "コピー"; btn.classList.remove("done"); }, 1600);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else { fallback(); }
+      function fallback(){
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch(err){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  /* ---- scrollspy + progress + top button ---- */
+  var links = Array.prototype.slice.call(document.querySelectorAll("#sideNav a, #drawerNav a"));
+  var targets = links.map(function(a){ return document.getElementById(a.dataset.target); });
+  var progress = document.getElementById("progress");
+  var topBtn = document.getElementById("top-btn");
+  var ticking = false;
+  var headerH = 0;
+
+  function measure(){
+    headerH = document.querySelector("header").offsetHeight;
+  }
+  measure();
+  window.addEventListener("resize", measure);
+
+  function update(){
+    ticking = false;
+    var y = window.scrollY || window.pageYOffset;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (max > 0 ? Math.min(100, (y / max) * 100) : 0) + "%";
+    topBtn.classList.toggle("show", y > 500);
+
+    var line = y + headerH + 40;
+    var activeIdx = -1;
+    for (var i = 0; i < targets.length; i++){
+      var el = targets[i];
+      if (el && el.getBoundingClientRect().top + y <= line) activeIdx = i;
+    }
+    links.forEach(function(a, i){ a.classList.toggle("active", i === activeIdx); });
+
+    if (activeIdx > -1){
+      var act = links[activeIdx];
+      if (act.closest("#sideNav")){
+        var side = document.querySelector("aside.sidebar");
+        if (side && side.offsetParent !== null){
+          var r = act.getBoundingClientRect(), sr = side.getBoundingClientRect();
+          if (r.top < sr.top + 8 || r.bottom > sr.bottom - 8){
+            side.scrollTop += r.top - sr.top - side.clientHeight / 2;
+          }
+        }
+      }
+    }
+  }
+  window.addEventListener("scroll", function(){
+    if (!ticking){ ticking = true; requestAnimationFrame(update); }
+  }, {passive:true});
+  update();
+
+  topBtn.addEventListener("click", function(){
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Claude CodeでPowerPoint／Excelをテンプレート準拠で作る運用ガイド。ドキュメントスキル、CLAUDE.md、Gmail／カレンダー連携、LINEログ取り込みまで。">
+<title>Claude Code で PowerPoint / Excel を作る運用ガイド</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+<style>
+:root{
+  --bg:#faf9f7;
+  --bg-elev:#ffffff;
+  --bg-sunken:#f2f0ed;
+  --text:#1f1e1d;
+  --text-muted:#6b6862;
+  --text-faint:#918d85;
+  --border:#e5e1db;
+  --border-strong:#d6d1c9;
+  --accent:#c4552f;
+  --accent-soft:#fdf1ec;
+  --accent-border:#f0c9b8;
+  --warn:#a8620a;
+  --warn-soft:#fdf4e7;
+  --warn-border:#f0dcb8;
+  --info:#2b6a8f;
+  --info-soft:#eaf3f8;
+  --info-border:#c2ddeb;
+  --code-bg:#282521;
+  --code-text:#e8e3db;
+  --code-inline-bg:#f0ede8;
+  --code-inline-text:#a8442a;
+  --shadow-sm:0 1px 2px rgba(31,30,29,.05);
+  --shadow-md:0 4px 16px -4px rgba(31,30,29,.10),0 2px 4px rgba(31,30,29,.04);
+  --shadow-lg:0 16px 48px -12px rgba(31,30,29,.24);
+  --radius:14px;
+  --radius-sm:9px;
+  --font:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --header-h:56px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1917;
+    --bg-elev:#232120;
+    --bg-sunken:#141312;
+    --text:#eeebe6;
+    --text-muted:#a5a099;
+    --text-faint:#7d7871;
+    --border:#35322e;
+    --border-strong:#474340;
+    --accent:#e2825c;
+    --accent-soft:#2e211b;
+    --accent-border:#5a3d2e;
+    --warn:#d6a05a;
+    --warn-soft:#2b2317;
+    --warn-border:#54432a;
+    --info:#7db8d8;
+    --info-soft:#182630;
+    --info-border:#2f4a5c;
+    --code-bg:#121110;
+    --code-text:#ded9d1;
+    --code-inline-bg:#2c2926;
+    --code-inline-text:#e9a184;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+    --shadow-md:0 4px 16px -4px rgba(0,0,0,.5);
+    --shadow-lg:0 16px 48px -12px rgba(0,0,0,.7);
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 16px);-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.85;
+  font-size:16px;
+  letter-spacing:.01em;
+  -webkit-font-smoothing:antialiased;
+  overflow-wrap:break-word;
+  word-break:normal;
+  line-break:strict;
+}
+body.nav-open{overflow:hidden}
+
+#progress{
+  position:fixed;top:0;left:0;height:2.5px;width:0;
+  background:linear-gradient(90deg,var(--accent),#e0a06f);
+  z-index:60;transition:width .1s linear;
+}
+
+header{
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  padding-top:env(safe-area-inset-top);
+  height:calc(var(--header-h) + env(safe-area-inset-top));
+  background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:saturate(180%) blur(14px);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--border);
+  z-index:50;
+  display:flex;align-items:center;gap:12px;
+  padding-left:max(16px,env(safe-area-inset-left));
+  padding-right:max(16px,env(safe-area-inset-right));
+}
+.header-inner{display:flex;align-items:center;gap:12px;width:100%;max-width:1200px;margin:0 auto;height:var(--header-h)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;letter-spacing:.02em;min-width:0}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.brand span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu-btn{
+  margin-left:auto;flex:none;
+  width:38px;height:38px;border-radius:10px;
+  border:1px solid var(--border-strong);background:var(--bg-elev);
+  color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.menu-btn:active{transform:scale(.94)}
+.menu-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round}
+
+.wrap{
+  max-width:1200px;margin:0 auto;
+  padding:calc(var(--header-h) + env(safe-area-inset-top)) max(18px,env(safe-area-inset-left)) 0 max(18px,env(safe-area-inset-right));
+  display:block;
+}
+main{min-width:0;padding-bottom:64px}
+
+.hero{padding:40px 0 30px;border-bottom:1px solid var(--border);margin-bottom:34px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;letter-spacing:.09em;
+  color:var(--accent);background:var(--accent-soft);
+  border:1px solid var(--accent-border);
+  padding:5px 11px;border-radius:999px;margin-bottom:16px;
+}
+.hero h1{
+  font-size:clamp(25px,6.6vw,42px);
+  line-height:1.34;font-weight:800;letter-spacing:-.01em;
+  margin-bottom:14px;
+}
+.hero p.lead{font-size:15px;color:var(--text-muted);line-height:1.8;margin-bottom:20px}
+.hero p.lead b{color:var(--text)}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-size:11.5px;font-weight:600;
+  background:var(--bg-elev);border:1px solid var(--border);
+  color:var(--text-muted);
+  padding:5px 10px;border-radius:8px;white-space:nowrap;
+}
+.chip b{color:var(--text);font-weight:700}
+.chip.link{color:var(--accent);border-color:var(--accent-border);background:var(--accent-soft);text-decoration:none}
+.chip.link:active{opacity:.6}
+
+.toc-card{
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px 16px;margin-bottom:32px;
+  box-shadow:var(--shadow-sm);
+}
+.toc-card h2{font-size:12px;letter-spacing:.1em;color:var(--text-faint);font-weight:700;margin-bottom:12px}
+.toc-card ol{list-style:none;display:flex;flex-direction:column;gap:2px}
+.toc-card a{
+  display:flex;align-items:center;gap:11px;
+  padding:9px 8px;border-radius:9px;
+  color:var(--text);text-decoration:none;font-size:14.5px;font-weight:600;
+  -webkit-tap-highlight-color:transparent;
+}
+.toc-card a:active{background:var(--bg-sunken)}
+.toc-card .num{
+  flex:none;min-width:24px;height:24px;padding:0 5px;border-radius:7px;
+  background:var(--accent-soft);border:1px solid var(--accent-border);
+  color:var(--accent);font-size:11.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+.chapter{margin-bottom:50px;scroll-margin-top:calc(var(--header-h) + 20px)}
+.chapter-head{
+  display:flex;align-items:center;gap:13px;
+  padding-bottom:14px;margin-bottom:24px;
+  border-bottom:2px solid var(--accent);
+}
+.chapter-head .badge{
+  flex:none;
+  min-width:34px;height:34px;padding:0 8px;border-radius:9px;
+  background:var(--accent);color:#fff;
+  font-size:15px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+  box-shadow:0 2px 8px -2px color-mix(in srgb,var(--accent) 60%,transparent);
+}
+.chapter-head h2{font-size:clamp(20px,5.2vw,26px);font-weight:800;letter-spacing:-.005em;line-height:1.4}
+
+h3{
+  font-size:clamp(16.5px,4.3vw,19px);font-weight:700;
+  margin:34px 0 13px;line-height:1.5;
+  scroll-margin-top:calc(var(--header-h) + 20px);
+  padding-left:13px;border-left:3.5px solid var(--accent);
+}
+h3:first-of-type{margin-top:0}
+h4{
+  font-size:15px;font-weight:700;color:var(--text);
+  margin:24px 0 10px;
+  display:flex;align-items:center;gap:8px;
+}
+h4::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--text-faint);flex:none}
+
+p{margin:0 0 14px}
+p:last-child{margin-bottom:0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-border)}
+a:active{opacity:.6}
+
+ul.bullets,ol.steps{margin:0 0 16px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.bullets li{position:relative;padding-left:19px;line-height:1.8}
+ul.bullets li::before{
+  content:"";position:absolute;left:3px;top:.72em;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);opacity:.55;
+}
+ol.steps{counter-reset:s}
+ol.steps li{position:relative;padding-left:34px;counter-increment:s;line-height:1.8;min-height:24px}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:.28em;
+  width:23px;height:23px;border-radius:7px;
+  background:var(--bg-sunken);border:1px solid var(--border-strong);
+  color:var(--text-muted);
+  font-size:11.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+.code{
+  position:relative;
+  background:var(--code-bg);border-radius:var(--radius-sm);
+  margin:0 0 18px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:var(--shadow-sm);
+}
+.code-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 8px 0 13px;height:34px;
+  background:rgba(255,255,255,.04);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.code-lang{
+  font-family:var(--mono);font-size:10.5px;font-weight:600;
+  color:#a09a90;letter-spacing:.07em;
+}
+.copy{
+  font-family:var(--font);font-size:11px;font-weight:600;
+  background:transparent;border:1px solid rgba(255,255,255,.15);
+  color:#cec8bf;padding:4px 9px;border-radius:6px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.copy:active{transform:scale(.94)}
+.copy.done{color:#7fca8f;border-color:#3f6b48}
+.code pre{
+  margin:0;padding:14px 13px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  font-family:var(--mono);font-size:12.5px;line-height:1.75;
+  color:var(--code-text);
+  tab-size:2;
+}
+.code pre code{white-space:pre;font-family:inherit}
+code:not(pre code){
+  font-family:var(--mono);font-size:.855em;
+  background:var(--code-inline-bg);color:var(--code-inline-text);
+  padding:2px 5px;border-radius:5px;
+  border:1px solid var(--border);
+  white-space:nowrap;
+}
+
+.code.prompt{background:var(--bg-sunken);border:1px solid var(--border-strong)}
+.code.prompt .code-head{background:transparent;border-bottom:1px dashed var(--border-strong)}
+.code.prompt .code-lang{color:var(--accent)}
+.code.prompt .copy{border-color:var(--border-strong);color:var(--text-muted)}
+.code.prompt pre{color:var(--text);font-size:13px;white-space:pre-wrap;word-break:break-word;line-break:strict}
+.code.prompt pre code{white-space:pre-wrap}
+
+.note{
+  border-radius:var(--radius-sm);
+  padding:14px 15px;margin:0 0 18px;
+  border:1px solid;font-size:14.5px;line-height:1.78;
+}
+.note .note-title{
+  display:flex;align-items:center;gap:7px;
+  font-weight:700;font-size:12.5px;letter-spacing:.03em;
+  margin-bottom:7px;
+}
+.note .note-title svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.note.warn{background:var(--warn-soft);border-color:var(--warn-border)}
+.note.warn .note-title{color:var(--warn)}
+.note.info{background:var(--info-soft);border-color:var(--info-border)}
+.note.info .note-title{color:var(--info)}
+.note.tip{background:var(--accent-soft);border-color:var(--accent-border)}
+.note.tip .note-title{color:var(--accent)}
+.note p:last-child{margin-bottom:0}
+.note ul.bullets{margin-top:8px;margin-bottom:0}
+.note code:not(pre code){background:color-mix(in srgb,var(--bg-elev) 70%,transparent)}
+
+.table-scroll{
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  margin:0 0 18px;
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--bg-elev);box-shadow:var(--shadow-sm);
+}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:440px}
+thead th{
+  background:var(--bg-sunken);
+  text-align:left;font-weight:700;font-size:11.5px;letter-spacing:.06em;
+  color:var(--text-faint);
+  padding:11px 14px;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.7}
+tbody tr:last-child td{border-bottom:none}
+tbody td:first-child{white-space:nowrap;font-weight:600}
+
+.tree{
+  background:var(--bg-sunken);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 13px;margin:0 0 18px;
+  font-family:var(--mono);font-size:12.5px;line-height:1.85;
+  color:var(--text-muted);overflow-x:auto;white-space:pre;
+}
+.tree b{color:var(--text);font-weight:600}
+.tree i{color:var(--accent);font-style:normal}
+
+/* option cards A/B/C */
+.opt-tag{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:24px;height:24px;padding:0 8px;border-radius:7px;margin-right:8px;
+  background:var(--accent);color:#fff;font-size:12px;font-weight:800;
+  vertical-align:middle;
+}
+
+.rule{height:1px;background:var(--border);border:none;margin:40px 0}
+
+.link-list{display:flex;flex-direction:column;gap:9px;margin-bottom:8px}
+.link-card{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px;
+  text-decoration:none;color:var(--text);box-shadow:var(--shadow-sm);
+  -webkit-tap-highlight-color:transparent;
+}
+.link-card:active{background:var(--bg-sunken);transform:scale(.99)}
+.link-card .lc-body{min-width:0;flex:1}
+.link-card .lc-title{font-size:14.5px;font-weight:700;line-height:1.5}
+.link-card .lc-url{font-size:11.5px;color:var(--text-faint);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.link-card .lc-arrow{flex:none;color:var(--text-faint)}
+.link-card .lc-arrow svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+footer{
+  border-top:1px solid var(--border);
+  padding:26px 0 calc(34px + env(safe-area-inset-bottom));
+  color:var(--text-faint);font-size:12.5px;line-height:1.8;
+}
+footer a{color:var(--text-muted)}
+
+.scrim{
+  position:fixed;inset:0;background:rgba(20,19,18,.42);
+  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:70;
+}
+body.nav-open .scrim{opacity:1;pointer-events:auto}
+nav.drawer{
+  position:fixed;top:0;right:0;bottom:0;
+  width:min(86vw,340px);
+  background:var(--bg-elev);
+  border-left:1px solid var(--border);
+  box-shadow:var(--shadow-lg);
+  transform:translateX(100%);
+  transition:transform .26s cubic-bezier(.32,.72,0,1);
+  z-index:80;
+  display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+body.nav-open nav.drawer{transform:translateX(0)}
+.drawer-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 14px 12px 18px;border-bottom:1px solid var(--border);flex:none;
+}
+.drawer-head span{font-size:12px;font-weight:700;letter-spacing:.09em;color:var(--text-faint)}
+.drawer-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 24px;flex:1}
+.drawer-body a{
+  display:block;padding:8px 12px;border-radius:8px;
+  color:var(--text-muted);text-decoration:none;border:none;
+  font-size:13.5px;line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+}
+.drawer-body a.lv1{font-weight:800;color:var(--text);font-size:14px;margin-top:8px}
+.drawer-body a.lv1:first-child{margin-top:0}
+.drawer-body a.lv2{padding-left:22px;font-size:13px}
+.drawer-body a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.drawer-body a:active{background:var(--bg-sunken)}
+
+#top-btn{
+  position:fixed;
+  right:max(16px,env(safe-area-inset-right));
+  bottom:calc(16px + env(safe-area-inset-bottom));
+  width:44px;height:44px;border-radius:50%;
+  background:var(--bg-elev);border:1px solid var(--border-strong);
+  box-shadow:var(--shadow-md);color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:40;
+  opacity:0;pointer-events:none;transform:translateY(8px);
+  transition:opacity .2s,transform .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+#top-btn.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+#top-btn:active{transform:scale(.92)}
+#top-btn svg{width:17px;height:17px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+@media (min-width:900px){
+  :root{--header-h:60px}
+  body{font-size:16.5px}
+  .wrap{display:grid;grid-template-columns:255px minmax(0,1fr);gap:52px;padding-left:32px;padding-right:32px}
+  .menu-btn{display:none}
+  .toc-card{display:none}
+  aside.sidebar{
+    position:sticky;
+    top:calc(var(--header-h) + env(safe-area-inset-top));
+    height:calc(100vh - var(--header-h) - env(safe-area-inset-top));
+    overflow-y:auto;
+    padding:34px 0 40px;
+    border-right:1px solid var(--border);
+    margin-right:-24px;padding-right:20px;
+  }
+  aside.sidebar .side-label{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--text-faint);margin-bottom:12px;padding-left:12px}
+  aside.sidebar a{
+    display:block;padding:5px 12px;border-radius:7px;
+    color:var(--text-muted);text-decoration:none;border:none;
+    font-size:13px;line-height:1.55;
+  }
+  aside.sidebar a.lv1{font-weight:800;color:var(--text);margin-top:11px;font-size:13.5px}
+  aside.sidebar a.lv1:first-of-type{margin-top:0}
+  aside.sidebar a.lv2{padding-left:22px;font-size:12.5px}
+  aside.sidebar a:hover{background:var(--bg-sunken);color:var(--text)}
+  aside.sidebar a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  main{padding-top:14px;padding-bottom:80px;max-width:800px}
+  .hero{padding-top:34px}
+  .copy:hover{background:rgba(255,255,255,.09)}
+  .code.prompt .copy:hover{background:var(--border)}
+  .link-card:hover{border-color:var(--accent-border);box-shadow:var(--shadow-md);transform:translateY(-1px);transition:.15s}
+  a:hover{border-bottom-color:var(--accent)}
+  #top-btn{right:32px;bottom:32px}
+}
+@media (max-width:899px){aside.sidebar{display:none}}
+@media (min-width:900px){nav.drawer,.scrim{display:none}}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="brand"><i class="dot"></i><span>Claude Code 資料作成ガイド</span></div>
+    <button class="menu-btn" id="menuBtn" aria-label="目次を開く" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="scrim" id="scrim"></div>
+<nav class="drawer" id="drawer" aria-label="目次">
+  <div class="drawer-head">
+    <span>目次</span>
+    <button class="menu-btn" id="closeBtn" style="display:flex" aria-label="目次を閉じる">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawerNav"></div>
+</nav>
+
+<div class="wrap">
+
+  <aside class="sidebar">
+    <div class="side-label">目次</div>
+    <div id="sideNav"></div>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <div class="eyebrow">資料作成ワークフロー</div>
+      <h1>Claude Code で<br>PowerPoint / Excel を作る運用ガイド</h1>
+      <p class="lead">ARTHの資料作成ワークフロー（vibe coding / ちょこちょこ開発）。常時稼働のMac miniを計算ノード、MacBook Airを携帯クライアントとして、<b>テンプレート準拠の資料生成を「翌週も続きから」</b>回すための運用ガイド。</p>
+      <div class="meta">
+        <span class="chip">作成日：<b>2026-07-19</b></span>
+        <span class="chip">PowerPoint</span>
+        <span class="chip">Excel</span>
+        <a class="chip link" href="/">リモート運用手順 →</a>
+        <a class="chip link" href="/platforms">プラットフォーム比較 →</a>
+      </div>
+    </div>
+
+    <div class="toc-card">
+      <h2>目次</h2>
+      <ol id="tocCardList"></ol>
+    </div>
+
+    <!-- ============ 0 ============ -->
+    <section class="chapter" id="ch0">
+      <div class="chapter-head"><div class="badge">0</div><h2>前提</h2></div>
+      <ul class="bullets">
+        <li><b>プラン</b>：Claude Code は Pro / Max / Team / Enterprise が必要（無料プラン不可）。</li>
+        <li><b>実行場所</b>：常時稼働の Mac mini を計算ノード、MacBook Air を携帯クライアントとする想定。</li>
+        <li><b>中身のエンジン</b>：PowerPoint / Excel の生成は Claude Code が <code>python-pptx</code> / <code>openpyxl</code> 等のコードを書いて実行する。チャット版と同じ仕組みで、差は「どこで動くか」だけ。</li>
+        <li><b>チャット版との使い分け</b>：単発・たたき台はチャット版、テンプレ準拠の定型資料や繰り返し更新するものは Claude Code。Claude Code はフォルダもスクリプトも手元に残るので「翌週も続きから」ができる。</li>
+      </ul>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 1 ============ -->
+    <section class="chapter" id="ch1">
+      <div class="chapter-head"><div class="badge">1</div><h2>インストール</h2></div>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH — macOS / Linux / WSL</span><button class="copy">コピー</button></div><pre><code>curl -fsSL https://claude.ai/install.sh | bash</code></pre></div>
+      <p>確認：</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>claude --version
+claude doctor      # 設定・認証の診断</code></pre></div>
+      <p>ターミナルが不要な Desktop アプリ版もある（同じ Claude Code を GUI で使える）。</p>
+
+      <h3 id="ch1-skill">ドキュメントスキルの導入（最重要）</h3>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>生成物の質を最も左右する</div>
+        <p>素の python-pptx で作らせるより、Anthropic公式の<b>ドキュメントスキル</b>を入れると、テンプレート追従・レイアウト・検証（サムネイル生成）まで自動でやってくれる。</p>
+      </div>
+      <p>Claude Code 内で：</p>
+      <div class="code"><div class="code-head"><span class="code-lang">CLAUDE CODE</span><button class="copy">コピー</button></div><pre><code>/plugin marketplace add anthropics/skills
+/plugin install document-skills@anthropic-agent-skills</code></pre></div>
+      <ul class="bullets">
+        <li>pptx / docx / xlsx / pdf のスキルが有効化され、「pptxスキルでこの内容のスライドを作って」等で呼べる。</li>
+        <li>スキルは「テンプレのテキスト抽出 → 差し替え → サムネイル生成 → 検証」の流れで作るため、素のコード生成より仕上がりが安定する。</li>
+        <li>プロジェクト固有にしたいなら <code>.claude/skills/&lt;name&gt;/SKILL.md</code> を置く方法もある（例：ARTH独自のブランドPPTX適用手順をスキル化すれば、毎回プロンプトで指定する必要がなくなる）。</li>
+      </ul>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 2 ============ -->
+    <section class="chapter" id="ch2">
+      <div class="chapter-head"><div class="badge">2</div><h2>プロジェクトフォルダの作り方</h2></div>
+      <p><b>方針：1つの ARTH 親フォルダ + クライアント別サブフォルダ。</b><br>Claude Code は起動フォルダから親方向へ <code>CLAUDE.md</code> を遡ってすべて読み込むため、共通ルール（書式・テンプレ）を1箇所で管理しつつ、案件ごとの文脈を足せる。</p>
+      <div class="tree">~/arth/
+├── <b>CLAUDE.md</b>              <i># 全社共通ルール（必ず読まれる）</i>
+├── templates/
+│   ├── <b>arth-format.pptx</b>   <i># PowerPoint の会社フォーマット</i>
+│   └── <b>arth-format.xlsx</b>   <i># Excel のひな型</i>
+├── assets/                <i># ロゴ・画像素材</i>
+└── clients/
+    ├── yoshida/
+    │   ├── <b>CLAUDE.md</b>      <i># ヨシダ案件固有の文脈</i>
+    │   ├── source/        <i># 参照する過去資料・データ・LINEログ</i>
+    │   └── output/        <i># 生成物</i>
+    └── &lt;other-client&gt;/
+        └── ...</div>
+      <ul class="bullets">
+        <li>テンプレは「マスタースライド・フォント・配色・ロゴが仕込まれた既存の .pptx / .xlsx」を置く。<b>ゼロから作らせず、これを複製させる</b>のがコツ。</li>
+        <li>1クライアントが複数案件を持つ場合は <code>yoshida/</code> の下にさらに案件サブフォルダを切る（同じ仕組みで階層化）。</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>完全分離すべきケース</div>
+        <p>競合する取引先を同時担当 / NDAが厳しい / 担当者が別 / Git履歴・アクセス権を分けたい → そのクライアントだけ独立フォルダ（または別リポジトリ）にする。</p>
+      </div>
+
+      <h3 id="ch2-template">テンプレートの作り込み（仕上がりを決める前提条件）</h3>
+      <p>スキルを入れても、テンプレの作り方が悪いと追従できない。ここが甘いと何度作り直しても揃わない。</p>
+      <ul class="bullets">
+        <li><b>スライドマスター/レイアウトを正しく作る</b>：手描きの1枚もの .pptx ではなく、PowerPoint のスライドマスター表示で「表紙」「本文」「図表」等のレイアウトとプレースホルダを定義しておく。Claude はこのレイアウトを複製して中身を流し込む。</li>
+        <li><b>代表スライドを2〜3枚同梱</b>：完成イメージの見本を <code>templates/</code> に入れておくと、トーン・構成を掴みやすい。</li>
+        <li><b>フォントを Mac mini にインストール</b>：ブランドフォントが未インストールだと生成物が別フォントにフォールバックする。生成ノード（Mac mini）側に必ず入れる。</li>
+        <li><b>Excel も同様</b>：数式・条件付き書式・シート構成をひな型で固めておく。</li>
+      </ul>
+
+      <h3 id="ch2-claudemd">CLAUDE.md の書き方（会社フォーマット準拠の肝）</h3>
+      <p><code>CLAUDE.md</code> は毎セッション自動で読まれる常設の指示書。ここに書式ルールを書けば毎回説明不要。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">MARKDOWN — CLAUDE.md</span><button class="copy">コピー</button></div><pre><code># ARTH 資料作成ルール
+
+## 基本方針
+- 新規スライド/シートは templates/ のマスター・配色・フォントを継承する
+- 過去の書式は各クライアントの source/ を参照して踏襲する
+- ロゴ等は assets/ から使う
+- 完成物は各クライアントの output/ に日付付き（YYYYMMDD_名称）で保存する
+
+## 参照ルール
+- 案件の背景・条件は、まず該当クライアントの source/ と Gmail の該当ラベルを確認する
+- 予定・提出期日は Google カレンダーを確認する
+- このクライアントの経緯は source/line-log.md も参照する
+
+## トーン
+- 投資家・外部企業向け。数値は根拠を明示。1スライド1メッセージ。
+
+## 生成方法
+- PowerPoint は python-pptx でテンプレを読み込み、レイアウトを複製して作る
+- Excel は openpyxl。数式・書式はひな型を踏襲
+- 白紙から作らない</code></pre></div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>CLAUDE.md の階層ルール</div>
+        <p>親（<code>~/arth/CLAUDE.md</code>）と子（<code>clients/yoshida/CLAUDE.md</code>）は両方ロードされ、競合時はより下層（案件固有）が優先される。<code>~/.claude/CLAUDE.md</code> は全プロジェクト共通のグローバル設定。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 3 ============ -->
+    <section class="chapter" id="ch3">
+      <div class="chapter-head"><div class="badge">3</div><h2>セッションの立て方</h2></div>
+      <ul class="bullets">
+        <li><b>必ずクライアントのサブフォルダから起動する</b>（親の <code>~/arth/</code> 直下からは起動しない）。</li>
+      </ul>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/arth/clients/yoshida
+claude</code></pre></div>
+      <p>→ 親の共通ルール（書式）を継承しつつ、セッションは1クライアントに閉じる。親から起動すると他クライアントのファイルまで横断でき、情報が混ざるリスクがある。</p>
+      <ul class="bullets">
+        <li>セッションは Claude Code が動いている間だけ状態を保持する。フォルダ・スクリプトはローカルに残るので翌週も続きから可能。</li>
+        <li><b>Mac mini で回すコツ</b>：SSH + tmux で Mac mini に入って起動すると、MacBook Air を閉じても走り続ける（既存の Tailscale + SSH + tmux 環境をそのまま活用）。</li>
+      </ul>
+      <h4>便利コマンド（セッション内）</h4>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>コマンド</th><th>用途</th></tr></thead>
+          <tbody>
+            <tr><td><code>/mcp</code></td><td>接続済みMCPの確認・OAuth認証</td></tr>
+            <tr><td><code>/memory</code></td><td>現在読み込まれている CLAUDE.md 群の確認（ルールが効かない時のデバッグ）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 4 ============ -->
+    <section class="chapter" id="ch4">
+      <div class="chapter-head"><div class="badge">4</div><h2>Gmail / Google カレンダーとの連携</h2></div>
+      <p>Claude Code は独自にMCPを登録する必要がある（チャット版のコネクタ設定とは別物）。Google は公式のリモートMCPサーバーを提供している。</p>
+
+      <h3 id="ch4-add">登録コマンド</h3>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>claude mcp add --transport http gmail   https://gmailmcp.googleapis.com/mcp/v1
+claude mcp add --transport http gcal    https://calendarmcp.googleapis.com/mcp/v1
+claude mcp add --transport http gdrive  https://drivemcp.googleapis.com/mcp/v1</code></pre></div>
+      <p>追加後、Claude Code 内で <code>/mcp</code> を実行 → ブラウザで OAuth 認証。</p>
+
+      <h3 id="ch4-auth">認証の注意</h3>
+      <ul class="bullets">
+        <li>Google公式のWorkspace MCPは <b>OAuth 2.0</b> で、Google Cloud プロジェクトと OAuth クライアントID/シークレットの用意が必要（現状 Developer Preview）。ここが唯一やや手間。</li>
+        <li>OAuth設定が煩雑なら、コミュニティ製の統合 Google Workspace MCP（<code>npx</code> / <code>uvx</code> で立てるタイプ）も選択肢。</li>
+      </ul>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>トークン消費に注意</div>
+        <p>MCPを載せると<b>多数のツールが常時コンテキストに載りトークンを消費する</b>。使うサービスだけ入れる。</p>
+      </div>
+
+      <h3 id="ch4-gmail">使い方（Gmail 特定ラベル）</h3>
+      <ul class="bullets">
+        <li>Gmail検索クエリで絞れる：<code>label:クライアント-ヨシダ</code> など。該当ラベルのスレッドだけをオンデマンドで読ませる。</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>書き込み系は後回し</div>
+        <p>書き込み系（送信・下書き）は必要になるまで有効化しない方が安全。メール本文はプロンプトインジェクションの経路になりうる。</p>
+      </div>
+
+      <h3 id="ch4-cal">使い方（カレンダー）</h3>
+      <p>予定の一覧・作成・更新が可能。資料の提出期日や打ち合わせ日程を Claude に確認・反映させられる。</p>
+
+      <h3 id="ch4-always">「常時参照」の考え方（重要）</h3>
+      <p>Claude Code は裏で常駐監視しない。実現できるのは次の2層。</p>
+      <ul class="bullets">
+        <li><b>オンデマンド層（MCP / ローカル）</b>：呼べばいつでも読める。Gmailラベル・カレンダー・Drive・ローカルはここ。</li>
+        <li><b>取り込み層（n8n / cron / launchd）</b>：常に最新にしたいもの（新着メール等）はスケジュール実行でローカルかNotionにコピーを溜め、Claudeはそのコピーを読む。</li>
+      </ul>
+      <p><code>CLAUDE.md</code> に「まず該当ラベルとカレンダーを見る」と書けば既定で参照しにいく。モデル内で「常時参照」に一番近い形。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 5 ============ -->
+    <section class="chapter" id="ch5">
+      <div class="chapter-head"><div class="badge">5</div><h2>Mac mini のフォルダの連携</h2></div>
+      <p><b>目的</b>：Mac mini（Claude Codeノード）が参照資料を確実にローカルで読める状態にする。MacBook Air は最適化ON（軽量）のまま。</p>
+
+      <h3 id="ch5-a"><span class="opt-tag">A</span>iCloud +「ダウンロードを維持」（最小変更・推奨）</h3>
+      <ol class="steps">
+        <li>資料フォルダを iCloud Drive 内に置く</li>
+        <li>Mac mini の Finder でそのフォルダを右クリック → <b>「ダウンロードを維持（Keep Downloaded）」</b></li>
+      </ol>
+      <ul class="bullets">
+        <li>そのフォルダは退避されず常にローカルに実体を持つ。</li>
+        <li><b>Airで作って同期されてきた新規ファイルも自動で維持対象</b>（フォルダ単位のピンは既存＋新規の両方に効く）。</li>
+        <li>ピンは<b>デバイスごと</b>。miniで設定してもAirには影響しない（Airは軽量のまま）。</li>
+        <li>確認：Finderのアイコンで判定（下向き矢印＝維持済み、雲＝まだローカルに無い）。</li>
+        <li>注意：Air作成 → アップ → mini取得の<b>同期ラグ</b>あり。作成直後に叩くワークフローは少し待つ設計にする。</li>
+      </ul>
+
+      <h3 id="ch5-b"><span class="opt-tag">B</span>Mac mini だけ Optimize を OFF（最も堅牢）</h3>
+      <ul class="bullets">
+        <li>システム設定 → Apple アカウント → iCloud → iCloud Drive →「Macストレージを最適化」を <b>OFF</b></li>
+        <li>iCloud Drive全部が常にローカル。ピン不要でメンテナンスフリー。</li>
+        <li>設定はそのMac限定。Airは無関係（ONのまま）。</li>
+        <li>ディスクに余裕がある専用ノード向き。</li>
+      </ul>
+
+      <h3 id="ch5-c"><span class="opt-tag">C</span>Google Drive にミラー</h3>
+      <ul class="bullets">
+        <li>Google Drive for desktop → 環境設定 →「パソコンのフォルダ」で対象フォルダを追加 → 双方向ミラー。</li>
+        <li>Claude Codeはミラーされたローカルフォルダを直接読める（MCP不要）。Drive MCP経由でも可。</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>二重同期しない</div>
+        <p>同じフォルダを iCloud と Google Drive の両方で同期しない（競合する）。どちらか一方に寄せる。</p>
+      </div>
+
+      <h3 id="ch5-edit">補足：編集させたいファイルの置き場所</h3>
+      <ul class="bullets">
+        <li>Claude Codeで .pptx / .xlsx を<b>編集</b>させたいなら、ローカル（最良）か Google Drive（Drive MCPがbase64でDL→編集→再アップ可）に置く。</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>Notion は編集不可</div>
+        <p>公式Notion MCPはファイルアクセスを公開しておらず、Notion上の .pptx / .xlsx をDL→編集→書き戻す一連はできない。Notionは<b>テキスト知識の置き場</b>に限定する。<br>（参考：Notion 3.6 以降、Notion自身のエージェントは pptx/xlsx の読み書きに対応。ただしこれは Claude Code とは別ツール）</p>
+      </div>
+
+      <h3 id="ch5-git">git リポジトリの注意</h3>
+      <p>iCloud Drive はアクティブな git リポジトリには不向き。コードは <code>~/Developer/</code> 等に置く（既存運用通り）。この連携は「参照資料置き場」用。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 6 ============ -->
+    <section class="chapter" id="ch6">
+      <div class="chapter-head"><div class="badge">6</div><h2>LINE の過去ログのコンテクスト化 + bot の入れ方</h2></div>
+
+      <h3 id="ch6-limit">制約（重要）</h3>
+      <p>LINE の Messaging API は、<b>公式アカウント（bot）を招待したグループで、bot参加後のメッセージをWebhookで受け取る</b>方式。</p>
+      <ul class="bullets">
+        <li><b>過去にさかのぼって履歴を取得するAPIは無い</b>。グループ名・メンバーIDは取れるが、スクロールバックは取れない。</li>
+        <li>botをグループに入れるには設定で「Allow bot to join group chats」を有効化（既定OFF）。1グループに入れる公式アカウントは同時に1つ。</li>
+      </ul>
+
+      <h3 id="ch6-conc">結論（2つに分ける）</h3>
+      <ul class="bullets">
+        <li><b>参加以降の新規発言</b>：botで拾ってファイル/DBに溜め、Claude Codeがそれを読む（取り込み層）。</li>
+        <li><b>参加前の過去ログ</b>：スマホのLINEでトーク履歴を <b>.txt エクスポート</b> し、クライアントの <code>source/</code> に置く → Claude Codeが読む（手動）。</li>
+      </ul>
+
+      <h3 id="ch6-bot">bot導入手順（概要）</h3>
+      <ol class="steps">
+        <li>LINE Developers コンソールで Provider を作成 → Messaging API チャネルを作成</li>
+        <li>チャネルの Messaging API タブで「Allow bot to join group chats」を有効化</li>
+        <li>Channel access token を発行</li>
+        <li>Webhook URL を設定（受信サーバー）。既に n8n があるので <b>n8n の Webhook ノードで受ける</b>のが早い</li>
+        <li>対象グループに公式アカウントを招待</li>
+        <li>n8n で受信メッセージ（group_id, user_id, text, timestamp）を整形 → ファイル / Notion / DB に追記</li>
+        <li>Claude Code はその蓄積ファイル（例：<code>source/line-log.md</code>）を参照</li>
+      </ol>
+      <p>※ この「LINEグループの文脈を取り込む」構成は、既存のメール自動化（n8n）と同じパターンで拡張できる。</p>
+
+      <h3 id="ch6-tips">過去ログのコンテクスト化のコツ</h3>
+      <ul class="bullets">
+        <li>エクスポートした .txt はそのままだと冗長。<b>日付・発言者・要点に整形</b>して置くと、参照時の精度とトークン効率が上がる。</li>
+        <li><code>CLAUDE.md</code> に「このクライアントの経緯は <code>source/line-log.md</code> を参照」と明記しておく。</li>
+      </ul>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 7 ============ -->
+    <section class="chapter" id="ch7">
+      <div class="chapter-head"><div class="badge">7</div><h2>コンテクストを読み込みながら指示を出すプロンプト例</h2></div>
+      <p>前提：<code>cd ~/arth/clients/yoshida &amp;&amp; claude</code> で起動済み（共通ルール＋ヨシダ文脈がロード済み）。</p>
+
+      <h3 id="ch7-1">例1：過去資料の書式を踏襲して新規作成</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>source/ の過去の投資家向け資料を参考に、西伊豆プロジェクトの提案資料を
+templates/arth-format.pptx のフォーマットで作って。
+Gmail の label:クライアント-ヨシダ の直近スレッドから条件（金額・スケジュール）を拾って反映。
+提出期日は Google カレンダーで確認して表紙に入れて。
+完成したら output/ に日付付きで保存。</code></pre></div>
+
+      <h3 id="ch7-2">例2：Excelモデルの更新</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>source/ の前四半期の実績データと templates/arth-format.xlsx をもとに、
+今四半期の収支シートを作成。数式と書式はひな型を踏襲。
+source/line-log.md で決まった前提条件があれば反映して。</code></pre></div>
+
+      <h3 id="ch7-3">例3：メール文脈だけ先に要約させる（作成前の確認）</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>Gmail の label:クライアント-ヨシダ の未読・直近1週間を読んで、
+資料に反映すべき論点だけ箇条書きで出して。まだ資料は作らないで。</code></pre></div>
+      <p>→ 先に文脈を確定させてから作成に進むと精度が上がる（収集 → 確認 → 生成の流れ）。</p>
+
+      <h3 id="ch7-4">例4：既存資料の修正</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>output/20260719_西伊豆提案.pptx の3枚目の図を、
+source/最新実績.xlsx の数値で差し替えて。配色はテンプレのまま。</code></pre></div>
+
+      <h3 id="ch7-tips">プロンプトのコツ</h3>
+      <ul class="bullets">
+        <li><b>参照元を明示</b>：「source/ を見て」「label:xxx から」「カレンダーで」と、どこを読むか具体的に指定する。</li>
+        <li><b>XMLタグ / 明確な境界</b>：複雑な指示はタグや箇条書きで区切ると安定（XMLが最も確実な境界マーカー）。</li>
+        <li><b>一度に全部やらせない</b>：文脈収集 → 確認 → 生成 → 修正、と段階を分ける。</li>
+        <li><b>確認を挟む</b>：「まだ作らないで、論点だけ」で暴走を防ぐ。書き込み系（メール送信等）には特に承認ゲートを設ける。</li>
+      </ul>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 8 ============ -->
+    <section class="chapter" id="ch8">
+      <div class="chapter-head"><div class="badge">8</div><h2>過去の会話の扱い + 品質・信頼性のための追加設定</h2></div>
+
+      <h3 id="ch8-1">8-1. 「過去の会話」を文脈にする</h3>
+      <p>Claude Code のセッションは、新しいセッションに自動では引き継がれない。過去の会話を根拠にするには次のいずれか。</p>
+      <ul class="bullets">
+        <li><b>決定事項をファイルに外部化（推奨）</b>：各クライアントに <code>source/decisions.md</code> を置き、会話の最後に「この会話の決定事項を <code>source/decisions.md</code> に追記して」と指示する。次回以降は CLAUDE.md の参照ルールでここを読ませる。最も確実で、人間も後から追える。</li>
+        <li><b>セッションを再開</b>：<code>claude --continue</code>（直近を継続）/ <code>claude --resume</code>（一覧から選択）で前回の文脈を引き継ぐ。</li>
+        <li>使い分け：長期の蓄積は <code>decisions.md</code>、短期の続きは <code>--resume</code>。</li>
+      </ul>
+
+      <h3 id="ch8-2">8-2. 確認（プレビュー）ループ</h3>
+      <ul class="bullets">
+        <li>Claude Code は .pptx を画面にレンダリングできない。pptxスキルは<b>サムネイル画像を生成</b>するので、それで素早く目視できる。</li>
+        <li>必要なら「PDFに書き出して」と頼む（LibreOffice の headless 変換等）。PowerPoint を開かずに確認でき、反復が速い。</li>
+      </ul>
+
+      <h3 id="ch8-3">8-3. 情報の優先順位（source of truth）</h3>
+      <ul class="bullets">
+        <li>メール・LINE・過去資料で数値が食い違うことがある。CLAUDE.md に優先順位を明記する。<br>例：「金額・日程は <b>最新のメール &gt; 過去資料</b>。矛盾があれば指摘してから進める」</li>
+        <li>これは「単一マスターを先に決める」原則と同じ発想。矛盾を黙って埋めさせない。</li>
+      </ul>
+
+      <h3 id="ch8-4">8-4. バージョン管理とバックアップ</h3>
+      <ul class="bullets">
+        <li><code>~/arth/</code>（テンプレ・CLAUDE.md・スクリプト・成果物）は <b>git 管理して GitHub に push</b>。テンプレやルールは資産なので必ず版管理する。</li>
+        <li>iCloud は git に不向きなので、<b><code>~/arth/</code> 自体は iCloud 外（<code>~/Developer/</code> 等）に置く</b>のが無難。大きな参照資料だけを iCloud / Drive 経由で各 <code>source/</code> に配置・同期する、と役割を分ける（§5参照）。</li>
+      </ul>
+
+      <h3 id="ch8-5">8-5. 摩擦を減らす設定</h3>
+      <ul class="bullets">
+        <li><code>.claude/settings.json</code> で定型ツールを許可しておくと、毎回の確認プロンプトが減り vibe coding が快適になる。ただし<b>書き込み系（メール送信等）は承認を残す</b>。</li>
+        <li><b>コンテキスト肥大を避ける</b>：「全部読んで」ではなく対象ファイルを指定。無関係な作業に切り替える時は <code>/clear</code> でリセット、関連作業の圧縮は <code>/compact</code>。</li>
+        <li><code>.claudeignore</code> で巨大・無関係ディレクトリを除外。</li>
+      </ul>
+
+      <h3 id="ch8-6">8-6. 新規クライアント立ち上げチェックリスト</h3>
+      <ol class="steps">
+        <li><code>clients/&lt;name&gt;/</code> を作成し、<code>source/</code> <code>output/</code> を用意</li>
+        <li><code>CLAUDE.md</code> を親からコピーして案件固有情報を追記</li>
+        <li>過去資料を <code>source/</code> に配置（または iCloud / Drive から）</li>
+        <li>参照するメールラベルを決める（例：<code>label:クライアント-&lt;name&gt;</code>）</li>
+        <li>LINEグループがあれば bot 参加 + ログ蓄積先を決める</li>
+        <li><code>cd clients/&lt;name&gt; &amp;&amp; claude</code> で起動し、テスト生成 → 微修正でテンプレ/CLAUDE.md を調整</li>
+      </ol>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 付録 ============ -->
+    <section class="chapter" id="appendix">
+      <div class="chapter-head"><div class="badge">＋</div><h2>付録：よく使うコマンド</h2></div>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>claude                                          # 起動（カレントフォルダがプロジェクト）
+claude --version                                # バージョン確認
+claude doctor                                   # 設定・認証の診断
+claude mcp add --transport http &lt;name&gt; &lt;url&gt;    # MCP追加
+claude mcp list                                 # 追加済みMCP一覧</code></pre></div>
+      <div class="code"><div class="code-head"><span class="code-lang">セッション内スラッシュコマンド</span><button class="copy">コピー</button></div><pre><code>/mcp        # MCP確認・OAuth認証
+/memory     # 読込中の CLAUDE.md 確認</code></pre></div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ まとめ ============ -->
+    <section class="chapter" id="summary">
+      <div class="chapter-head"><div class="badge">◎</div><h2>まとめ（役割分担の全体像）</h2></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>用途</th><th>置き場所 / 手段</th></tr></thead>
+          <tbody>
+            <tr><td>ドキュメント生成の質</td><td>公式ドキュメントスキル（<code>/plugin install document-skills</code>）</td></tr>
+            <tr><td>会社フォーマット・ロゴ</td><td><code>~/arth/templates/</code>, <code>assets/</code>（ローカル・共通、スライドマスター整備＋フォント導入）</td></tr>
+            <tr><td>書式ルール・案件文脈</td><td><code>CLAUDE.md</code>（親＝共通、子＝案件別）</td></tr>
+            <tr><td>編集する .pptx / .xlsx</td><td>ローカル（最良）or Google Drive</td></tr>
+            <tr><td>テキストの知識・議事録</td><td>Notion（参照のみ）or ローカルの .md</td></tr>
+            <tr><td>メール文脈</td><td>Gmail MCP（ラベル検索）/ 最新化は n8n</td></tr>
+            <tr><td>予定・期日</td><td>Google カレンダー MCP</td></tr>
+            <tr><td>過去の会話・決定事項</td><td><code>source/decisions.md</code> に外部化 / <code>claude --resume</code></td></tr>
+            <tr><td>Mac mini のローカル保持</td><td>iCloud「ダウンロードを維持」or Optimize OFF</td></tr>
+            <tr><td>LINE 新規発言</td><td>bot + n8n でファイルに蓄積</td></tr>
+            <tr><td>LINE 過去ログ</td><td>手動で .txt エクスポート → <code>source/</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      Claude Code で PowerPoint / Excel を作る運用ガイド ／ 作成日：2026-07-19<br>
+      関連：<a href="/">リモート運用手順</a> ・ <a href="/platforms">プラットフォーム比較</a> ・ <a href="/ota-agent">OTA設定AIエージェント</a>
+    </footer>
+
+  </main>
+</div>
+
+<button id="top-btn" aria-label="ページ先頭へ戻る">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+(function(){
+  "use strict";
+
+  var NAV = [
+    {id:"ch0", label:"0. 前提", num:"0", children:[]},
+    {id:"ch1", label:"1. インストール", num:"1", children:[
+      {id:"ch1-skill", label:"ドキュメントスキルの導入"}
+    ]},
+    {id:"ch2", label:"2. プロジェクトフォルダ", num:"2", children:[
+      {id:"ch2-template", label:"テンプレートの作り込み"},
+      {id:"ch2-claudemd", label:"CLAUDE.md の書き方"}
+    ]},
+    {id:"ch3", label:"3. セッションの立て方", num:"3", children:[]},
+    {id:"ch4", label:"4. Gmail / カレンダー連携", num:"4", children:[
+      {id:"ch4-add", label:"登録コマンド"},
+      {id:"ch4-auth", label:"認証の注意"},
+      {id:"ch4-gmail", label:"使い方（Gmail）"},
+      {id:"ch4-always", label:"「常時参照」の考え方"}
+    ]},
+    {id:"ch5", label:"5. Mac mini のフォルダ連携", num:"5", children:[
+      {id:"ch5-a", label:"方法A：iCloud維持"},
+      {id:"ch5-b", label:"方法B：Optimize OFF"},
+      {id:"ch5-c", label:"方法C：Driveミラー"},
+      {id:"ch5-edit", label:"編集ファイルの置き場所"}
+    ]},
+    {id:"ch6", label:"6. LINEログ + bot", num:"6", children:[
+      {id:"ch6-limit", label:"制約"},
+      {id:"ch6-conc", label:"結論（2つに分ける）"},
+      {id:"ch6-bot", label:"bot導入手順"}
+    ]},
+    {id:"ch7", label:"7. プロンプト例", num:"7", children:[
+      {id:"ch7-1", label:"例1：書式を踏襲し新規作成"},
+      {id:"ch7-2", label:"例2：Excel更新"},
+      {id:"ch7-3", label:"例3：メール文脈を要約"},
+      {id:"ch7-4", label:"例4：既存資料の修正"},
+      {id:"ch7-tips", label:"プロンプトのコツ"}
+    ]},
+    {id:"ch8", label:"8. 過去の会話 + 品質設定", num:"8", children:[
+      {id:"ch8-1", label:"8-1. 過去の会話を文脈に"},
+      {id:"ch8-2", label:"8-2. プレビューループ"},
+      {id:"ch8-3", label:"8-3. 情報の優先順位"},
+      {id:"ch8-4", label:"8-4. バージョン管理"},
+      {id:"ch8-5", label:"8-5. 摩擦を減らす設定"},
+      {id:"ch8-6", label:"8-6. 新規クライアント"}
+    ]},
+    {id:"appendix", label:"付録：よく使うコマンド", num:"＋", children:[]},
+    {id:"summary", label:"まとめ：役割分担", num:"◎", children:[]}
+  ];
+
+  function buildNav(host){
+    var frag = document.createDocumentFragment();
+    NAV.forEach(function(sec){
+      var a = document.createElement("a");
+      a.href = "#" + sec.id; a.className = "lv1"; a.textContent = sec.label;
+      a.dataset.target = sec.id;
+      frag.appendChild(a);
+      sec.children.forEach(function(c){
+        var b = document.createElement("a");
+        b.href = "#" + c.id; b.className = "lv2"; b.textContent = c.label;
+        b.dataset.target = c.id;
+        frag.appendChild(b);
+      });
+    });
+    host.appendChild(frag);
+  }
+  buildNav(document.getElementById("sideNav"));
+  buildNav(document.getElementById("drawerNav"));
+
+  var tocList = document.getElementById("tocCardList");
+  NAV.forEach(function(sec){
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = "#" + sec.id;
+    a.innerHTML = '<span class="num">' + sec.num + "</span>";
+    var t = document.createElement("span");
+    t.textContent = sec.label;
+    a.appendChild(t);
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  var body = document.body;
+  var menuBtn = document.getElementById("menuBtn");
+  var closeBtn = document.getElementById("closeBtn");
+  var scrim = document.getElementById("scrim");
+  function openNav(){ body.classList.add("nav-open"); menuBtn.setAttribute("aria-expanded","true"); }
+  function closeNav(){ body.classList.remove("nav-open"); menuBtn.setAttribute("aria-expanded","false"); }
+  menuBtn.addEventListener("click", openNav);
+  closeBtn.addEventListener("click", closeNav);
+  scrim.addEventListener("click", closeNav);
+  document.getElementById("drawerNav").addEventListener("click", function(e){
+    if (e.target.closest("a")) closeNav();
+  });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeNav(); });
+
+  document.querySelectorAll(".copy").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var code = btn.closest(".code").querySelector("code");
+      var text = code.innerText;
+      var done = function(){
+        btn.textContent = "コピー済み";
+        btn.classList.add("done");
+        setTimeout(function(){ btn.textContent = "コピー"; btn.classList.remove("done"); }, 1600);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else { fallback(); }
+      function fallback(){
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch(err){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  var links = Array.prototype.slice.call(document.querySelectorAll("#sideNav a, #drawerNav a"));
+  var targets = links.map(function(a){ return document.getElementById(a.dataset.target); });
+  var progress = document.getElementById("progress");
+  var topBtn = document.getElementById("top-btn");
+  var ticking = false;
+  var headerH = 0;
+
+  function measure(){ headerH = document.querySelector("header").offsetHeight; }
+  measure();
+  window.addEventListener("resize", measure);
+
+  function update(){
+    ticking = false;
+    var y = window.scrollY || window.pageYOffset;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (max > 0 ? Math.min(100, (y / max) * 100) : 0) + "%";
+    topBtn.classList.toggle("show", y > 500);
+
+    var line = y + headerH + 40;
+    var activeIdx = -1;
+    for (var i = 0; i < targets.length; i++){
+      var el = targets[i];
+      if (el && el.getBoundingClientRect().top + y <= line) activeIdx = i;
+    }
+    links.forEach(function(a, i){ a.classList.toggle("active", i === activeIdx); });
+
+    if (activeIdx > -1){
+      var act = links[activeIdx];
+      if (act.closest("#sideNav")){
+        var side = document.querySelector("aside.sidebar");
+        if (side && side.offsetParent !== null){
+          var r = act.getBoundingClientRect(), sr = side.getBoundingClientRect();
+          if (r.top < sr.top + 8 || r.bottom > sr.bottom - 8){
+            side.scrollTop += r.top - sr.top - side.clientHeight / 2;
+          }
+        }
+      }
+    }
+  }
+  window.addEventListener("scroll", function(){
+    if (!ticking){ ticking = true; requestAnimationFrame(update); }
+  }, {passive:true});
+  update();
+
+  topBtn.addEventListener("click", function(){
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+})();
+</script>
+</body>
+</html>

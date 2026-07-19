@@ -1,0 +1,8 @@
+# 依存パッケージ（git 管理しない）
+node_modules
+
+# Vercel のローカル設定
+.vercel
+
+# macOS が自動生成するファイル
+.DS_Store

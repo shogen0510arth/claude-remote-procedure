@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
+<meta name="description" content="楽天トラベル・一休.comの設定変更をチャットで依頼する専用AIエージェントの、PC初心者向け構築・運用手順。Claude Code＋Playwright＋Agent SDK。">
+<title>楽天トラベル・一休.com 設定変更AIエージェント 構築・運用手順</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏨</text></svg>">
+<style>
+:root{
+  --bg:#faf9f7;
+  --bg-elev:#ffffff;
+  --bg-sunken:#f2f0ed;
+  --text:#1f1e1d;
+  --text-muted:#6b6862;
+  --text-faint:#918d85;
+  --border:#e5e1db;
+  --border-strong:#d6d1c9;
+  --accent:#c4552f;
+  --accent-soft:#fdf1ec;
+  --accent-border:#f0c9b8;
+  --warn:#a8620a;
+  --warn-soft:#fdf4e7;
+  --warn-border:#f0dcb8;
+  --info:#2b6a8f;
+  --info-soft:#eaf3f8;
+  --info-border:#c2ddeb;
+  --code-bg:#282521;
+  --code-text:#e8e3db;
+  --code-inline-bg:#f0ede8;
+  --code-inline-text:#a8442a;
+  --shadow-sm:0 1px 2px rgba(31,30,29,.05);
+  --shadow-md:0 4px 16px -4px rgba(31,30,29,.10),0 2px 4px rgba(31,30,29,.04);
+  --shadow-lg:0 16px 48px -12px rgba(31,30,29,.24);
+  --radius:14px;
+  --radius-sm:9px;
+  --font:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --header-h:56px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1917;
+    --bg-elev:#232120;
+    --bg-sunken:#141312;
+    --text:#eeebe6;
+    --text-muted:#a5a099;
+    --text-faint:#7d7871;
+    --border:#35322e;
+    --border-strong:#474340;
+    --accent:#e2825c;
+    --accent-soft:#2e211b;
+    --accent-border:#5a3d2e;
+    --warn:#d6a05a;
+    --warn-soft:#2b2317;
+    --warn-border:#54432a;
+    --info:#7db8d8;
+    --info-soft:#182630;
+    --info-border:#2f4a5c;
+    --code-bg:#121110;
+    --code-text:#ded9d1;
+    --code-inline-bg:#2c2926;
+    --code-inline-text:#e9a184;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+    --shadow-md:0 4px 16px -4px rgba(0,0,0,.5);
+    --shadow-lg:0 16px 48px -12px rgba(0,0,0,.7);
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 16px);-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.85;
+  font-size:16px;
+  letter-spacing:.01em;
+  -webkit-font-smoothing:antialiased;
+  overflow-wrap:break-word;
+  word-break:normal;
+  line-break:strict;
+}
+body.nav-open{overflow:hidden}
+
+/* ---------- progress ---------- */
+#progress{
+  position:fixed;top:0;left:0;height:2.5px;width:0;
+  background:linear-gradient(90deg,var(--accent),#e0a06f);
+  z-index:60;transition:width .1s linear;
+}
+
+/* ---------- header ---------- */
+header{
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  padding-top:env(safe-area-inset-top);
+  height:calc(var(--header-h) + env(safe-area-inset-top));
+  background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:saturate(180%) blur(14px);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--border);
+  z-index:50;
+  display:flex;align-items:center;gap:12px;
+  padding-left:max(16px,env(safe-area-inset-left));
+  padding-right:max(16px,env(safe-area-inset-right));
+}
+.header-inner{display:flex;align-items:center;gap:12px;width:100%;max-width:1200px;margin:0 auto;height:var(--header-h)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;letter-spacing:.02em;min-width:0}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.brand span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu-btn{
+  margin-left:auto;flex:none;
+  width:38px;height:38px;border-radius:10px;
+  border:1px solid var(--border-strong);background:var(--bg-elev);
+  color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.menu-btn:active{transform:scale(.94)}
+.menu-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round}
+
+/* ---------- layout ---------- */
+.wrap{
+  max-width:1200px;margin:0 auto;
+  padding:calc(var(--header-h) + env(safe-area-inset-top)) max(18px,env(safe-area-inset-left)) 0 max(18px,env(safe-area-inset-right));
+  display:block;
+}
+main{min-width:0;padding-bottom:64px}
+
+/* ---------- hero ---------- */
+.hero{padding:40px 0 30px;border-bottom:1px solid var(--border);margin-bottom:34px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;letter-spacing:.09em;
+  color:var(--accent);background:var(--accent-soft);
+  border:1px solid var(--accent-border);
+  padding:5px 11px;border-radius:999px;margin-bottom:16px;
+}
+.hero h1{
+  font-size:clamp(25px,6.6vw,42px);
+  line-height:1.34;font-weight:800;letter-spacing:-.01em;
+  margin-bottom:14px;
+}
+.hero p.lead{font-size:15px;color:var(--text-muted);line-height:1.8;margin-bottom:20px}
+.hero p.lead b{color:var(--text)}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-size:11.5px;font-weight:600;
+  background:var(--bg-elev);border:1px solid var(--border);
+  color:var(--text-muted);
+  padding:5px 10px;border-radius:8px;white-space:nowrap;
+}
+.chip b{color:var(--text);font-weight:700}
+.chip.link{color:var(--accent);border-color:var(--accent-border);background:var(--accent-soft);text-decoration:none}
+.chip.link:active{opacity:.6}
+
+/* ---------- toc card (mobile inline) ---------- */
+.toc-card{
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px 16px;margin-bottom:24px;
+  box-shadow:var(--shadow-sm);
+}
+.toc-card h2{font-size:12px;letter-spacing:.1em;color:var(--text-faint);font-weight:700;margin-bottom:12px}
+.toc-card ol{list-style:none;display:flex;flex-direction:column;gap:2px}
+.toc-card a{
+  display:flex;align-items:center;gap:11px;
+  padding:8px 8px;border-radius:9px;
+  color:var(--text);text-decoration:none;font-size:14px;font-weight:600;
+  -webkit-tap-highlight-color:transparent;
+}
+.toc-card a:active{background:var(--bg-sunken)}
+.toc-card .num{
+  flex:none;min-width:24px;height:24px;padding:0 5px;border-radius:7px;
+  background:var(--accent-soft);border:1px solid var(--accent-border);
+  color:var(--accent);font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- sections ---------- */
+.chapter{margin-bottom:48px;scroll-margin-top:calc(var(--header-h) + 20px)}
+.chapter-head{
+  display:flex;align-items:center;gap:13px;
+  padding-bottom:14px;margin-bottom:24px;
+  border-bottom:2px solid var(--accent);
+}
+.chapter-head .badge{
+  flex:none;
+  min-width:34px;height:34px;padding:0 8px;border-radius:9px;
+  background:var(--accent);color:#fff;
+  font-size:15px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+  box-shadow:0 2px 8px -2px color-mix(in srgb,var(--accent) 60%,transparent);
+}
+.chapter-head h2{font-size:clamp(19px,4.9vw,25px);font-weight:800;letter-spacing:-.005em;line-height:1.4}
+
+/* part banner */
+.part{
+  scroll-margin-top:calc(var(--header-h) + 20px);
+  margin:8px 0 40px;padding:22px 20px;
+  background:linear-gradient(135deg,var(--accent-soft),var(--bg-sunken));
+  border:1px solid var(--accent-border);border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);
+}
+.part .p-label{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--accent)}
+.part .p-title{font-size:clamp(19px,5vw,24px);font-weight:800;line-height:1.4;margin-top:6px}
+
+h3{
+  font-size:clamp(16.5px,4.2vw,19px);font-weight:700;
+  margin:34px 0 13px;line-height:1.5;
+  scroll-margin-top:calc(var(--header-h) + 20px);
+  padding-left:13px;border-left:3.5px solid var(--accent);
+}
+h3:first-of-type{margin-top:0}
+h4{
+  font-size:15px;font-weight:700;color:var(--text);
+  margin:24px 0 10px;
+  display:flex;align-items:center;gap:8px;
+}
+h4::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--text-faint);flex:none}
+
+p{margin:0 0 14px}
+p:last-child{margin-bottom:0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-border)}
+a:active{opacity:.6}
+
+/* ---------- lists ---------- */
+ul.bullets,ol.steps{margin:0 0 16px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.bullets li{position:relative;padding-left:19px;line-height:1.8}
+ul.bullets li::before{
+  content:"";position:absolute;left:3px;top:.72em;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);opacity:.55;
+}
+ol.steps{counter-reset:s}
+ol.steps li{position:relative;padding-left:34px;counter-increment:s;line-height:1.8;min-height:24px}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:.28em;
+  width:23px;height:23px;border-radius:7px;
+  background:var(--bg-sunken);border:1px solid var(--border-strong);
+  color:var(--text-muted);
+  font-size:11.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* checklist */
+ul.check{list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:9px}
+ul.check li{position:relative;padding-left:30px;line-height:1.7}
+ul.check li::before{
+  content:"";position:absolute;left:0;top:.18em;
+  width:19px;height:19px;border-radius:5px;
+  border:1.8px solid var(--border-strong);background:var(--bg-elev);
+}
+
+/* ---------- code ---------- */
+.code{
+  position:relative;
+  background:var(--code-bg);border-radius:var(--radius-sm);
+  margin:0 0 18px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:var(--shadow-sm);
+}
+.code-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 8px 0 13px;height:34px;
+  background:rgba(255,255,255,.04);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.code-lang{
+  font-family:var(--mono);font-size:10.5px;font-weight:600;
+  color:#a09a90;letter-spacing:.07em;
+}
+.copy{
+  font-family:var(--font);font-size:11px;font-weight:600;
+  background:transparent;border:1px solid rgba(255,255,255,.15);
+  color:#cec8bf;padding:4px 9px;border-radius:6px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.copy:active{transform:scale(.94)}
+.copy.done{color:#7fca8f;border-color:#3f6b48}
+.code pre{
+  margin:0;padding:14px 13px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  font-family:var(--mono);font-size:12.5px;line-height:1.75;
+  color:var(--code-text);
+  tab-size:2;
+}
+.code pre code{white-space:pre;font-family:inherit}
+code:not(pre code){
+  font-family:var(--mono);font-size:.855em;
+  background:var(--code-inline-bg);color:var(--code-inline-text);
+  padding:2px 5px;border-radius:5px;
+  border:1px solid var(--border);
+  white-space:nowrap;
+}
+
+/* prompt template variant */
+.code.prompt{background:var(--bg-sunken);border:1px solid var(--border-strong)}
+.code.prompt .code-head{background:transparent;border-bottom:1px dashed var(--border-strong)}
+.code.prompt .code-lang{color:var(--accent)}
+.code.prompt .copy{border-color:var(--border-strong);color:var(--text-muted)}
+.code.prompt pre{color:var(--text);font-size:13px;white-space:pre-wrap;word-break:break-word;line-break:strict}
+.code.prompt pre code{white-space:pre-wrap}
+
+/* ---------- callouts ---------- */
+.note{
+  border-radius:var(--radius-sm);
+  padding:14px 15px;margin:0 0 18px;
+  border:1px solid;font-size:14.5px;line-height:1.78;
+}
+.note .note-title{
+  display:flex;align-items:center;gap:7px;
+  font-weight:700;font-size:12.5px;letter-spacing:.03em;
+  margin-bottom:7px;
+}
+.note .note-title svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.note.warn{background:var(--warn-soft);border-color:var(--warn-border)}
+.note.warn .note-title{color:var(--warn)}
+.note.info{background:var(--info-soft);border-color:var(--info-border)}
+.note.info .note-title{color:var(--info)}
+.note.tip{background:var(--accent-soft);border-color:var(--accent-border)}
+.note.tip .note-title{color:var(--accent)}
+.note p:last-child{margin-bottom:0}
+.note ul.bullets{margin-top:8px}
+.note code:not(pre code){background:color-mix(in srgb,var(--bg-elev) 70%,transparent)}
+
+/* quote (sample chat / mail) */
+.quote{
+  border-left:3.5px solid var(--accent-border);
+  background:var(--bg-sunken);border-radius:0 9px 9px 0;
+  padding:13px 16px;margin:0 0 18px;
+  color:var(--text);font-size:14.5px;line-height:1.85;
+}
+.quote .q-label{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--text-faint);margin-bottom:6px}
+
+/* ---------- table ---------- */
+.table-scroll{
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  margin:0 0 18px;
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--bg-elev);box-shadow:var(--shadow-sm);
+}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:440px}
+table.wide{min-width:600px}
+thead th{
+  background:var(--bg-sunken);
+  text-align:left;font-weight:700;font-size:11.5px;letter-spacing:.06em;
+  color:var(--text-faint);
+  padding:11px 14px;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.7}
+tbody tr:last-child td{border-bottom:none}
+tbody td:first-child{white-space:nowrap;font-weight:600}
+td .ok{color:#2f9e5a;font-weight:700}
+
+/* ---------- tree ---------- */
+.tree{
+  background:var(--bg-sunken);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 13px;margin:0 0 18px;
+  font-family:var(--mono);font-size:12.5px;line-height:1.85;
+  color:var(--text-muted);overflow-x:auto;white-space:pre;
+}
+.tree b{color:var(--text);font-weight:600}
+
+/* ---------- flow (mermaid substitute) ---------- */
+.flow{display:flex;flex-direction:column;align-items:stretch;margin:0 0 18px;gap:0}
+.flow-step{
+  background:var(--bg-elev);border:1px solid var(--border-strong);
+  border-radius:9px;padding:11px 14px;
+  font-size:13.5px;font-weight:600;text-align:center;line-height:1.5;
+  box-shadow:var(--shadow-sm);
+}
+.flow-step.q{background:var(--accent-soft);border-color:var(--accent-border);color:var(--accent)}
+.flow-arrow{align-self:center;color:var(--text-faint);font-size:15px;line-height:1;padding:5px 0}
+.flow-branch{display:flex;gap:10px}
+.flow-branch>div{flex:1;display:flex;flex-direction:column}
+.flow-tag{
+  display:inline-block;align-self:center;
+  font-size:10.5px;font-weight:800;color:var(--accent);
+  background:var(--accent-soft);border:1px solid var(--accent-border);
+  border-radius:5px;padding:1px 8px;margin-bottom:6px;
+}
+.flow-tag.no{color:var(--text-muted);background:var(--bg-sunken);border-color:var(--border-strong)}
+
+/* ---------- mock screen ---------- */
+.mock{
+  border:1px solid var(--border-strong);border-radius:var(--radius-sm);
+  overflow:hidden;margin:0 0 18px;background:var(--bg-elev);box-shadow:var(--shadow-sm);
+}
+.mock-bar{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 13px;background:var(--bg-sunken);
+  border-bottom:1px solid var(--border);
+  font-size:12px;font-weight:700;color:var(--text-muted);
+}
+.mock-bar .dots{display:flex;gap:5px;flex:none}
+.mock-bar .dots i{width:9px;height:9px;border-radius:50%;background:var(--border-strong);display:block}
+.mock-body{padding:13px 15px;display:flex;flex-direction:column;gap:9px;font-size:13.5px;line-height:1.6}
+.mock-row{display:flex;gap:10px}
+.mock-row .k{color:var(--text-faint);min-width:76px;font-weight:600;flex:none}
+.mock-row .v{color:var(--text);min-width:0}
+.mock-pick{color:var(--accent);font-weight:700}
+.mock-danger{color:var(--warn);font-weight:700}
+.mock-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.mock-btn{font-size:12px;font-weight:700;padding:6px 12px;border-radius:7px;border:1px solid var(--border-strong);background:var(--bg-sunken);color:var(--text-muted)}
+.mock-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.mock-btn.stop{border-style:dashed;border-color:var(--warn-border);color:var(--warn);background:var(--warn-soft)}
+
+/* ---------- divider ---------- */
+.rule{height:1px;background:var(--border);border:none;margin:40px 0}
+
+/* ---------- links section ---------- */
+.link-list{display:flex;flex-direction:column;gap:9px;margin-bottom:8px}
+.link-card{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px;
+  text-decoration:none;color:var(--text);box-shadow:var(--shadow-sm);
+  -webkit-tap-highlight-color:transparent;
+}
+.link-card:active{background:var(--bg-sunken);transform:scale(.99)}
+.link-card .lc-body{min-width:0;flex:1}
+.link-card .lc-title{font-size:14.5px;font-weight:700;line-height:1.5}
+.link-card .lc-url{font-size:11.5px;color:var(--text-faint);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.link-card .lc-arrow{flex:none;color:var(--text-faint)}
+.link-card .lc-arrow svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- footer ---------- */
+footer{
+  border-top:1px solid var(--border);
+  padding:26px 0 calc(34px + env(safe-area-inset-bottom));
+  color:var(--text-faint);font-size:12.5px;line-height:1.8;
+}
+footer a{color:var(--text-muted)}
+
+/* ---------- drawer nav (mobile) ---------- */
+.scrim{
+  position:fixed;inset:0;background:rgba(20,19,18,.42);
+  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:70;
+}
+body.nav-open .scrim{opacity:1;pointer-events:auto}
+nav.drawer{
+  position:fixed;top:0;right:0;bottom:0;
+  width:min(86vw,340px);
+  background:var(--bg-elev);
+  border-left:1px solid var(--border);
+  box-shadow:var(--shadow-lg);
+  transform:translateX(100%);
+  transition:transform .26s cubic-bezier(.32,.72,0,1);
+  z-index:80;
+  display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+body.nav-open nav.drawer{transform:translateX(0)}
+.drawer-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 14px 12px 18px;border-bottom:1px solid var(--border);flex:none;
+}
+.drawer-head span{font-size:12px;font-weight:700;letter-spacing:.09em;color:var(--text-faint)}
+.drawer-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 24px;flex:1}
+.drawer-body a{
+  display:block;padding:8px 12px;border-radius:8px;
+  color:var(--text-muted);text-decoration:none;border:none;
+  font-size:13.5px;line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+}
+.drawer-body a.lv1{font-weight:800;color:var(--text);font-size:14px;margin-top:8px}
+.drawer-body a.lv1:first-child{margin-top:0}
+.drawer-body a.lv2{padding-left:22px;font-size:13px}
+.drawer-body a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.drawer-body a:active{background:var(--bg-sunken)}
+
+/* ---------- back to top ---------- */
+#top-btn{
+  position:fixed;
+  right:max(16px,env(safe-area-inset-right));
+  bottom:calc(16px + env(safe-area-inset-bottom));
+  width:44px;height:44px;border-radius:50%;
+  background:var(--bg-elev);border:1px solid var(--border-strong);
+  box-shadow:var(--shadow-md);color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:40;
+  opacity:0;pointer-events:none;transform:translateY(8px);
+  transition:opacity .2s,transform .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+#top-btn.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+#top-btn:active{transform:scale(.92)}
+#top-btn svg{width:17px;height:17px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- desktop ---------- */
+@media (min-width:900px){
+  :root{--header-h:60px}
+  body{font-size:16.5px}
+  .wrap{display:grid;grid-template-columns:260px minmax(0,1fr);gap:52px;padding-left:32px;padding-right:32px}
+  .menu-btn{display:none}
+  .toc-card{display:none}
+  aside.sidebar{
+    position:sticky;
+    top:calc(var(--header-h) + env(safe-area-inset-top));
+    height:calc(100vh - var(--header-h) - env(safe-area-inset-top));
+    overflow-y:auto;
+    padding:34px 0 40px;
+    border-right:1px solid var(--border);
+    margin-right:-24px;padding-right:20px;
+  }
+  aside.sidebar .side-label{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--text-faint);margin-bottom:12px;padding-left:12px}
+  aside.sidebar a{
+    display:block;padding:5px 12px;border-radius:7px;
+    color:var(--text-muted);text-decoration:none;border:none;
+    font-size:13px;line-height:1.55;
+  }
+  aside.sidebar a.lv1{font-weight:800;color:var(--text);margin-top:10px;font-size:13.5px}
+  aside.sidebar a.lv1:first-of-type{margin-top:0}
+  aside.sidebar a.lv2{padding-left:22px;font-size:12.5px}
+  aside.sidebar a:hover{background:var(--bg-sunken);color:var(--text)}
+  aside.sidebar a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  main{padding-top:14px;padding-bottom:80px;max-width:800px}
+  .hero{padding-top:34px}
+  .copy:hover{background:rgba(255,255,255,.09)}
+  .code.prompt .copy:hover{background:var(--border)}
+  .link-card:hover{border-color:var(--accent-border);box-shadow:var(--shadow-md);transform:translateY(-1px);transition:.15s}
+  a:hover{border-bottom-color:var(--accent)}
+  #top-btn{right:32px;bottom:32px}
+}
+@media (max-width:899px){aside.sidebar{display:none}}
+@media (min-width:900px){nav.drawer,.scrim{display:none}}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="brand"><i class="dot"></i><span>OTA設定変更AIエージェント 手順</span></div>
+    <button class="menu-btn" id="menuBtn" aria-label="目次を開く" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="scrim" id="scrim"></div>
+<nav class="drawer" id="drawer" aria-label="目次">
+  <div class="drawer-head">
+    <span>目次</span>
+    <button class="menu-btn" id="closeBtn" style="display:flex" aria-label="目次を閉じる">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawerNav"></div>
+</nav>
+
+<div class="wrap">
+
+  <aside class="sidebar">
+    <div class="side-label">目次</div>
+    <div id="sideNav"></div>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <div class="eyebrow">構築・運用手順</div>
+      <h1>楽天トラベル・一休.com<br>設定変更AIエージェント 構築手順</h1>
+      <p class="lead">宿泊施設管理画面でのプラン登録・文章修正・料金／販売期間の入力・写真変更を、担当者が<b>チャットで依頼</b>できる専用AIエージェントを作る、PC初心者向けの手順書。Claude Code＋Playwright＋Claude Agent SDK。</p>
+      <div class="meta">
+        <span class="chip">作成日：<b>2026年7月19日</b></span>
+        <span class="chip">楽天トラベル</span>
+        <span class="chip">一休.com</span>
+        <span class="chip">PC初心者向け</span>
+        <a class="chip link" href="/">← リモート運用手順へ</a>
+        <a class="chip link" href="/ppt-excel">PPT/Excel作成ガイド →</a>
+      </div>
+    </div>
+
+    <div class="toc-card">
+      <h2>目次</h2>
+      <ol id="tocCardList"></ol>
+    </div>
+
+    <div class="note info">
+      <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>この手順書の「画面イメージ」について</div>
+      <p>本書の「画面イメージ」は操作の考え方を説明するための<b>模式図</b>です。楽天トラベル・一休.comの実際の管理画面は、契約内容や画面更新によって、項目名・配置が異なります。</p>
+    </div>
+
+    <!-- ============ 1 ============ -->
+    <section class="chapter" id="ch1">
+      <div class="chapter-head"><div class="badge">1</div><h2>この仕組みで実現すること</h2></div>
+      <p>最終的には、担当者が次のようにチャットで依頼できる仕組みを作ります。</p>
+      <div class="quote">
+        <span class="q-label">依頼例</span>
+        LOQUAT西伊豆の楽天トラベルと一休で、既存の「スタンダード2食付きプラン」を複製してください。<br>
+        販売期間は2026年9月1日から11月30日まで。<br>
+        料金は元プランの10％増し。<br>
+        添付した秋の料理写真を1枚目にしてください。<br>
+        公開はせず、入力内容を私に確認してください。
+      </div>
+      <p>AIは以下を順番に行います。</p>
+      <ol class="steps">
+        <li>指示の不足項目を確認する</li>
+        <li>対象施設・対象OTAを特定する</li>
+        <li>現在の設定内容を読み取る</li>
+        <li>変更前の画面を保存する</li>
+        <li>プランや写真を入力する</li>
+        <li>公開直前で停止する</li>
+        <li>変更内容を担当者へ報告する</li>
+        <li>担当者の承認後に公開する</li>
+        <li>公開後の内容を再確認して報告する</li>
+      </ol>
+      <div class="flow">
+        <div class="flow-step">担当者がチャットで依頼</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">Claudeが指示を整理</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">PlaywrightがOTA管理画面へ入力</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">変更内容と画面を提示</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-branch">
+          <div><span class="flow-tag">承認</span><div class="flow-step">公開・再確認・完了報告</div></div>
+          <div><span class="flow-tag no">差し戻し</span><div class="flow-step">指示の整理へ戻る</div></div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 2 ============ -->
+    <section class="chapter" id="ch2">
+      <div class="chapter-head"><div class="badge">2</div><h2>最初に知っておく言葉</h2></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>言葉</th><th>初心者向けの意味</th></tr></thead>
+          <tbody>
+            <tr><td>OTA</td><td>楽天トラベル、一休.com、じゃらんなどの宿泊予約サイト</td></tr>
+            <tr><td>施設管理画面</td><td>宿泊施設側がプラン・料金・写真などを設定する画面</td></tr>
+            <tr><td>Claude Code</td><td>チャットで指示すると、PC上で調査・プログラム作成・ツール操作を行うAI</td></tr>
+            <tr><td>Claude Agent SDK</td><td>Claudeを自社専用のシステムに組み込むための部品</td></tr>
+            <tr><td>Playwright</td><td>AIやプログラムからChromeを開き、クリック・入力・画像アップロードなどを行う道具</td></tr>
+            <tr><td>ターミナル</td><td>PCに文字で指示を出すアプリ。WindowsではPowerShell、Macではターミナルを使う</td></tr>
+            <tr><td>APIキー</td><td>自社システムからClaudeを利用するための秘密の鍵。パスワードと同様に扱う</td></tr>
+            <tr><td>下書き</td><td>管理画面に入力したものの、まだ公開・確定していない状態</td></tr>
+            <tr><td>承認ゲート</td><td>人間が承認しない限り公開できない仕組み</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3 id="ch2-roles">Claude Codeと専用エージェントの役割の違い</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>段階</th><th>使用するもの</th><th>役割</th></tr></thead>
+          <tbody>
+            <tr><td>試作・テスト</td><td>Claude Code＋Playwright</td><td>管理画面を確認し、正しい操作手順を作る</td></tr>
+            <tr><td>実際の社内運用</td><td>Claude Agent SDK＋Playwright</td><td>社内チャットから同じ操作を繰り返せるようにする</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 3 ============ -->
+    <section class="chapter" id="ch3">
+      <div class="chapter-head"><div class="badge">3</div><h2>絶対に守る安全ルール</h2></div>
+
+      <h3 id="ch3-1">3-1. 公開は必ず人間が承認する</h3>
+      <p>最初から完全自動公開にはしません。</p>
+      <div class="flow">
+        <div class="flow-step">入力</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">内容確認</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step q">担当者が承認？</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-branch">
+          <div><span class="flow-tag">はい</span><div class="flow-step">公開</div></div>
+          <div><span class="flow-tag no">いいえ</span><div class="flow-step">修正または中止</div></div>
+        </div>
+      </div>
+      <p>AIに、次の操作を無条件で許可してはいけません。</p>
+      <ul class="bullets">
+        <li>公開・販売開始</li>
+        <li>プラン削除</li>
+        <li>写真の全削除</li>
+        <li>売止め・在庫ゼロ設定</li>
+        <li>料金の一括変更</li>
+        <li>既存プランへの上書き</li>
+      </ul>
+
+      <h3 id="ch3-2">3-2. パスワードや認証コードをチャットに書かない</h3>
+      <ul class="bullets">
+        <li>ログインID、パスワード、ワンタイムパスワードは担当者自身が入力します。</li>
+        <li>Claudeへのチャットにパスワードを貼り付けません。</li>
+        <li>APIキーもClaudeへの通常のプロンプトやプログラム本文に書きません。</li>
+      </ul>
+
+      <h3 id="ch3-3">3-3. 予約者情報を見せない</h3>
+      <p>OTA管理画面には氏名、電話番号、メールアドレス、宿泊履歴などが含まれます。</p>
+      <ul class="bullets">
+        <li>「プラン管理」「施設情報」「写真管理」だけを対象にします。</li>
+        <li>「予約一覧」「顧客情報」「メッセージ」画面を開かせません。</li>
+        <li>可能ならOTA側で設定専用の権限制限アカウントを発行します。</li>
+      </ul>
+
+      <h3 id="ch3-4">3-4. 自動操作の可否をOTAに確認する</h3>
+      <p>楽天トラベル・一休.comの担当者へ、次の文面で確認してください。</p>
+      <div class="quote">
+        <span class="q-label">確認文面</span>
+        当社施設の管理画面について、RPAまたはブラウザ自動操作を用いて、プラン登録や画像更新を行うことは可能でしょうか。<br>
+        また、施設情報、プラン、画像を更新できるAPIまたは正式な外部連携手段があればご案内ください。<br>
+        公開・確定操作は当社担当者の承認後に行う運用を予定しています。
+      </div>
+      <p>APIやサイトコントローラーから変更できる項目はそちらを優先し、ブラウザ操作はAPIで対応できない項目に限定します。</p>
+    </section>
+
+    <!-- ===== PART 1 ===== -->
+    <div class="part" id="part1">
+      <div class="p-label">第 1 部</div>
+      <div class="p-title">Claude Codeで安全な試作版を動かす</div>
+    </div>
+
+    <!-- ============ 4 ============ -->
+    <section class="chapter" id="ch4">
+      <div class="chapter-head"><div class="badge">4</div><h2>最初の実証実験の範囲</h2></div>
+      <p>最初は以下の範囲だけにします。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>項目</th><th>最初の設定例</th></tr></thead>
+          <tbody>
+            <tr><td>施設</td><td>LOQUAT西伊豆</td></tr>
+            <tr><td>OTA</td><td>楽天トラベルのみ</td></tr>
+            <tr><td>作業</td><td>既存プランの複製</td></tr>
+            <tr><td>変更</td><td>プラン名、説明文、販売期間、料金、写真</td></tr>
+            <tr><td>公開</td><td>しない。公開直前で停止</td></tr>
+            <tr><td>操作する人</td><td>本社または施設の担当者1名</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>この作業を5～10回安全に成功させてから、一休.comや別施設を追加します。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 5 ============ -->
+    <section class="chapter" id="ch5">
+      <div class="chapter-head"><div class="badge">5</div><h2>用意するもの</h2></div>
+      <ul class="bullets">
+        <li>Windows 10以降、またはmacOS 13以降のPC</li>
+        <li>Google Chrome</li>
+        <li>Claudeの利用アカウント</li>
+        <li>Claude APIを利用する場合はClaude Consoleの契約</li>
+        <li>楽天トラベル・一休.comの施設管理アカウント</li>
+        <li>安定したインターネット接続</li>
+        <li>OTA操作専用のPC、または専用ユーザーアカウント</li>
+        <li>テストに使う公開前プランまたは複製可能な既存プラン</li>
+      </ul>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>ヒント</div>
+        <p>普段メール、ネットバンキング、契約書などを見るブラウザとは分けてください。OTA作業専用のPCまたはPCユーザーを用意するのが最も安全です。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 6 ============ -->
+    <section class="chapter" id="ch6">
+      <div class="chapter-head"><div class="badge">6</div><h2>Google Chromeを準備する</h2></div>
+
+      <h3 id="ch6-1">6-1. Chromeをインストールする</h3>
+      <p>すでにGoogle Chromeが入っていれば、この作業は不要です。</p>
+      <ol class="steps">
+        <li>ブラウザで「Google Chrome ダウンロード」と検索する</li>
+        <li>Google公式サイトを開く</li>
+        <li><code>Chromeをダウンロード</code>を押す</li>
+        <li>ダウンロードしたファイルを開く</li>
+        <li>画面に従ってインストールする</li>
+      </ol>
+
+      <h3 id="ch6-2">6-2. OTA専用のChromeプロファイルを作る</h3>
+      <ol class="steps">
+        <li>Chromeを開く</li>
+        <li>右上の丸いプロフィールアイコンを押す</li>
+        <li><code>追加</code>を押す</li>
+        <li><code>アカウントなしで続行</code>または業務用Googleアカウントを選ぶ</li>
+        <li>名前を「ARTH OTA作業」にする</li>
+        <li>デスクトップショートカットを作成する</li>
+      </ol>
+      <div class="mock">
+        <div class="mock-bar"><span class="dots"><i></i><i></i><i></i></span>Chromeのプロフィール選択</div>
+        <div class="mock-body">
+          <div class="mock-row"><span class="v">○ 個人用</span></div>
+          <div class="mock-row"><span class="v mock-pick">○ ARTH OTA作業 ← こちらを使用</span></div>
+          <div class="mock-row"><span class="v">＋ 追加</span></div>
+        </div>
+      </div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>注意</div>
+        <p>個人用Chromeのプロフィールで作業しないでください。AIが操作するタブに、メール、銀行、契約書、顧客名簿などを開かないでください。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 7 ============ -->
+    <section class="chapter" id="ch7">
+      <div class="chapter-head"><div class="badge">7</div><h2>Node.jsをインストールする</h2></div>
+      <p>Playwrightや専用アプリを動かすためにNode.jsを使用します。</p>
+      <ol class="steps">
+        <li><a href="https://nodejs.org/en/download" target="_blank" rel="noopener">Node.js公式ダウンロードページ</a>を開く</li>
+        <li><code>LTS</code>と書かれた安定版を選ぶ</li>
+        <li>Windowsなら<code>.msi</code>、Macなら<code>.pkg</code>のインストーラーをダウンロードする</li>
+        <li>ダウンロードしたファイルを開く</li>
+        <li>基本的にはすべて初期設定のまま<code>Next</code>または<code>続ける</code>を押す</li>
+        <li>インストール完了後、開いているPowerShellまたはターミナルを一度閉じる</li>
+      </ol>
+      <h4>インストール確認</h4>
+      <p>Windowsはスタートメニューから<code>PowerShell</code>、Macは<code>ターミナル</code>を開き、次を1行ずつ入力します。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>node -v
+npm -v</code></pre></div>
+      <h4>正常な画面イメージ</h4>
+      <div class="code"><div class="code-head"><span class="code-lang">TEXT</span><button class="copy">コピー</button></div><pre><code>PS C:\Users\担当者> node -v
+v24.x.x
+
+PS C:\Users\担当者> npm -v
+11.x.x</code></pre></div>
+      <p>数字が表示されれば成功です。<code>認識されていません</code>や<code>command not found</code>と表示された場合は、PCを再起動してもう一度確認します。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 8 ============ -->
+    <section class="chapter" id="ch8">
+      <div class="chapter-head"><div class="badge">8</div><h2>Claude Codeをインストールする</h2></div>
+      <p>公式手順は<a href="https://code.claude.com/docs/en/setup" target="_blank" rel="noopener">Claude Codeセットアップ</a>で確認できます。</p>
+
+      <h3 id="ch8-1">8-1. Windowsの場合</h3>
+      <ol class="steps">
+        <li>画面下のスタートボタンを押す</li>
+        <li><code>PowerShell</code>と入力する</li>
+        <li><code>Windows PowerShell</code>または<code>ターミナル</code>を開く</li>
+        <li>次の1行をコピーして貼り付ける</li>
+        <li>Enterキーを押す</li>
+      </ol>
+      <div class="code"><div class="code-head"><span class="code-lang">POWERSHELL</span><button class="copy">コピー</button></div><pre><code>irm https://claude.ai/install.ps1 | iex</code></pre></div>
+      <p>別の公式方法として、次も利用できます。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">POWERSHELL</span><button class="copy">コピー</button></div><pre><code>winget install Anthropic.ClaudeCode</code></pre></div>
+
+      <h3 id="ch8-2">8-2. Macの場合</h3>
+      <ol class="steps">
+        <li><code>command</code>キーとスペースキーを同時に押す</li>
+        <li><code>ターミナル</code>と入力する</li>
+        <li>ターミナルを開く</li>
+        <li>次の1行をコピーして貼り付ける</li>
+        <li>Returnキーを押す</li>
+      </ol>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>curl -fsSL https://claude.ai/install.sh | bash</code></pre></div>
+
+      <h3 id="ch8-3">8-3. インストール確認</h3>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>claude --version</code></pre></div>
+      <p>バージョン番号が表示されれば成功です。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 9 ============ -->
+    <section class="chapter" id="ch9">
+      <div class="chapter-head"><div class="badge">9</div><h2>OTAエージェント用フォルダを作る</h2></div>
+      <h3 id="ch9-win">Windowsの場合</h3>
+      <p>PowerShellに次を1行ずつ貼り付けます。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">POWERSHELL</span><button class="copy">コピー</button></div><pre><code>mkdir "$HOME\OTA-Agent"
+cd "$HOME\OTA-Agent"</code></pre></div>
+      <h3 id="ch9-mac">Macの場合</h3>
+      <p>ターミナルに次を1行ずつ貼り付けます。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>mkdir -p "$HOME/OTA-Agent"
+cd "$HOME/OTA-Agent"</code></pre></div>
+      <h4>現在地を確認する</h4>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>pwd</code></pre></div>
+      <p>末尾が<code>OTA-Agent</code>になっていれば成功です。</p>
+      <div class="tree">現在のフォルダ
+└─ <b>OTA-Agent</b>
+   ├─ 後で作る施設設定
+   ├─ 後で作る操作プログラム
+   └─ 変更前後の記録</div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 10 ============ -->
+    <section class="chapter" id="ch10">
+      <div class="chapter-head"><div class="badge">10</div><h2>Claude Codeを初めて起動する</h2></div>
+      <p>OTA-Agentフォルダにいる状態で、次を入力します。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>claude</code></pre></div>
+      <p>初回はログインや利用許可の案内が表示されます。画面の指示に従い、Claudeアカウントでログインしてください。</p>
+      <h4>起動後の画面イメージ</h4>
+      <div class="code"><div class="code-head"><span class="code-lang">TEXT</span><button class="copy">コピー</button></div><pre><code>Claude Code
+
+現在のフォルダ：OTA-Agent
+
+> ここに日本語で指示を入力します</code></pre></div>
+      <h3 id="ch10-rule">最初に入れる安全ルールのプロンプト</h3>
+      <p>以下をそのまま貼り付けてください。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>このフォルダでは、楽天トラベル、一休.comなどの宿泊施設管理画面を操作する仕組みを作ります。
+
+必ず次のルールを守ってください。
+1. 私が明示的に承認するまで、保存、公開、販売開始、削除、売止めを実行しない。
+2. 予約一覧、顧客情報、メッセージ、決済情報を開かない。
+3. ログインID、パスワード、ワンタイムパスワードを要求しない。
+4. 画面が想定と異なる場合、推測で操作せず停止して報告する。
+5. 操作の前後で、対象施設、対象OTA、対象プランを確認する。
+6. 料金、日付、人数、税区分は入力後に読み直して照合する。
+7. 公開または削除につながるボタンを押す前に、必ず私へ確認する。
+
+まず、このルールを理解したことだけを回答してください。ブラウザ操作はまだ開始しないでください。</code></pre></div>
+      <p>Claudeがルールを要約して返答すれば成功です。</p>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>重要</div>
+        <p>このプロンプトだけで安全が保証されるわけではありません。試作段階では担当者が画面を見ながら操作し、本番版ではプログラム側でも公開を禁止します。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 11 ============ -->
+    <section class="chapter" id="ch11">
+      <div class="chapter-head"><div class="badge">11</div><h2>PlaywrightをClaude Codeへ追加する</h2></div>
+
+      <h3 id="ch11-1">11-1. Claude Codeを一度終了する</h3>
+      <p>Claude Codeの入力欄に次を入力します。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">コマンド</span><button class="copy">コピー</button></div><pre><code>/exit</code></pre></div>
+
+      <h3 id="ch11-2">11-2. Playwright MCPを追加する</h3>
+      <p>通常のPowerShellまたはターミナル画面に戻ったら、次を入力します。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>claude mcp add playwright npx @playwright/mcp@latest</code></pre></div>
+      <p>Playwright MCPは、ブラウザの移動、クリック、入力、選択、スクリーンショット取得などをClaudeから実行するための機能です。公式の設定方法は<a href="https://playwright.dev/docs/getting-started-mcp" target="_blank" rel="noopener">Playwright MCPドキュメント</a>を参照してください。</p>
+
+      <h3 id="ch11-3">11-3. 接続確認</h3>
+      <p>再びClaude Codeを起動します。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>claude</code></pre></div>
+      <p>Claude Code内で次を入力します。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">コマンド</span><button class="copy">コピー</button></div><pre><code>/mcp</code></pre></div>
+      <p>一覧に<code>playwright</code>が表示され、接続済みになっていれば成功です。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>MCP接続一覧</th><th>状態</th></tr></thead>
+          <tbody><tr><td>playwright</td><td><span class="ok">接続済み</span></td></tr></tbody>
+        </table>
+      </div>
+
+      <h3 id="ch11-4">11-4. 一般サイトで安全にテストする</h3>
+      <p>次のプロンプトを入力します。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>Playwrightを使って https://example.com をブラウザで開いてください。
+ページのタイトルを読み取り、スクリーンショットを1枚保存してください。
+クリックや入力はしないでください。</code></pre></div>
+      <p>ブラウザが開き、Claudeがページタイトルを報告すれば接続成功です。</p>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>メモ</div>
+        <p>Playwright MCPは通常、操作中のブラウザが見える状態で起動し、プロジェクトごとにログイン状態を保持できます。詳しくは<a href="https://playwright.dev/docs/getting-started-mcp#user-profile" target="_blank" rel="noopener">Playwright MCPのプロファイル設定</a>を参照してください。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 12 ============ -->
+    <section class="chapter" id="ch12">
+      <div class="chapter-head"><div class="badge">12</div><h2>OTAへ手動でログインする</h2></div>
+
+      <h3 id="ch12-1">12-1. ログイン画面だけを開かせる</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>Playwrightを使って楽天トラベルの宿泊施設管理画面のログインページを開いてください。
+ログイン情報は私が手動で入力します。
+ログインボタンを押さず、そのまま待機してください。</code></pre></div>
+
+      <h3 id="ch12-2">12-2. Claudeの操作を止めた状態で担当者が入力する</h3>
+      <ol class="steps">
+        <li>開いたブラウザをクリックする</li>
+        <li>担当者自身がログインIDを入力する</li>
+        <li>担当者自身がパスワードを入力する</li>
+        <li>必要ならワンタイムパスワードを入力する</li>
+        <li>担当者自身がログインボタンを押す</li>
+        <li>管理画面のトップが表示されたことを確認する</li>
+      </ol>
+
+      <h3 id="ch12-3">12-3. ログイン後にClaudeへ伝える</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>私が手動でログインしました。
+現在のページが楽天トラベルの施設管理トップであることだけを確認してください。
+まだメニューを開いたり、別のページへ移動したりしないでください。</code></pre></div>
+      <div class="mock">
+        <div class="mock-bar"><span class="dots"><i></i><i></i><i></i></span>楽天トラベル 施設管理画面（模式図）</div>
+        <div class="mock-body">
+          <div class="mock-row"><span class="k">施設名</span><span class="v">LOQUAT西伊豆</span></div>
+          <div class="mock-row"><span class="k">メニュー</span><span class="v">プラン管理／料金・在庫／施設情報／写真管理</span></div>
+          <div class="mock-row"><span class="v mock-danger">予約一覧・顧客情報は開かない</span></div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 13 ============ -->
+    <section class="chapter" id="ch13">
+      <div class="chapter-head"><div class="badge">13</div><h2>最初は「読み取りだけ」を行う</h2></div>
+      <p>次のプロンプトを貼り付けます。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>現在ログインしている施設名を確認してください。
+その後、「プラン管理」に移動し、公開中のプラン名を一覧にしてください。
+
+禁止事項：
+- プランの編集画面を開かない
+- 保存、公開、削除を行わない
+- 予約一覧や顧客情報を開かない
+
+取得できた施設名、プラン名、現在のページURLだけを報告してください。</code></pre></div>
+      <h4>確認ポイント</h4>
+      <ul class="bullets">
+        <li>指示した施設名と一致しているか</li>
+        <li>別施設の管理画面ではないか</li>
+        <li>Claudeが予約情報を開いていないか</li>
+        <li>プラン名が正しく読めているか</li>
+      </ul>
+      <p>違う施設が表示された場合は、その場で中止します。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>操作を中止してください。現在の画面から移動せず、ブラウザ操作を終了してください。</code></pre></div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 14 ============ -->
+    <section class="chapter" id="ch14">
+      <div class="chapter-head"><div class="badge">14</div><h2>既存プランの内容を読み取る</h2></div>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>施設名が「LOQUAT西伊豆」であることをもう一度確認してください。
+
+プラン管理から「スタンダード2食付きプラン」を探し、編集画面を開いてください。
+次の項目を読み取って表にしてください。
+
+- プラン名
+- プラン説明文
+- 販売開始日・終了日
+- 宿泊可能期間
+- 対象客室
+- 食事条件
+- 料金設定方法
+- キャンセル条件
+- 登録写真と表示順
+
+読み取りだけを行い、変更、保存、公開は一切しないでください。
+画面の最下部に保存ボタンがあっても押さないでください。</code></pre></div>
+      <h4>Claudeから受け取る報告イメージ</h4>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>項目</th><th>現在の設定</th></tr></thead>
+          <tbody>
+            <tr><td>プラン名</td><td>スタンダード2食付きプラン</td></tr>
+            <tr><td>販売期間</td><td>2026/04/01～2027/03/31</td></tr>
+            <tr><td>食事</td><td>夕朝食付き</td></tr>
+            <tr><td>対象客室</td><td>二ノ蔵、三ノ蔵</td></tr>
+            <tr><td>写真</td><td>5枚</td></tr>
+            <tr><td>保存操作</td><td>未実施</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>この時点で、ClaudeがOTA画面の項目を正しく認識できるか確認します。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 15 ============ -->
+    <section class="chapter" id="ch15">
+      <div class="chapter-head"><div class="badge">15</div><h2>プランを「公開せず」に複製する</h2></div>
+
+      <h3 id="ch15-1">15-1. 指示内容を先に整理させる</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>まだブラウザ操作はしないでください。
+
+以下の新規プラン登録依頼を、作業前確認表に整理してください。
+不足している情報があれば、私に質問してください。
+
+施設：LOQUAT西伊豆
+OTA：楽天トラベル
+元プラン：スタンダード2食付きプラン
+新プラン名：秋の特別ディナープラン
+販売期間：2026年9月1日から2026年11月30日
+宿泊対象期間：販売期間と同じ
+料金：元プランの10％増し
+食事条件：夕朝食付き
+対象客室：元プランと同じ
+キャンセル条件：元プランと同じ
+写真：後で指定する3枚を追加
+公開：しない</code></pre></div>
+      <p>Claudeが不足情報を質問した場合は回答します。料金の丸め方、税込・税別、除外日などが不明なら、推測させず確認します。</p>
+
+      <h3 id="ch15-2">15-2. 下書きを入力させる</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>先ほど確認した内容で、楽天トラベルの既存プランを複製し、新しいプランの入力を行ってください。
+
+必ず守る条件：
+1. 施設名がLOQUAT西伊豆であることを操作直前に確認する。
+2. 元プランは「スタンダード2食付きプラン」とする。
+3. 既存プランには上書きせず、複製として作成する。
+4. 入力後、販売期間、宿泊期間、料金、対象客室、食事条件を読み直す。
+5. 保存、登録、公開、販売開始ボタンは押さない。
+6. 公開直前の画面で停止する。
+7. 変更前と入力後のスクリーンショットを保存する。
+8. 入力内容を表にして報告する。</code></pre></div>
+      <h4>公開前確認画面のイメージ</h4>
+      <div class="mock">
+        <div class="mock-bar"><span class="dots"><i></i><i></i><i></i></span>新規プラン・確認画面（模式図）</div>
+        <div class="mock-body">
+          <div class="mock-row"><span class="k">施設</span><span class="v">LOQUAT西伊豆</span></div>
+          <div class="mock-row"><span class="k">プラン名</span><span class="v">秋の特別ディナープラン</span></div>
+          <div class="mock-row"><span class="k">販売期間</span><span class="v">2026/09/01～2026/11/30</span></div>
+          <div class="mock-row"><span class="k">料金</span><span class="v">元プラン×1.10</span></div>
+          <div class="mock-row"><span class="k">写真</span><span class="v">3枚追加予定</span></div>
+          <div class="mock-btns"><span class="mock-btn">戻る</span><span class="mock-btn">下書き保存</span><span class="mock-btn stop">公開 ← まだ押さない</span></div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 16 ============ -->
+    <section class="chapter" id="ch16">
+      <div class="chapter-head"><div class="badge">16</div><h2>写真を変更する</h2></div>
+
+      <h3 id="ch16-1">16-1. 写真ファイルを準備する</h3>
+      <p>写真は、分かりやすい名前に変更しておきます。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">TEXT</span><button class="copy">コピー</button></div><pre><code>01_秋料理_メイン.jpg
+02_秋料理_前菜.jpg
+03_客室_三ノ蔵.jpg</code></pre></div>
+      <p><code>IMG_8374.jpg</code>のような名前のままだと、別の写真を選ぶ事故が起きやすくなります。</p>
+
+      <h3 id="ch16-2">16-2. 写真アップロードのプロンプト</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>新しいプランの写真設定画面を開いてください。
+
+次の3枚をこの順番で登録してください。
+1. 01_秋料理_メイン.jpg
+2. 02_秋料理_前菜.jpg
+3. 03_客室_三ノ蔵.jpg
+
+条件：
+- 1枚目をメイン画像にする。
+- 既存写真は削除しない。
+- 同じ写真を重複登録しない。
+- 各写真のファイル名と表示順を登録後に読み直す。
+- 保存または公開はしない。
+- 写真一覧のスクリーンショットを保存して報告する。</code></pre></div>
+      <h4>写真確認のポイント</h4>
+      <ul class="bullets">
+        <li>別施設の写真を選んでいないか</li>
+        <li>客室タイプと写真が一致しているか</li>
+        <li>縦横比やトリミングに問題がないか</li>
+        <li>メイン写真の指定が正しいか</li>
+        <li>料理の季節や内容がプランと一致しているか</li>
+        <li>クレジット表記が必要な写真ではないか</li>
+      </ul>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 17 ============ -->
+    <section class="chapter" id="ch17">
+      <div class="chapter-head"><div class="badge">17</div><h2>公開前の最終確認をさせる</h2></div>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>公開操作はまだ行わないでください。
+
+現在入力されている新規プランについて、次を実行してください。
+1. 施設名を確認する。
+2. OTA名を確認する。
+3. 元プランと新プランの差分を表にする。
+4. 販売期間と宿泊期間に矛盾がないか確認する。
+5. 料金が元プランの10％増しになっているか、代表日を3日選んで計算確認する。
+6. 対象客室、食事条件、キャンセル条件を確認する。
+7. 写真の枚数と順番を確認する。
+8. 公開後にお客様から見える内容を要約する。
+9. 問題があれば公開可能と判断せず、問題点を報告する。
+
+最後に「公開してよい状態」「修正が必要」のどちらかを明記してください。</code></pre></div>
+      <h4>差分報告のイメージ</h4>
+      <div class="table-scroll">
+        <table class="wide">
+          <thead><tr><th>項目</th><th>元プラン</th><th>新プラン</th><th>判定</th></tr></thead>
+          <tbody>
+            <tr><td>プラン名</td><td>スタンダード2食付き</td><td>秋の特別ディナー</td><td>変更あり</td></tr>
+            <tr><td>販売期間</td><td>通年</td><td>9/1～11/30</td><td><span class="ok">OK</span></td></tr>
+            <tr><td>料金</td><td>基準料金</td><td>10％増し</td><td>要検算</td></tr>
+            <tr><td>食事</td><td>夕朝食付き</td><td>夕朝食付き</td><td>同一</td></tr>
+            <tr><td>写真</td><td>既存5枚</td><td>既存＋3枚</td><td><span class="ok">OK</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 18 ============ -->
+    <section class="chapter" id="ch18">
+      <div class="chapter-head"><div class="badge">18</div><h2>公開を承認する場合のプロンプト</h2></div>
+      <p>試作中は、できる限り担当者自身が公開ボタンを押してください。AIに公開操作まで行わせる場合も、次のように対象を限定します。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>公開を承認します。
+
+承認対象：
+- 施設：LOQUAT西伊豆
+- OTA：楽天トラベル
+- プラン名：秋の特別ディナープラン
+- 販売期間：2026年9月1日～2026年11月30日
+- 今回の確認画面に表示されている内容のみ
+
+上記以外のプラン、施設、料金、在庫、写真は変更しないでください。
+公開ボタンを1回だけ押し、完了メッセージを確認してください。
+エラーが表示された場合は再実行せず、その画面で停止して報告してください。</code></pre></div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>警告</div>
+        <p>「公開して」「全部反映して」のような短い指示は使わないでください。施設、OTA、プラン名、期間を毎回明記します。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 19 ============ -->
+    <section class="chapter" id="ch19">
+      <div class="chapter-head"><div class="badge">19</div><h2>公開後の確認プロンプト</h2></div>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>公開後の確認を行ってください。
+
+1. 管理画面を再読み込みする。
+2. 対象プランが公開中になっているか確認する。
+3. プラン名、販売期間、料金、対象客室、食事条件、写真順を再取得する。
+4. 承認した内容と一致するか照合する。
+5. 完了画面と設定内容のスクリーンショットを保存する。
+6. 一般公開ページへ反映されていれば、そちらも確認する。
+7. 反映待ちの場合は「未確認」として報告し、成功と断定しない。
+
+結果を「成功」「一部未確認」「失敗」のいずれかで報告してください。</code></pre></div>
+      <h4>完了報告のイメージ</h4>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>確認項目</th><th>結果</th></tr></thead>
+          <tbody>
+            <tr><td>管理画面で公開中</td><td><span class="ok">成功</span></td></tr>
+            <tr><td>販売期間</td><td>一致</td></tr>
+            <tr><td>料金</td><td>一致</td></tr>
+            <tr><td>写真順</td><td>一致</td></tr>
+            <tr><td>一般公開ページ</td><td>反映待ち</td></tr>
+            <tr><td>総合判定</td><td>一部未確認</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== PART 2 ===== -->
+    <div class="part" id="part2">
+      <div class="p-label">第 2 部</div>
+      <div class="p-title">社内専用のチャット画面を作る</div>
+    </div>
+
+    <!-- ============ 20 ============ -->
+    <section class="chapter" id="ch20">
+      <div class="chapter-head"><div class="badge">20</div><h2>専用システムの完成イメージ</h2></div>
+      <p>Claude Codeを毎回ターミナルで操作するのではなく、担当者がブラウザ上の専用画面から依頼できるようにします。</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="dots"><i></i><i></i><i></i></span>OTA更新エージェント（画面イメージ）</div>
+        <div class="mock-body">
+          <div class="mock-row"><span class="k">施設</span><span class="v">LOQUAT西伊豆 ▼</span></div>
+          <div class="mock-row"><span class="k">対象OTA</span><span class="v">☑ 楽天トラベル　☑ 一休.com</span></div>
+          <div class="mock-row"><span class="k">作業</span><span class="v">既存プランを複製 ▼</span></div>
+          <div class="mock-row"><span class="k">元プラン</span><span class="v">スタンダード2食付き</span></div>
+          <div class="mock-row"><span class="k">依頼内容</span><span class="v">秋のプランを作成してください……</span></div>
+          <div class="mock-row"><span class="k">写真</span><span class="v">ファイルを選択</span></div>
+          <div class="mock-row"><span class="k">公開方法</span><span class="v mock-pick">● 公開前に承認</span><span class="v">○ 下書きのみ</span></div>
+          <div class="mock-btns"><span class="mock-btn primary">内容を確認する</span></div>
+        </div>
+      </div>
+      <p>入力後は、次の確認画面を表示します。</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="dots"><i></i><i></i><i></i></span>公開承認画面（画面イメージ）</div>
+        <div class="mock-body">
+          <div class="mock-row"><span class="k">変更対象</span><span class="v">LOQUAT西伊豆／楽天トラベル</span></div>
+          <div class="mock-row"><span class="k">変更内容</span><span class="v">プラン名、期間、料金、写真3枚</span></div>
+          <div class="mock-row"><span class="v mock-danger">警告：料金の変更があります</span></div>
+          <div class="mock-btns"><span class="mock-btn">差し戻す</span><span class="mock-btn primary">公開を承認する</span></div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 21 ============ -->
+    <section class="chapter" id="ch21">
+      <div class="chapter-head"><div class="badge">21</div><h2>Claude Agent SDKをインストールする</h2></div>
+      <p>OTA-Agentフォルダで、PowerShellまたはターミナルを開きます。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>npm init -y
+npm install @anthropic-ai/claude-agent-sdk @playwright/test zod express multer
+npm install -D typescript tsx @types/express @types/multer
+npx playwright install chromium</code></pre></div>
+      <p>Claude Agent SDKは、Claude Codeと同じエージェント処理をTypeScriptまたはPythonのアプリへ組み込むための公式SDKです。<a href="https://code.claude.com/docs/en/agent-sdk/overview" target="_blank" rel="noopener">Claude Agent SDK公式案内</a></p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 22 ============ -->
+    <section class="chapter" id="ch22">
+      <div class="chapter-head"><div class="badge">22</div><h2>Claude APIキーを準備する</h2></div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>メモ</div>
+        <p>ClaudeのPro、Max、Teamなどの月額契約と、Claude APIの料金は別です。専用システムでは通常、Claude ConsoleでAPI利用設定が必要です。</p>
+      </div>
+      <ol class="steps">
+        <li><a href="https://platform.claude.com/" target="_blank" rel="noopener">Claude Console</a>を開く</li>
+        <li>業務用アカウントでログインする</li>
+        <li>Workspaceを作成する。名前は<code>ARTH OTA Agent</code>などにする</li>
+        <li><code>API Keys</code>を開く</li>
+        <li><code>Create Key</code>を押す</li>
+        <li>キー名を<code>ota-agent-local</code>などにする</li>
+        <li>表示されたキーを安全なパスワード管理ツールへ保存する</li>
+      </ol>
+      <p>APIキーの作成場所については<a href="https://support.claude.com/en/articles/8114521-how-can-i-access-the-claude-api" target="_blank" rel="noopener">Claude API利用案内</a>を参照してください。</p>
+
+      <h3 id="ch22-win">APIキーをPCへ登録する（Windows）</h3>
+      <ol class="steps">
+        <li>スタートメニューで<code>環境変数</code>と検索する</li>
+        <li><code>システム環境変数の編集</code>を開く</li>
+        <li><code>環境変数</code>を押す</li>
+        <li>上側の「ユーザー環境変数」で<code>新規</code>を押す</li>
+        <li>変数名に<code>ANTHROPIC_API_KEY</code>を入力する</li>
+        <li>変数値にAPIキーを入力する</li>
+        <li><code>OK</code>を押してすべて閉じる</li>
+        <li>PowerShellを一度閉じて開き直す</li>
+      </ol>
+
+      <h3 id="ch22-mac">APIキーをPCへ登録する（Mac）</h3>
+      <p>ターミナルで一時的に設定する場合は次の形式です。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>export ANTHROPIC_API_KEY="ここにAPIキー"</code></pre></div>
+      <p>恒久設定や本番運用では、エンジニアに依頼してMacのキーチェーンまたは秘密情報管理サービスを利用してください。</p>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>APIキーの取り扱い</div>
+        <p>APIキーをチャット、メール、ソースコード、GitHub、スクリーンショットへ貼らないでください。漏洩した場合は、Claude Consoleで直ちに無効化して再発行します。<a href="https://support.claude.com/en/articles/9767949-api-key-best-practices-keeping-your-keys-safe-and-secure" target="_blank" rel="noopener">APIキー安全ガイド</a></p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 23 ============ -->
+    <section class="chapter" id="ch23">
+      <div class="chapter-head"><div class="badge">23</div><h2>Claude Codeへ専用アプリを作らせる</h2></div>
+      <p>OTA-Agentフォルダで<code>claude</code>を起動し、以下の「開発用マスタープロンプト」を貼り付けます。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">開発用マスタープロンプト</span><button class="copy">コピー</button></div><pre><code>このフォルダに、宿泊施設のOTA設定変更を依頼する社内専用Webアプリの試作版を作ってください。
+
+対象者：PC操作に詳しくない宿泊施設担当者
+動作環境：担当者のPC内、localhostのみ
+言語：TypeScript
+バックエンド：Express
+AI：@anthropic-ai/claude-agent-sdk
+ブラウザ操作：Playwright
+入力検証：Zod
+
+必要な画面：
+1. 新規依頼画面
+2. 依頼内容の確認画面
+3. 実行状況画面
+4. 公開前の差分確認・承認画面
+5. 完了報告画面
+
+新規依頼画面の項目：
+- 施設
+- 対象OTA
+- 作業種別
+- 元プラン
+- 新プラン名
+- 販売期間
+- 宿泊対象期間
+- 料金変更ルール
+- 食事条件
+- 対象客室
+- キャンセル条件
+- 自由記述
+- 写真アップロードと表示順
+- 下書きのみ／承認後公開
+
+必須の安全要件：
+1. 初期状態では下書き操作だけを許可する。
+2. 公開、削除、売止め、在庫変更を通常のブラウザ操作から実行できないようにする。
+3. 公開処理を独立した関数にし、サーバーが発行する一度限りの承認トークンがなければ実行できないようにする。
+4. Claudeが承認トークンを生成、推測、書き換えできないようにする。
+5. 公開・削除に関係するツール呼び出しをPreToolUseフックでも拒否する。
+6. 予約一覧、顧客情報、決済情報、メッセージ画面への移動をURLとページタイトルの両方で拒否する。
+7. 施設、OTA、プランを操作直前に再確認する。
+8. 変更前と変更後の値をJSONで保存する。
+9. 操作前、公開前、公開後のスクリーンショットを保存する。
+10. エラー時は自動再公開せず停止する。
+11. すべての操作に日時、担当者、施設、OTA、対象プラン、結果を記録する。
+12. APIキー、OTAのID、パスワード、Cookieをログに残さない。
+13. 外部ネットワークからアクセスできず、127.0.0.1だけで待ち受ける。
+
+フォルダ構成：
+- src/app：Web画面
+- src/agent：Claude Agent SDK
+- src/adapters：OTA別のPlaywright操作
+- src/policies：禁止操作と承認ルール
+- src/facilities：施設別設定
+- data/tasks：作業記録
+- data/screenshots：変更前後の画面
+- uploads：一時アップロード画像
+
+最初は実際のOTAを操作せず、架空のテスト画面を使うデモモードを作ってください。
+デモモードで、依頼入力→下書き→差分確認→承認→公開→完了報告まで試せるようにしてください。
+
+作成後、PC初心者向けに次を説明してください。
+- 起動方法
+- 終了方法
+- デモ操作方法
+- 本番OTAアダプターの追加方法
+- エラー時の戻し方
+
+まず実装計画と作成予定ファイルを説明し、私の承認を待ってください。まだファイルを作らないでください。</code></pre></div>
+      <p>Claudeが計画を出したら内容を読み、問題なければ次を入力します。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>計画を承認します。
+まずデモモードだけを実装してください。
+実際の楽天トラベル、一休.comには接続しないでください。
+実装後、テストを実行し、私が入力するコマンドを1つずつ案内してください。</code></pre></div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 24 ============ -->
+    <section class="chapter" id="ch24">
+      <div class="chapter-head"><div class="badge">24</div><h2>デモアプリを起動する</h2></div>
+      <p>Claude Codeが実装を完了すると、通常は次のような起動コマンドが案内されます。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>npm run dev</code></pre></div>
+      <p>次のように表示されたら、Chromeで<code>http://localhost:3000</code>を開きます。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">TEXT</span><button class="copy">コピー</button></div><pre><code>OTA Agent is running
+http://127.0.0.1:3000</code></pre></div>
+      <h4>デモで確認すること</h4>
+      <ol class="steps">
+        <li>施設を選択できる</li>
+        <li>OTAを選択できる</li>
+        <li>写真をアップロードできる</li>
+        <li>指示内容が確認画面に整理される</li>
+        <li>公開前で止まる</li>
+        <li>承認ボタンを押さない限り公開されない</li>
+        <li>承認後に完了報告が出る</li>
+        <li>変更前後の差分が残る</li>
+      </ol>
+      <h4>アプリを終了する</h4>
+      <p>PowerShellまたはターミナルで、<code>Ctrl</code>キーを押しながら<code>C</code>キーを押します。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 25 ============ -->
+    <section class="chapter" id="ch25">
+      <div class="chapter-head"><div class="badge">25</div><h2>楽天トラベル用アダプターを追加する</h2></div>
+      <p>デモが安定してから、Claude Codeへ次を依頼します。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>デモモードは残したまま、楽天トラベル用の本番アダプターを追加する準備をしてください。
+
+最初の対象は以下だけです。
+- 施設：LOQUAT西伊豆
+- 作業：既存プランの内容読み取り
+- 書き込み：禁止
+- 予約一覧、顧客情報、メッセージ：アクセス禁止
+
+Playwrightで現在ログイン済みの楽天トラベル管理画面を調査し、次を作成してください。
+1. 施設名の確認方法
+2. プラン一覧への安全な移動方法
+3. プラン詳細の読み取り方法
+4. ページが想定と違う場合の停止条件
+5. 読み取った内容を共通JSONへ変換する処理
+
+ブラウザ操作を始める前に、調査手順を説明して私の承認を待ってください。
+保存、公開、削除は一切行わないでください。</code></pre></div>
+      <p>読み取りが10回程度安定したら、「下書き入力」を追加します。その後、最後に「承認付き公開」を追加します。</p>
+      <div class="flow">
+        <div class="flow-step">読み取りのみを10回確認</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">下書き入力を追加</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">差分確認を追加</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">承認付き公開を追加</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">一休.comへ展開</div>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 26 ============ -->
+    <section class="chapter" id="ch26">
+      <div class="chapter-head"><div class="badge">26</div><h2>一休.comへ展開する</h2></div>
+      <p>楽天トラベルの操作コードをそのまま流用せず、一休.com専用のアダプターを作ります。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>楽天トラベル用アダプターを変更せず、新しく一休.com専用アダプターを作成してください。
+
+楽天トラベルと一休.comで、次の項目がどう対応するか調査し、対応表を作ってください。
+- プラン名
+- プラン説明
+- 販売期間
+- 宿泊対象期間
+- 料金
+- 対象客室
+- 食事条件
+- キャンセル条件
+- 写真
+- 公開状態
+
+最初は読み取りだけとし、保存、公開、削除は行わないでください。
+調査前に操作予定を説明し、私の承認を待ってください。</code></pre></div>
+      <h4>OTA間で自動的に同じにしない項目</h4>
+      <ul class="bullets">
+        <li>文字数制限</li>
+        <li>OTA限定プラン名</li>
+        <li>ポイント・クーポン</li>
+        <li>手数料を考慮した料金</li>
+        <li>キャンペーン参加条件</li>
+        <li>税・サービス料の表示</li>
+        <li>子供料金区分</li>
+        <li>写真の推奨サイズ・枚数</li>
+        <li>一休限定、一休会員限定などの販売条件</li>
+      </ul>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 27 ============ -->
+    <section class="chapter" id="ch27">
+      <div class="chapter-head"><div class="badge">27</div><h2>普段の依頼に使うプロンプト集</h2></div>
+
+      <h3 id="ch27-1">27-1. 新しいプランの作成依頼</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>次の条件でプランの下書きを作成してください。
+
+施設：LOQUAT西伊豆
+OTA：楽天トラベル、一休.com
+元プラン：スタンダード2食付きプラン
+新プラン名：秋の西伊豆美食プラン
+販売期間：2026年9月1日～2026年11月30日
+宿泊対象期間：2026年9月15日～2026年11月30日
+除外日：2026年10月10日～10月12日
+料金：元プランの10％増し、100円未満切り上げ
+食事：夕朝食付き
+対象客室：元プランと同じ
+写真：添付した3枚を指定順に使用
+公開：しない
+
+OTAごとの文字数や設定項目に違いがある場合は、入力前に質問してください。</code></pre></div>
+
+      <h3 id="ch27-2">27-2. 写真だけ変更する依頼</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>施設：TheMana Village
+OTA：楽天トラベル
+対象：スイートルームの写真
+
+添付した5枚を追加し、次の順に並べてください。
+1. テラスからの海景
+2. 客室全景
+3. 露天風呂
+4. ベッドルーム
+5. アメニティ
+
+既存写真は削除しないでください。
+登録後の順番をスクリーンショットで示し、保存・公開前で停止してください。</code></pre></div>
+
+      <h3 id="ch27-3">27-3. 説明文だけ修正する依頼</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>施設：Atarayo西伊豆
+OTA：楽天トラベル、一休.com
+対象プラン：露天風呂付きスイート2食付きプラン
+
+現在の説明文を読み取り、事実関係を変えずに、次を分かりやすくしてください。
+- 客室面積
+- 客室露天風呂
+- 夕食の最終開始時刻
+- チェックイン・チェックアウト
+
+修正案を先にチャットで提示してください。
+私が文章を承認するまで管理画面へ入力しないでください。</code></pre></div>
+
+      <h3 id="ch27-4">27-4. 現在の設定を比較する依頼</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>LOQUAT西伊豆の同じ宿泊プランについて、楽天トラベルと一休.comの現在の設定を読み取り、差分を比較してください。
+
+比較項目：
+- プラン名
+- 説明文
+- 販売期間
+- 宿泊期間
+- 料金
+- 対象客室
+- 食事条件
+- キャンセル条件
+- 写真
+
+変更は一切行わず、差分と修正推奨だけを報告してください。</code></pre></div>
+
+      <h3 id="ch27-5">27-5. 画面が変わった場合</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>OTA管理画面が以前の記録と異なっています。
+操作を停止し、現在のURL、ページタイトル、見つからない項目、表示されている主要メニューを報告してください。
+推測で別のボタンを押したり、保存や公開を試したりしないでください。</code></pre></div>
+
+      <h3 id="ch27-6">27-6. 作業を即時停止する</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>すべてのブラウザ操作を直ちに停止してください。
+現在の画面から移動せず、クリック、入力、保存、公開、再試行を行わないでください。
+停止したページと、すでに行った操作だけを報告してください。</code></pre></div>
+
+      <h3 id="ch27-7">27-7. 作業履歴をまとめる</h3>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">プロンプト</span><button class="copy">コピー</button></div><pre><code>今回の作業履歴を次の形式でまとめてください。
+- 作業日時
+- 担当者
+- 施設
+- OTA
+- 対象プラン
+- 変更前
+- 変更後
+- 公開承認者
+- 公開結果
+- 一般公開ページ確認結果
+- 未確認事項
+- 保存したスクリーンショット一覧</code></pre></div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 28 ============ -->
+    <section class="chapter" id="ch28">
+      <div class="chapter-head"><div class="badge">28</div><h2>トラブル時の対処</h2></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>症状</th><th>対処</th></tr></thead>
+          <tbody>
+            <tr><td><code>claude</code>が見つからない</td><td>PowerShell／ターミナルを閉じて開き直す。PCを再起動する</td></tr>
+            <tr><td><code>node</code>や<code>npm</code>が見つからない</td><td>Node.js LTSを再インストールし、PCを再起動する</td></tr>
+            <tr><td>Playwrightが接続されない</td><td>Claude Codeで<code>/mcp</code>を開き、playwrightの状態を確認する</td></tr>
+            <tr><td>ブラウザが開かない</td><td>Claude Codeを終了し、Playwright MCPの追加コマンドを再確認する</td></tr>
+            <tr><td>OTAからログアウトした</td><td>AIに認証情報を渡さず、担当者が手動で再ログインする</td></tr>
+            <tr><td>二段階認証が出た</td><td>担当者が手動で入力する。自動化しない</td></tr>
+            <tr><td>CAPTCHAが出た</td><td>自動回避せず、担当者が対応する。頻発する場合はOTAへ相談する</td></tr>
+            <tr><td>ボタン名や配置が変わった</td><td>即時停止し、アダプターを修正する</td></tr>
+            <tr><td>公開後にエラーが出た</td><td>再度公開ボタンを押さず、現在の状態を読み取って担当者へ報告する</td></tr>
+            <tr><td>間違った施設を開いた</td><td>何も変更せずログアウトまたはタブを閉じる</td></tr>
+            <tr><td>APIキーを漏らした</td><td>Claude Consoleで該当キーを無効化し、新しいキーを発行する</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>緊急停止</div>
+        <p>アプリやClaude Codeの動作を止めたいときは、PowerShellまたはターミナルで<code>Ctrl</code>＋<code>C</code>を押します。ブラウザ操作中なら、ブラウザを閉じるだけでなく、ターミナル側の処理も停止してください。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 29 ============ -->
+    <section class="chapter" id="ch29">
+      <div class="chapter-head"><div class="badge">29</div><h2>本番運用へ移るための合格基準</h2></div>
+      <p>次をすべて満たすまで、本番の自動公開を有効にしません。</p>
+      <ul class="check">
+        <li>OTAから自動操作の可否について回答を得た</li>
+        <li>専用PCまたは専用PCユーザーを用意した</li>
+        <li>権限を絞ったOTAアカウントを用意した</li>
+        <li>予約者情報ページへのアクセスを禁止した</li>
+        <li>読み取り操作を10回連続で成功した</li>
+        <li>下書き入力を10回連続で成功した</li>
+        <li>料金・期間・写真順の検算に成功した</li>
+        <li>画面変更時に推測で操作せず停止できた</li>
+        <li>公開承認なしでは公開できないことをテストした</li>
+        <li>同じ承認トークンを2回使えないことをテストした</li>
+        <li>エラー時に自動再公開しないことをテストした</li>
+        <li>操作ログと変更前後の画像が保存された</li>
+        <li>担当者が緊急停止方法を理解した</li>
+        <li>エンジニアまたはセキュリティ担当者が本番設定を確認した</li>
+      </ul>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 30 ============ -->
+    <section class="chapter" id="ch30">
+      <div class="chapter-head"><div class="badge">30</div><h2>推奨する導入スケジュール</h2></div>
+      <div class="table-scroll">
+        <table class="wide">
+          <thead><tr><th>段階</th><th>内容</th><th>目安</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>OTAへの確認、専用PC・アカウント準備</td><td>1～2週間</td></tr>
+            <tr><td>2</td><td>Claude Code＋Playwright接続</td><td>1日</td></tr>
+            <tr><td>3</td><td>楽天トラベルの読み取りテスト</td><td>2～5日</td></tr>
+            <tr><td>4</td><td>下書き入力と差分確認</td><td>3～7日</td></tr>
+            <tr><td>5</td><td>デモ用チャット画面の作成</td><td>3～7日</td></tr>
+            <tr><td>6</td><td>承認付き公開と操作ログ</td><td>1～2週間</td></tr>
+            <tr><td>7</td><td>一休.comへの展開</td><td>1～2週間</td></tr>
+            <tr><td>8</td><td>他施設への展開</td><td>施設ごとに数日～1週間</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>PC初心者だけで試せるのは、原則として「Claude Code＋Playwrightを使い、担当者が画面を見ながら公開前まで入力する」段階です。承認機能、複数施設対応、APIキー・Cookie管理を含む本番版は、エンジニアによる確認を受けてください。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 31 ============ -->
+    <section class="chapter" id="ch31">
+      <div class="chapter-head"><div class="badge">31</div><h2>参考リンク</h2></div>
+      <div class="link-list">
+        <a class="link-card" href="https://code.claude.com/docs/en/setup" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude Codeセットアップ</div><div class="lc-url">code.claude.com/docs/en/setup</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/agent-sdk/overview" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude Agent SDK公式案内</div><div class="lc-url">code.claude.com/docs/en/agent-sdk/overview</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://code.claude.com/docs/en/mcp" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude CodeとMCPの接続</div><div class="lc-url">code.claude.com/docs/en/mcp</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://playwright.dev/docs/getting-started-mcp" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Playwright MCP公式ドキュメント</div><div class="lc-url">playwright.dev/docs/getting-started-mcp</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://playwright.dev/docs/auth" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Playwrightによるログイン状態の管理</div><div class="lc-url">playwright.dev/docs/auth</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://support.claude.com/en/articles/8114521-how-can-i-access-the-claude-api" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude APIの利用開始</div><div class="lc-url">support.claude.com/en/articles/8114521-...</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://support.claude.com/en/articles/9767949-api-key-best-practices-keeping-your-keys-safe-and-secure" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude APIキーの安全管理</div><div class="lc-url">support.claude.com/en/articles/9767949-...</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://support.claude.com/en/articles/12902428-use-claude-in-chrome-safely" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Claude in Chrome安全利用ガイド</div><div class="lc-url">support.claude.com/en/articles/12902428-...</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://nodejs.org/en/download" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Node.js公式ダウンロード</div><div class="lc-url">nodejs.org/en/download</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 32 ============ -->
+    <section class="chapter" id="ch32">
+      <div class="chapter-head"><div class="badge">32</div><h2>最初に実施する推奨作業</h2></div>
+      <p>迷った場合は、まず以下の4点だけを実施してください。</p>
+      <ol class="steps">
+        <li>楽天トラベル・一休.comへ自動操作の可否を確認する</li>
+        <li>OTA作業専用PCまたは専用Chrome環境を用意する</li>
+        <li>Claude CodeとPlaywrightを接続する</li>
+        <li>LOQUAT西伊豆の楽天トラベルで、プラン一覧を「読み取るだけ」のテストを行う</li>
+      </ol>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>この段階では変更しない</div>
+        <p>プランの変更・保存・公開は行いません。読み取りが安定してから、既存プランの複製と下書き入力へ進みます。</p>
+      </div>
+    </section>
+
+    <footer>
+      楽天トラベル・一休.com 設定変更AIエージェント 構築・運用手順 ／ 作成日：2026年7月19日<br>
+      関連：<a href="/">リモート運用手順</a> ・ <a href="/platforms">プラットフォーム比較</a>
+    </footer>
+
+  </main>
+</div>
+
+<button id="top-btn" aria-label="ページ先頭へ戻る">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+(function(){
+  "use strict";
+
+  var NAV = [
+    {id:"ch1", label:"1. 実現すること", num:"1", children:[]},
+    {id:"ch2", label:"2. 最初に知っておく言葉", num:"2", children:[]},
+    {id:"ch3", label:"3. 絶対に守る安全ルール", num:"3", children:[]},
+    {id:"part1", label:"第1部：試作版を動かす", num:"Ⅰ", children:[
+      {id:"ch4", label:"4. 実証実験の範囲"},
+      {id:"ch5", label:"5. 用意するもの"},
+      {id:"ch6", label:"6. Chromeを準備する"},
+      {id:"ch7", label:"7. Node.jsを入れる"},
+      {id:"ch8", label:"8. Claude Codeを入れる"},
+      {id:"ch9", label:"9. 作業フォルダを作る"},
+      {id:"ch10", label:"10. 初めて起動する"},
+      {id:"ch11", label:"11. Playwrightを追加"},
+      {id:"ch12", label:"12. 手動でログイン"},
+      {id:"ch13", label:"13. 読み取りだけ行う"},
+      {id:"ch14", label:"14. 既存プランを読む"},
+      {id:"ch15", label:"15. 公開せず複製する"},
+      {id:"ch16", label:"16. 写真を変更する"},
+      {id:"ch17", label:"17. 公開前の最終確認"},
+      {id:"ch18", label:"18. 公開を承認する"},
+      {id:"ch19", label:"19. 公開後の確認"}
+    ]},
+    {id:"part2", label:"第2部：チャット画面を作る", num:"Ⅱ", children:[
+      {id:"ch20", label:"20. 完成イメージ"},
+      {id:"ch21", label:"21. Agent SDKを入れる"},
+      {id:"ch22", label:"22. APIキーを準備"},
+      {id:"ch23", label:"23. 専用アプリを作らせる"},
+      {id:"ch24", label:"24. デモを起動する"},
+      {id:"ch25", label:"25. 楽天アダプター追加"},
+      {id:"ch26", label:"26. 一休.comへ展開"},
+      {id:"ch27", label:"27. 依頼プロンプト集"}
+    ]},
+    {id:"ch28", label:"28. トラブル時の対処", num:"28", children:[]},
+    {id:"ch29", label:"29. 本番運用の合格基準", num:"29", children:[]},
+    {id:"ch30", label:"30. 導入スケジュール", num:"30", children:[]},
+    {id:"ch31", label:"31. 参考リンク", num:"31", children:[]},
+    {id:"ch32", label:"32. 最初に実施する作業", num:"32", children:[]}
+  ];
+
+  function buildNav(host){
+    var frag = document.createDocumentFragment();
+    NAV.forEach(function(sec){
+      var a = document.createElement("a");
+      a.href = "#" + sec.id; a.className = "lv1"; a.textContent = sec.label;
+      a.dataset.target = sec.id;
+      frag.appendChild(a);
+      sec.children.forEach(function(c){
+        var b = document.createElement("a");
+        b.href = "#" + c.id; b.className = "lv2"; b.textContent = c.label;
+        b.dataset.target = c.id;
+        frag.appendChild(b);
+      });
+    });
+    host.appendChild(frag);
+  }
+  buildNav(document.getElementById("sideNav"));
+  buildNav(document.getElementById("drawerNav"));
+
+  var tocList = document.getElementById("tocCardList");
+  NAV.forEach(function(sec){
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = "#" + sec.id;
+    a.innerHTML = '<span class="num">' + sec.num + "</span>";
+    var t = document.createElement("span");
+    t.textContent = sec.label;
+    a.appendChild(t);
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  /* ---- drawer ---- */
+  var body = document.body;
+  var menuBtn = document.getElementById("menuBtn");
+  var closeBtn = document.getElementById("closeBtn");
+  var scrim = document.getElementById("scrim");
+  function openNav(){ body.classList.add("nav-open"); menuBtn.setAttribute("aria-expanded","true"); }
+  function closeNav(){ body.classList.remove("nav-open"); menuBtn.setAttribute("aria-expanded","false"); }
+  menuBtn.addEventListener("click", openNav);
+  closeBtn.addEventListener("click", closeNav);
+  scrim.addEventListener("click", closeNav);
+  document.getElementById("drawerNav").addEventListener("click", function(e){
+    if (e.target.closest("a")) closeNav();
+  });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeNav(); });
+
+  /* ---- copy buttons ---- */
+  document.querySelectorAll(".copy").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var code = btn.closest(".code").querySelector("code");
+      var text = code.innerText;
+      var done = function(){
+        btn.textContent = "コピー済み";
+        btn.classList.add("done");
+        setTimeout(function(){ btn.textContent = "コピー"; btn.classList.remove("done"); }, 1600);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else { fallback(); }
+      function fallback(){
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch(err){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  /* ---- scrollspy + progress + top button ---- */
+  var links = Array.prototype.slice.call(document.querySelectorAll("#sideNav a, #drawerNav a"));
+  var targets = links.map(function(a){ return document.getElementById(a.dataset.target); });
+  var progress = document.getElementById("progress");
+  var topBtn = document.getElementById("top-btn");
+  var ticking = false;
+  var headerH = 0;
+
+  function measure(){
+    headerH = document.querySelector("header").offsetHeight;
+  }
+  measure();
+  window.addEventListener("resize", measure);
+
+  function update(){
+    ticking = false;
+    var y = window.scrollY || window.pageYOffset;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (max > 0 ? Math.min(100, (y / max) * 100) : 0) + "%";
+    topBtn.classList.toggle("show", y > 500);
+
+    var line = y + headerH + 40;
+    var activeIdx = -1;
+    for (var i = 0; i < targets.length; i++){
+      var el = targets[i];
+      if (el && el.getBoundingClientRect().top + y <= line) activeIdx = i;
+    }
+    links.forEach(function(a, i){ a.classList.toggle("active", i === activeIdx); });
+
+    if (activeIdx > -1){
+      var act = links[activeIdx];
+      if (act.closest("#sideNav")){
+        var side = document.querySelector("aside.sidebar");
+        if (side && side.offsetParent !== null){
+          var r = act.getBoundingClientRect(), sr = side.getBoundingClientRect();
+          if (r.top < sr.top + 8 || r.bottom > sr.bottom - 8){
+            side.scrollTop += r.top - sr.top - side.clientHeight / 2;
+          }
+        }
+      }
+    }
+  }
+  window.addEventListener("scroll", function(){
+    if (!ticking){ ticking = true; requestAnimationFrame(update); }
+  }, {passive:true});
+  update();
+
+  topBtn.addEventListener("click", function(){
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+})();
+</script>
+</body>
+</html>
