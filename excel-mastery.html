@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
+<meta name="description" content="「Excelが使える」の本当の意味を、初心者が投資銀行のエキスパート水準へ到達できるように体系化。所作・集計・分析・設計・検証・伝達から、3表連動モデル・DCF・不動産IRRまで、具体的な数式とワークト例で解説する完全ガイド。">
+<title>コンサル・投資銀行水準のExcel 完全ガイド</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+<style>
+:root{
+  --bg:#faf9f7;
+  --bg-elev:#ffffff;
+  --bg-sunken:#f2f0ed;
+  --text:#1f1e1d;
+  --text-muted:#6b6862;
+  --text-faint:#918d85;
+  --border:#e5e1db;
+  --border-strong:#d6d1c9;
+  --accent:#c4552f;
+  --accent-soft:#fdf1ec;
+  --accent-border:#f0c9b8;
+  --warn:#a8620a;
+  --warn-soft:#fdf4e7;
+  --warn-border:#f0dcb8;
+  --info:#2b6a8f;
+  --info-soft:#eaf3f8;
+  --info-border:#c2ddeb;
+  --code-bg:#282521;
+  --code-text:#e8e3db;
+  --code-inline-bg:#f0ede8;
+  --code-inline-text:#a8442a;
+  --shadow-sm:0 1px 2px rgba(31,30,29,.05);
+  --shadow-md:0 4px 16px -4px rgba(31,30,29,.10),0 2px 4px rgba(31,30,29,.04);
+  --shadow-lg:0 16px 48px -12px rgba(31,30,29,.24);
+  --radius:14px;
+  --radius-sm:9px;
+  --font:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --header-h:56px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1917;
+    --bg-elev:#232120;
+    --bg-sunken:#141312;
+    --text:#eeebe6;
+    --text-muted:#a5a099;
+    --text-faint:#7d7871;
+    --border:#35322e;
+    --border-strong:#474340;
+    --accent:#e2825c;
+    --accent-soft:#2e211b;
+    --accent-border:#5a3d2e;
+    --warn:#d6a05a;
+    --warn-soft:#2b2317;
+    --warn-border:#54432a;
+    --info:#7db8d8;
+    --info-soft:#182630;
+    --info-border:#2f4a5c;
+    --code-bg:#121110;
+    --code-text:#ded9d1;
+    --code-inline-bg:#2c2926;
+    --code-inline-text:#e9a184;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+    --shadow-md:0 4px 16px -4px rgba(0,0,0,.5);
+    --shadow-lg:0 16px 48px -12px rgba(0,0,0,.7);
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 16px);-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.85;
+  font-size:16px;
+  letter-spacing:.01em;
+  -webkit-font-smoothing:antialiased;
+  overflow-wrap:break-word;
+  word-break:normal;
+  line-break:strict;
+}
+body.nav-open{overflow:hidden}
+
+/* ---------- progress ---------- */
+#progress{
+  position:fixed;top:0;left:0;height:2.5px;width:0;
+  background:linear-gradient(90deg,var(--accent),#e0a06f);
+  z-index:60;transition:width .1s linear;
+}
+
+/* ---------- header ---------- */
+header{
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  padding-top:env(safe-area-inset-top);
+  height:calc(var(--header-h) + env(safe-area-inset-top));
+  background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:saturate(180%) blur(14px);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--border);
+  z-index:50;
+  display:flex;align-items:center;gap:12px;
+  padding-left:max(16px,env(safe-area-inset-left));
+  padding-right:max(16px,env(safe-area-inset-right));
+}
+.header-inner{display:flex;align-items:center;gap:12px;width:100%;max-width:1200px;margin:0 auto;height:var(--header-h)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;letter-spacing:.02em;min-width:0}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.brand span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu-btn{
+  margin-left:auto;flex:none;
+  width:38px;height:38px;border-radius:10px;
+  border:1px solid var(--border-strong);background:var(--bg-elev);
+  color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.menu-btn:active{transform:scale(.94)}
+.menu-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round}
+
+/* ---------- layout ---------- */
+.wrap{
+  max-width:1200px;margin:0 auto;
+  padding:calc(var(--header-h) + env(safe-area-inset-top)) max(18px,env(safe-area-inset-left)) 0 max(18px,env(safe-area-inset-right));
+  display:block;
+}
+main{min-width:0;padding-bottom:64px}
+
+/* ---------- hero ---------- */
+.hero{padding:40px 0 30px;border-bottom:1px solid var(--border);margin-bottom:34px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;letter-spacing:.09em;
+  color:var(--accent);background:var(--accent-soft);
+  border:1px solid var(--accent-border);
+  padding:5px 11px;border-radius:999px;margin-bottom:16px;
+}
+.hero h1{
+  font-size:clamp(27px,7.6vw,44px);
+  line-height:1.32;font-weight:800;letter-spacing:-.01em;
+  margin-bottom:14px;
+}
+.hero p.lead{font-size:15px;color:var(--text-muted);line-height:1.8;margin-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-size:11.5px;font-weight:600;
+  background:var(--bg-elev);border:1px solid var(--border);
+  color:var(--text-muted);
+  padding:5px 10px;border-radius:8px;white-space:nowrap;
+}
+.chip b{color:var(--text);font-weight:700}
+.chip.link{color:var(--accent);border-color:var(--accent-border);background:var(--accent-soft);text-decoration:none}
+.chip.link:active{opacity:.6}
+
+/* ---------- toc card (mobile inline) ---------- */
+.toc-card{
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px 16px;margin-bottom:38px;
+  box-shadow:var(--shadow-sm);
+}
+.toc-card h2{font-size:12px;letter-spacing:.1em;color:var(--text-faint);font-weight:700;margin-bottom:12px}
+.toc-card ol{list-style:none;display:flex;flex-direction:column;gap:2px}
+.toc-card a{
+  display:flex;align-items:center;gap:11px;
+  padding:9px 8px;border-radius:9px;
+  color:var(--text);text-decoration:none;font-size:14.5px;font-weight:600;
+  -webkit-tap-highlight-color:transparent;
+}
+.toc-card a:active{background:var(--bg-sunken)}
+.toc-card .num{
+  flex:none;width:24px;height:24px;border-radius:7px;
+  background:var(--accent-soft);border:1px solid var(--accent-border);
+  color:var(--accent);font-size:11.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- sections ---------- */
+.chapter{margin-bottom:52px;scroll-margin-top:calc(var(--header-h) + 20px)}
+.chapter-head{
+  display:flex;align-items:center;gap:13px;
+  padding-bottom:14px;margin-bottom:26px;
+  border-bottom:2px solid var(--accent);
+}
+.chapter-head .badge{
+  flex:none;
+  min-width:34px;height:34px;padding:0 8px;border-radius:9px;
+  background:var(--accent);color:#fff;
+  font-size:15px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+  box-shadow:0 2px 8px -2px color-mix(in srgb,var(--accent) 60%,transparent);
+}
+.chapter-head h2{font-size:clamp(20px,5.4vw,27px);font-weight:800;letter-spacing:-.005em;line-height:1.4}
+
+h3{
+  font-size:clamp(17px,4.5vw,20px);font-weight:700;
+  margin:38px 0 14px;line-height:1.5;
+  scroll-margin-top:calc(var(--header-h) + 20px);
+  padding-left:13px;border-left:3.5px solid var(--accent);
+}
+h3:first-of-type{margin-top:0}
+h4{
+  font-size:15px;font-weight:700;color:var(--text);
+  margin:26px 0 10px;
+  display:flex;align-items:center;gap:8px;
+}
+h4::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--text-faint);flex:none}
+
+p{margin:0 0 14px}
+p:last-child{margin-bottom:0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-border)}
+a:active{opacity:.6}
+
+/* ---------- lists ---------- */
+ul.bullets,ol.steps{margin:0 0 16px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.bullets li{position:relative;padding-left:19px;line-height:1.8}
+ul.bullets li::before{
+  content:"";position:absolute;left:3px;top:.72em;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);opacity:.55;
+}
+ol.steps{counter-reset:s}
+ol.steps li{position:relative;padding-left:34px;counter-increment:s;line-height:1.8;min-height:24px}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:.28em;
+  width:23px;height:23px;border-radius:7px;
+  background:var(--bg-sunken);border:1px solid var(--border-strong);
+  color:var(--text-muted);
+  font-size:11.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- code ---------- */
+.code{
+  position:relative;
+  background:var(--code-bg);border-radius:var(--radius-sm);
+  margin:0 0 18px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:var(--shadow-sm);
+}
+.code-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 8px 0 13px;height:34px;
+  background:rgba(255,255,255,.04);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.code-lang{
+  font-family:var(--mono);font-size:10.5px;font-weight:600;
+  color:#a09a90;letter-spacing:.07em;
+}
+.copy{
+  font-family:var(--font);font-size:11px;font-weight:600;
+  background:transparent;border:1px solid rgba(255,255,255,.15);
+  color:#cec8bf;padding:4px 9px;border-radius:6px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.copy:active{transform:scale(.94)}
+.copy.done{color:#7fca8f;border-color:#3f6b48}
+.code pre{
+  margin:0;padding:14px 13px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  font-family:var(--mono);font-size:12.5px;line-height:1.75;
+  color:var(--code-text);
+  tab-size:2;
+}
+.code pre code{white-space:pre;font-family:inherit}
+code:not(pre code){
+  font-family:var(--mono);font-size:.855em;
+  background:var(--code-inline-bg);color:var(--code-inline-text);
+  padding:2px 5px;border-radius:5px;
+  border:1px solid var(--border);
+  white-space:nowrap;
+}
+
+/* prompt template variant */
+.code.prompt{background:var(--bg-sunken);border:1px solid var(--border-strong)}
+.code.prompt .code-head{background:transparent;border-bottom:1px dashed var(--border-strong)}
+.code.prompt .code-lang{color:var(--accent)}
+.code.prompt .copy{border-color:var(--border-strong);color:var(--text-muted)}
+.code.prompt pre{color:var(--text);font-size:13px;white-space:pre-wrap;word-break:break-word;line-break:strict}
+.code.prompt pre code{white-space:pre-wrap}
+
+/* ---------- callouts ---------- */
+.note{
+  border-radius:var(--radius-sm);
+  padding:14px 15px;margin:0 0 18px;
+  border:1px solid;font-size:14.5px;line-height:1.78;
+}
+.note .note-title{
+  display:flex;align-items:center;gap:7px;
+  font-weight:700;font-size:12.5px;letter-spacing:.03em;
+  margin-bottom:7px;
+}
+.note .note-title svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.note.warn{background:var(--warn-soft);border-color:var(--warn-border)}
+.note.warn .note-title{color:var(--warn)}
+.note.info{background:var(--info-soft);border-color:var(--info-border)}
+.note.info .note-title{color:var(--info)}
+.note.tip{background:var(--accent-soft);border-color:var(--accent-border)}
+.note.tip .note-title{color:var(--accent)}
+.note p:last-child{margin-bottom:0}
+.note code:not(pre code){background:color-mix(in srgb,var(--bg-elev) 70%,transparent)}
+
+/* ---------- table ---------- */
+.table-scroll{
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  margin:0 0 18px;
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--bg-elev);box-shadow:var(--shadow-sm);
+}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:440px}
+thead th{
+  background:var(--bg-sunken);
+  text-align:left;font-weight:700;font-size:11.5px;letter-spacing:.06em;
+  color:var(--text-faint);
+  padding:11px 14px;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.7}
+tbody tr:last-child td{border-bottom:none}
+tbody td:first-child{white-space:nowrap;font-weight:600}
+
+/* ---------- checklist / tree ---------- */
+.tree{
+  background:var(--bg-sunken);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 13px;margin:0 0 18px;
+  font-family:var(--mono);font-size:12.5px;line-height:1.85;
+  color:var(--text-muted);overflow-x:auto;white-space:pre;
+}
+.tree b{color:var(--text);font-weight:600}
+
+.status-grid{display:flex;flex-direction:column;gap:7px;margin:0 0 18px}
+.status-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:9px;padding:10px 12px;
+  font-family:var(--mono);font-size:12.5px;color:var(--text);
+}
+.status-item .ok{
+  flex:none;width:16px;height:16px;border-radius:50%;
+  background:#2f9e5a;display:flex;align-items:center;justify-content:center;
+}
+.status-item .ok svg{width:9px;height:9px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* path comparison */
+.path-cmp{display:flex;flex-direction:column;gap:8px;margin:0 0 18px}
+.path-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:9px;border:1px solid;
+  font-family:var(--mono);font-size:13px;
+}
+.path-row .tag{font-family:var(--font);font-size:11px;font-weight:800;flex:none;padding:2px 7px;border-radius:5px}
+.path-row.good{background:#eef7f0;border-color:#c6e3ce;color:#1e6b3c}
+.path-row.good .tag{background:#2f9e5a;color:#fff}
+.path-row.bad{background:#fdefee;border-color:#f2cdc9;color:#96382f}
+.path-row.bad .tag{background:#c0392b;color:#fff}
+@media (prefers-color-scheme:dark){
+  .path-row.good{background:#16261c;border-color:#2c4a36;color:#8ed6a6}
+  .path-row.bad{background:#2a1917;border-color:#4f2c28;color:#e59a91}
+}
+
+/* ---------- divider ---------- */
+.rule{height:1px;background:var(--border);border:none;margin:44px 0}
+
+/* ---------- links section ---------- */
+.link-list{display:flex;flex-direction:column;gap:9px;margin-bottom:8px}
+.link-card{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px;
+  text-decoration:none;color:var(--text);box-shadow:var(--shadow-sm);
+  -webkit-tap-highlight-color:transparent;
+}
+.link-card:active{background:var(--bg-sunken);transform:scale(.99)}
+.link-card .lc-body{min-width:0;flex:1}
+.link-card .lc-title{font-size:14.5px;font-weight:700;line-height:1.5}
+.link-card .lc-url{font-size:11.5px;color:var(--text-faint);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.link-card .lc-arrow{flex:none;color:var(--text-faint)}
+.link-card .lc-arrow svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- footer ---------- */
+footer{
+  border-top:1px solid var(--border);
+  padding:26px 0 calc(34px + env(safe-area-inset-bottom));
+  color:var(--text-faint);font-size:12.5px;line-height:1.8;
+}
+
+/* ---------- drawer nav (mobile) ---------- */
+.scrim{
+  position:fixed;inset:0;background:rgba(20,19,18,.42);
+  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:70;
+}
+body.nav-open .scrim{opacity:1;pointer-events:auto}
+nav.drawer{
+  position:fixed;top:0;right:0;bottom:0;
+  width:min(84vw,330px);
+  background:var(--bg-elev);
+  border-left:1px solid var(--border);
+  box-shadow:var(--shadow-lg);
+  transform:translateX(100%);
+  transition:transform .26s cubic-bezier(.32,.72,0,1);
+  z-index:80;
+  display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+body.nav-open nav.drawer{transform:translateX(0)}
+.drawer-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 14px 12px 18px;border-bottom:1px solid var(--border);flex:none;
+}
+.drawer-head span{font-size:12px;font-weight:700;letter-spacing:.09em;color:var(--text-faint)}
+.drawer-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 24px;flex:1}
+.drawer-body a{
+  display:block;padding:9px 12px;border-radius:8px;
+  color:var(--text-muted);text-decoration:none;border:none;
+  font-size:14px;line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+}
+.drawer-body a.lv1{font-weight:800;color:var(--text);font-size:14.5px;margin-top:10px}
+.drawer-body a.lv1:first-child{margin-top:0}
+.drawer-body a.lv2{padding-left:22px;font-size:13.5px}
+.drawer-body a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.drawer-body a:active{background:var(--bg-sunken)}
+
+/* ---------- back to top ---------- */
+#top-btn{
+  position:fixed;
+  right:max(16px,env(safe-area-inset-right));
+  bottom:calc(16px + env(safe-area-inset-bottom));
+  width:44px;height:44px;border-radius:50%;
+  background:var(--bg-elev);border:1px solid var(--border-strong);
+  box-shadow:var(--shadow-md);color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:40;
+  opacity:0;pointer-events:none;transform:translateY(8px);
+  transition:opacity .2s,transform .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+#top-btn.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+#top-btn:active{transform:scale(.92)}
+#top-btn svg{width:17px;height:17px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- desktop ---------- */
+@media (min-width:900px){
+  :root{--header-h:60px}
+  body{font-size:16.5px}
+  .wrap{display:grid;grid-template-columns:250px minmax(0,1fr);gap:52px;padding-left:32px;padding-right:32px}
+  .menu-btn{display:none}
+  .toc-card{display:none}
+  aside.sidebar{
+    position:sticky;
+    top:calc(var(--header-h) + env(safe-area-inset-top));
+    height:calc(100vh - var(--header-h) - env(safe-area-inset-top));
+    overflow-y:auto;
+    padding:34px 0 40px;
+    border-right:1px solid var(--border);
+    margin-right:-24px;padding-right:20px;
+  }
+  aside.sidebar .side-label{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--text-faint);margin-bottom:12px;padding-left:12px}
+  aside.sidebar a{
+    display:block;padding:6px 12px;border-radius:7px;
+    color:var(--text-muted);text-decoration:none;border:none;
+    font-size:13.5px;line-height:1.6;
+  }
+  aside.sidebar a.lv1{font-weight:800;color:var(--text);margin-top:12px;font-size:14px}
+  aside.sidebar a.lv1:first-of-type{margin-top:0}
+  aside.sidebar a.lv2{padding-left:22px;font-size:13px}
+  aside.sidebar a:hover{background:var(--bg-sunken);color:var(--text)}
+  aside.sidebar a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  main{padding-top:14px;padding-bottom:80px;max-width:780px}
+  .hero{padding-top:34px}
+  .copy:hover{background:rgba(255,255,255,.09)}
+  .code.prompt .copy:hover{background:var(--border)}
+  .link-card:hover{border-color:var(--accent-border);box-shadow:var(--shadow-md);transform:translateY(-1px);transition:.15s}
+  a:hover{border-bottom-color:var(--accent)}
+  #top-btn{right:32px;bottom:32px}
+}
+@media (max-width:899px){aside.sidebar{display:none}}
+@media (min-width:900px){nav.drawer,.scrim{display:none}}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="brand"><i class="dot"></i><span>コンサル・投資銀行水準のExcel 完全ガイド</span></div>
+    <button class="menu-btn" id="menuBtn" aria-label="目次を開く" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="scrim" id="scrim"></div>
+<nav class="drawer" id="drawer" aria-label="目次">
+  <div class="drawer-head">
+    <span>目次</span>
+    <button class="menu-btn" id="closeBtn" style="display:flex" aria-label="目次を閉じる">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawerNav"></div>
+</nav>
+
+<div class="wrap">
+
+  <aside class="sidebar">
+    <div class="side-label">目次</div>
+    <div id="sideNav"></div>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <div class="eyebrow">スキルガイド</div>
+      <h1>コンサル・投資銀行水準の<br>Excel 完全ガイド</h1>
+      <p class="lead">「Excelが使える」とは、関数を知っていることではありません。<b>短時間で正確に処理でき／第三者が理解・検証・更新でき／意思決定に必要な示唆を出せる</b>——この3点がそろった状態です。初心者が投資銀行のエキスパート水準へ到達するために、具体的な数式・サンプル・数値付きの計算例をふんだんに入れて体系化しました。読み進めるだけで身につく構成です。</p>
+      <div class="meta">
+        <span class="chip">対象：<b>初心者〜実務者</b></span>
+        <span class="chip">到達目標：<b>プロ水準</b></span>
+        <span class="chip">具体例</span>
+        <span class="chip">3表連動 / DCF / IRR</span>
+      </div>
+    </div>
+
+    <div class="toc-card">
+      <h2>目次</h2>
+      <ol id="tocCardList"></ol>
+    </div>
+
+    <!-- ============ intro ============ -->
+    <section class="chapter" id="intro">
+      <div class="chapter-head"><div class="badge">◎</div><h2>「Excelが使える」とは何か</h2></div>
+      <p>コンサルティング会社や投資銀行でいう「Excelが使える」とは、単に関数を知っていることではありません。次の3点がそろっている状態を指します。</p>
+      <ul class="bullets">
+        <li><b>短時間で正確に処理できる</b>（速度と正確性）</li>
+        <li><b>第三者が理解・検証・更新できる</b>（再現性と保守性）</li>
+        <li><b>意思決定に必要な示唆を出せる</b>（分析と伝達）</li>
+      </ul>
+      <p>この能力は、大きく次の5領域で評価できます。本ガイドはこの5領域＋モデリング（第6章以降）を、具体例とともに順に解説します。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>領域</th><th>主な評価対象</th><th>本ガイド</th></tr></thead>
+          <tbody>
+            <tr><td>1. 所作</td><td>体裁、操作スピード、正確性</td><td>第1章</td></tr>
+            <tr><td>2. 内容</td><td>集計、分析、シミュレーション</td><td>第2章</td></tr>
+            <tr><td>3. 設計</td><td>シート構成、入力・計算・出力の分離</td><td>第3章</td></tr>
+            <tr><td>4. 検証</td><td>エラーチェック、整合性、再現性</td><td>第4章</td></tr>
+            <tr><td>5. 伝達</td><td>結論の見せ方、レビューのしやすさ</td><td>第5章</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>この資料の読み方</div>
+        <p>第1〜5章で「プロの土台」を、第6〜8章で「モデリングの考え方」を、第9〜10章で投資銀行・不動産ファンドの<b>実践モデル（数値付き）</b>を、第11〜13章で到達段階・成果物・リファレンスをまとめます。具体例のセル番地や数字はそのまま手を動かして再現できます。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 1 ============ -->
+    <section class="chapter" id="ch1">
+      <div class="chapter-head"><div class="badge">1</div><h2>所作：速く、きれいに、事故なく扱える</h2></div>
+
+      <h3 id="ch1-1">1-1. 体裁を統一できる</h3>
+      <p>「見栄えがよい」だけでなく、<b>数字の意味が視覚的に分かる</b>ことが重要です。具体的には次の状態です。</p>
+      <ul class="bullets">
+        <li>フォント・文字サイズ・行高・列幅が統一されている</li>
+        <li>見出し・入力欄・計算欄・出力欄が区別されている</li>
+        <li>金額・数量・比率・日付の表示形式が統一されている</li>
+        <li>単位が明記されている（円／千円／百万円、人／室／㎡／kWh、税込／税抜）</li>
+        <li>小数点以下の桁数が必要以上に多くない</li>
+        <li>罫線や色を使いすぎていない</li>
+        <li>マイナス値・ゼロ・異常値が認識しやすい</li>
+        <li>印刷範囲・改ページ・ヘッダーが整理されている</li>
+        <li>ウィンドウ枠固定・フィルターが適切に設定されている</li>
+      </ul>
+      <p>実務では<b>色（フォントカラー）にも意味を持たせます</b>。これはプロのモデルを見分ける最重要サインの一つです。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>色</th><th>意味</th><th>例</th></tr></thead>
+          <tbody>
+            <tr><td>青字</td><td>手入力・アサンプション（変えてよい値）</td><td>稼働率 <code>65%</code></td></tr>
+            <tr><td>黒字</td><td>同一シート内の数式</td><td><code>=B5*C5</code></td></tr>
+            <tr><td>緑字</td><td>他シート参照</td><td><code>=Assumption!B10</code></td></tr>
+            <tr><td>赤字</td><td>注意・エラー・要確認</td><td>チェック不一致</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>表示形式は「見た目だけ」を変え、元の値は保持します。代表的なユーザー定義書式の例です。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">表示形式（ユーザー定義）</span><button class="copy">コピー</button></div><pre><code>#,##0        → 12345 を 12,345
+#,##0"千円"  → 12345 を 12,345千円
+0.0%         → 0.653 を 65.3%
+#,##0;[赤]▲#,##0   → 負数を ▲ と赤で表示
+0"室"        → 20 を 20室</code></pre></div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>プロの流儀：色は「出所」を表す</div>
+        <p>青＝人が入れた値、黒＝計算、緑＝他シート参照。この3色を徹底するだけで、レビュー担当は「どこを触れば結果が変わるか」を一瞬で判断できます。ただし会社・チームのルールがあればそれを優先します。</p>
+      </div>
+
+      <h3 id="ch1-2">1-2. 操作が速い</h3>
+      <p>速さの本質は「入力速度」ではなく<b>「無駄な工程の少なさ」</b>です。マウスに持ち替えず思考を止めないことで、修正と検証を高速に繰り返せます。最低限、次のショートカットは指が覚えるまで使ってください（Windows / Mac）。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>操作</th><th>Windows</th><th>Mac</th></tr></thead>
+          <tbody>
+            <tr><td>データの端まで移動</td><td><code>Ctrl + 方向キー</code></td><td><code>⌘ + 方向キー</code></td></tr>
+            <tr><td>端まで範囲選択</td><td><code>Ctrl + Shift + 方向キー</code></td><td><code>⌘ + Shift + 方向キー</code></td></tr>
+            <tr><td>表全体を選択</td><td><code>Ctrl + A</code></td><td><code>⌘ + A</code></td></tr>
+            <tr><td>セル編集</td><td><code>F2</code></td><td><code>Ctrl + U</code></td></tr>
+            <tr><td>形式を選択して貼り付け</td><td><code>Ctrl + Alt + V</code></td><td><code>⌘ + Ctrl + V</code></td></tr>
+            <tr><td>値のみ貼り付け</td><td><code>Ctrl+Alt+V → V</code></td><td>同上 → 値</td></tr>
+            <tr><td>合計を自動入力</td><td><code>Alt + Shift + =</code></td><td><code>⌘ + Shift + T</code></td></tr>
+            <tr><td>絶対/相対参照の切替</td><td><code>F4</code></td><td><code>⌘ + T</code></td></tr>
+            <tr><td>行/列の挿入</td><td><code>Ctrl + Shift + +</code></td><td><code>⌘ + Shift + +</code></td></tr>
+            <tr><td>フィルター</td><td><code>Ctrl + Shift + L</code></td><td><code>⌘ + Shift + F</code></td></tr>
+            <tr><td>直前の操作を繰り返す</td><td><code>Ctrl + Y</code> / <code>F4</code></td><td><code>⌘ + Y</code></td></tr>
+            <tr><td>参照元/参照先の追跡</td><td>数式タブ → トレース</td><td>同左</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>求められる中核能力は、次のとおりです。</p>
+      <ul class="bullets">
+        <li>キーボードでセル間・表間を高速移動できる</li>
+        <li>コピー／貼り付け／形式を選択して貼り付けを使い分ける</li>
+        <li>数式を横方向・縦方向へ正しく展開する</li>
+        <li>絶対参照・相対参照・複合参照を使い分ける（<code>$</code> の位置）</li>
+        <li>検索・置換・ジャンプ（<code>Ctrl+G</code> → セル選択 → 空白/数式など）を使える</li>
+        <li>フィルター・並べ替え・ピボットテーブルをすぐ作れる</li>
+        <li>同じ作業を繰り返さず、まとめて処理する（Power Query／マクロ）</li>
+      </ul>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>$の使い分け（複合参照）</div>
+        <p>感応度表のように「行方向は同じ列を、列方向は同じ行を」参照したいとき、<code>$</code>を片方だけ固定します。例：単価の行 <code>$B4</code>（列B固定）と数量の列 <code>C$3</code>（行3固定）を掛けると、1つの数式を全マスにコピーするだけで表が完成します。<code>F4</code>（Macは<code>⌘T</code>）を押すたびに <code>A1 → $A$1 → A$1 → $A1</code> と循環します。</p>
+      </div>
+
+      <h3 id="ch1-3">1-3. 壊しにくい</h3>
+      <p>プロにとって速さ以上に重要なのが、<b>既存の数式や参照を壊さずに修正できる</b>ことです。</p>
+      <ul class="bullets">
+        <li>数式セルへ直接数値を上書きしない（数式が消える）</li>
+        <li>行・列の追加による参照切れ（<code>#REF!</code>）を確認する</li>
+        <li>コピー時に絶対参照が正しいか確認する</li>
+        <li>外部リンクを無闇に作らない（開くたびに壊れる原因）</li>
+        <li>数値の直接埋め込み（ベタ打ち）を避け、アサンプションを参照する</li>
+        <li>修正前後の差分を確認する（重要セルの値をメモしてから触る）</li>
+        <li>元データは加工せず、コピーしてから加工する</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>最も多い事故：数式への上書き</div>
+        <p>「この月だけ実績に合わせたい」と数式セルに数値をベタ打ちすると、その列だけロジックが切れます。以後の更新で必ず矛盾します。実績を入れたいなら<b>入力用の行を別に設け、数式側はそれを参照</b>します。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 2 ============ -->
+    <section class="chapter" id="ch2">
+      <div class="chapter-head"><div class="badge">2</div><h2>内容：集計・分析・予測ができる</h2></div>
+
+      <h3 id="ch2-1">2-1. 実績集計</h3>
+      <p>まず、次の集計が正確にできることが土台です。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>種類</th><th>関数</th></tr></thead>
+          <tbody>
+            <tr><td>基本集計</td><td><code>SUM</code> / <code>AVERAGE</code> / <code>MAX</code> / <code>MIN</code> / <code>COUNT</code> / <code>COUNTA</code> / <code>ROUND</code> / <code>SUBTOTAL</code></td></tr>
+            <tr><td>条件付き集計</td><td><code>SUMIF(S)</code> / <code>COUNTIF(S)</code> / <code>AVERAGEIF(S)</code></td></tr>
+            <tr><td>結合・照合</td><td><code>XLOOKUP</code> / <code>VLOOKUP</code> / <code>INDEX+MATCH</code> / <code>XMATCH</code> / <code>SUMIFS</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><b>具体例：予約データから条件付き集計する。</b>次のような明細（<code>予約</code>シート A〜E列）があるとします。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>行</th><th>A 施設</th><th>B 月</th><th>C 客室タイプ</th><th>D 宿泊人数</th><th>E 売上(円)</th></tr></thead>
+          <tbody>
+            <tr><td>2</td><td>西伊豆</td><td>7</td><td>スイート</td><td>2</td><td>80,000</td></tr>
+            <tr><td>3</td><td>西伊豆</td><td>7</td><td>スタンダード</td><td>2</td><td>36,000</td></tr>
+            <tr><td>4</td><td>熱海</td><td>7</td><td>スタンダード</td><td>3</td><td>42,000</td></tr>
+            <tr><td>5</td><td>西伊豆</td><td>8</td><td>スイート</td><td>2</td><td>90,000</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>「西伊豆・7月の売上合計」と「スイートの平均単価」「7月の予約件数」は次のように書きます。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">EXCEL</span><button class="copy">コピー</button></div><pre><code>=SUMIFS(予約!E:E, 予約!A:A,"西伊豆", 予約!B:B,7)      → 116,000
+=AVERAGEIFS(予約!E:E, 予約!C:C,"スイート")            → 85,000
+=COUNTIFS(予約!B:B,7)                                  → 3</code></pre></div>
+      <p><b>具体例：マスタから原価を引く（XLOOKUP）。</b><code>Master</code>シートに商品コード→原価の対応表があるとき、明細の各行に原価を付与します。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">EXCEL</span><button class="copy">コピー</button></div><pre><code>=XLOOKUP(B2, Master!$A:$A, Master!$C:$C, "該当なし")
+   ┗ 検索値  ┗探す列       ┗返す列        ┗見つからない時
+
+旧環境なら INDEX+MATCH（VLOOKUPより堅牢）：
+=INDEX(Master!$C:$C, MATCH(B2, Master!$A:$A, 0))</code></pre></div>
+      <p>プロは関数を書けるだけでなく、照合の前に次を判断します。</p>
+      <ul class="bullets">
+        <li>キーは一意か（重複があると合計がずれる）</li>
+        <li>該当なしをどう扱うか（0か、空白か、エラー表示か）</li>
+        <li>完全一致か近似一致か（<code>XLOOKUP</code>は既定で完全一致、<code>VLOOKUP</code>は第4引数<code>FALSE</code>を忘れない）</li>
+        <li>表記揺れ（全角半角・前後空白）はないか</li>
+        <li>マスタ更新時に参照が壊れないか</li>
+      </ul>
+      <p><b>ホテルでの典型的な集計軸：</b>施設別・月別売上／客室タイプ別ADR／予約経路別の宿泊人数／曜日別稼働率／国籍別平均単価／プラン別キャンセル率／部門別人件費率。これらはすべて<code>SUMIFS</code>と<code>ピボットテーブル</code>で作れます。</p>
+
+      <h3 id="ch2-2">2-2. データ加工・クリーニング</h3>
+      <p>分析の前段、データ整備もExcelスキルの一部です。汚いデータのままでは集計が合いません。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>やること</th><th>関数・機能</th></tr></thead>
+          <tbody>
+            <tr><td>前後の空白除去・改行除去</td><td><code>TRIM</code> / <code>CLEAN</code></td></tr>
+            <tr><td>文字置換・不要文字削除</td><td><code>SUBSTITUTE</code></td></tr>
+            <tr><td>文字列の一部取り出し</td><td><code>LEFT</code> / <code>RIGHT</code> / <code>MID</code></td></tr>
+            <tr><td>文字列→数値／日付整形</td><td><code>VALUE</code> / <code>TEXT</code></td></tr>
+            <tr><td>条件分岐・エラー処理</td><td><code>IF</code> / <code>IFS</code> / <code>IFERROR</code></td></tr>
+            <tr><td>重複除去・抽出・並べ替え</td><td><code>UNIQUE</code> / <code>FILTER</code> / <code>SORT</code></td></tr>
+            <tr><td>大量・定期処理の統合</td><td>Power Query</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><b>具体例：エラーを0に、空白を除いて表記を整える。</b></p>
+      <div class="code"><div class="code-head"><span class="code-lang">EXCEL</span><button class="copy">コピー</button></div><pre><code>=IFERROR(XLOOKUP(B2,Master!A:A,Master!C:C), 0)     エラーなら0
+=TRIM(CLEAN(A2))                                    前後空白・改行を除去
+=VALUE(SUBSTITUTE(A2,",",""))                       "1,234"→数値1234
+=SUBSTITUTE(SUBSTITUTE(A2,"　"," ")," ","")          全角/半角空白を除去
+=UNIQUE(FILTER(A2:A100, B2:B100="西伊豆"))          条件付きで一意抽出</code></pre></div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>繰り返すなら Power Query</div>
+        <p>毎月同じ形で届くCSVの結合・整形は、関数よりPower Queryが正解です。手順を「記録」しておけば、翌月は新ファイルを差し替えて<b>更新ボタン一つ</b>で完了します。属人化と手作業ミスを同時に無くせます。</p>
+      </div>
+
+      <h3 id="ch2-3">2-3. 分析（要因分解）</h3>
+      <p>集計から一段進み、<b>「なぜそうなったか」を説明できる</b>状態が分析です。まず指標を掛け算・足し算に分解します。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">構造式</span><button class="copy">コピー</button></div><pre><code>売上 = 客数 × 客単価
+客室売上 = 販売可能室数 × 稼働率 × ADR
+       （＝ 客室数 × 営業日数 × 稼働率 × ADR）
+RevPAR（販売可能客室1室あたり売上）= ADR × 稼働率</code></pre></div>
+      <p><b>具体例：売上が前年 1,000万円 → 今年 920万円（▲80万円）。なぜ下がったのか。</b>客数と単価に分解します。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>要素</th><th>前年</th><th>今年</th><th>差</th></tr></thead>
+          <tbody>
+            <tr><td>客数（人）</td><td>2,000</td><td>1,840</td><td>▲160</td></tr>
+            <tr><td>客単価（円）</td><td>5,000</td><td>5,000</td><td>0</td></tr>
+            <tr><td>売上（円）</td><td>10,000,000</td><td>9,200,000</td><td>▲800,000</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>要因分解（ブリッジ）は、片方を固定して差分を出します。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">要因分解</span><button class="copy">コピー</button></div><pre><code>客数要因 = (今年客数 − 前年客数) × 前年単価
+        = (1,840 − 2,000) × 5,000 = ▲800,000 円
+単価要因 = 今年客数 × (今年単価 − 前年単価)
+        = 1,840 × 0 = 0 円
+合計 ▲800,000 円  … 減少はすべて客数要因、と説明できる</code></pre></div>
+      <p>代表的な分析手法：前年比・予算比・計画比／構成比／単価・数量分析／<b>ブリッジ分析</b>／ABC分析／コホート分析／感度分析／損益分岐点分析／相関分析／KPIツリー／シナリオ比較。</p>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>損益分岐点（覚えておく型）</div>
+        <p><code>損益分岐点売上高 = 固定費 ÷ 限界利益率</code>（限界利益率 = 1 − 変動費率）。固定費600万円・限界利益率40%なら、分岐点は <code>600 ÷ 0.4 = 1,500万円</code>。この1本で「あと何％売れば黒字か」を即答できます。</p>
+      </div>
+
+      <h3 id="ch2-4">2-4. 予測・シミュレーション</h3>
+      <p>予測モデルの要件は、<b>入力条件を変えると結果が自動で更新される</b>ことです。事業構造をそのまま数式に落とします。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">事業構造の数式化</span><button class="copy">コピー</button></div><pre><code>売上     = 客室売上 + 飲食売上 + その他売上
+客室売上 = 客室数 × 営業日数 × 稼働率 × ADR
+飲食売上 = 宿泊人数 × 1人当たり飲食単価
+営業利益 = 売上 − 変動費 − 固定費</code></pre></div>
+      <p><b>具体例：年間の客室売上を積み上げる。</b>客室数20室・営業日365日・稼働率65%・ADR 50,000円なら、</p>
+      <div class="code"><div class="code-head"><span class="code-lang">計算例</span><button class="copy">コピー</button></div><pre><code>販売室数 = 20 × 365 × 65% = 4,745 室
+客室売上 = 4,745 × 50,000 = 237,250,000 円（約2.37億円）
+RevPAR  = 50,000 × 65% = 32,500 円</code></pre></div>
+      <p>次に、主要ドライバーを変えた<b>3ケース</b>を並べます。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>ケース</th><th>稼働率</th><th>ADR</th><th>客室売上</th></tr></thead>
+          <tbody>
+            <tr><td>Downside（不調）</td><td>55%</td><td>46,000</td><td>184,690,000</td></tr>
+            <tr><td>Base（標準）</td><td>65%</td><td>50,000</td><td>237,250,000</td></tr>
+            <tr><td>Upside（好調）</td><td>72%</td><td>54,000</td><td>283,824,000</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>感応度表（データテーブル）</div>
+        <p>「稼働率×ADRで営業利益がどう動くか」の一覧は、Excelの<b>What-If分析 → データテーブル</b>で自動生成できます。左上に結果セルを参照し、行に稼働率、列にADRを並べ、範囲選択して実行するだけ。1-2の複合参照と並ぶ、シミュレーションの必須技術です。</p>
+      </div>
+      <p>シミュレーションの目的は「数字を当てる」ことではなく、<b>「何が変わると、結果がどの程度変わるか」を見えるようにする</b>ことです。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 3 ============ -->
+    <section class="chapter" id="ch3">
+      <div class="chapter-head"><div class="badge">3</div><h2>設計：第三者が更新できる構造にする</h2></div>
+
+      <h3 id="ch3-1">3-1. シート構成</h3>
+      <p>基本形は、役割ごとにシートを分けます。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>シート</th><th>役割</th></tr></thead>
+          <tbody>
+            <tr><td><code>00_Index</code></td><td>目次、ファイルの目的、更新日、前提の要約</td></tr>
+            <tr><td><code>01_Assumption</code></td><td>前提条件、置き値（青字の入力はここに集約）</td></tr>
+            <tr><td><code>02_RawData</code></td><td>加工前の元データ（触らない）</td></tr>
+            <tr><td><code>03_Master</code></td><td>商品・施設・顧客などのマスタ</td></tr>
+            <tr><td><code>04_Calculation</code></td><td>集計・計算ロジック</td></tr>
+            <tr><td><code>05_Output</code></td><td>結果表、グラフ、KPI</td></tr>
+            <tr><td><code>06_Check</code></td><td>エラーチェック、整合性確認</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>小規模ファイルでここまで分ける必要はありませんが、少なくとも <b>入力 → 計算 → 出力</b> の流れを混在させないことが大切です。</p>
+
+      <h3 id="ch3-2">3-2. 入力・計算・出力を分ける</h3>
+      <p>悪いモデルは、同じ表の中に「実績値・手入力の予測・数式・外部データ・最終結果」が混ざり、<b>どの数字を変えてよいか分かりません</b>。良いモデルは一方向の構造です。</p>
+      <div class="tree">アサンプション（青字・入力）
+        │
+        ▼
+実績・外部データ ──▶ 計算ロジック ──▶ KPI・財務数値 ──▶ 判断・施策
+        （出力から入力へ逆流する参照を作らない）</div>
+      <ul class="bullets">
+        <li>入力値はアサンプションシートに集約する</li>
+        <li>計算は計算シートで行う</li>
+        <li>判断に必要な数字は出力シートに集約する</li>
+        <li>出力→入力の逆流参照を作らない（循環と混乱の元）</li>
+      </ul>
+
+      <h3 id="ch3-3">3-3. 時間軸を統一する</h3>
+      <p>時間軸の混乱は重大なミスに直結します。着手前に次を固定します。</p>
+      <ul class="bullets">
+        <li>月次か年次か</li>
+        <li>暦年（1〜12月）か事業年度か</li>
+        <li>稼働開始月はいつか／初年度は12か月あるか</li>
+        <li>日数は365日か営業日数か／月による日数差を反映するか</li>
+        <li>季節性をどう扱うか</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>年次を単純に12分割しない</div>
+        <p>繁忙期・閑散期のあるホテルで、年間売上を<code>÷12</code>すると各月が実態とずれます。<b>月別の季節指数（例：8月=1.5、2月=0.6、合計12.0）</b>を掛けて配分します。合計が必ず年次と一致するよう、指数の合計＝月数になるよう作るのがコツです。</p>
+      </div>
+
+      <h3 id="ch3-4">3-4. 数式の一貫性</h3>
+      <p>良いモデルは、同じ行の数式が<b>横方向に同じ構造</b>です。次のような状態は避けます。</p>
+      <ul class="bullets">
+        <li>途中の月だけ数式が違う</li>
+        <li>一部のセルだけ手入力されている</li>
+        <li>同じ指標なのに列ごとに考え方が違う</li>
+        <li>数式内に根拠不明の数字が埋め込まれている</li>
+      </ul>
+      <div class="code"><div class="code-head"><span class="code-lang">悪い例 → 良い例</span><button class="copy">コピー</button></div><pre><code>×  =売上*0.32          32%の根拠が式に埋没。全列に散らばると修正不能
+○  =売上*原価率        原価率(32%)はAssumptionに1か所だけ置く
+
+  Assumption!B5 に 32% を青字で置き、各月は =C10*$B$5 で参照</code></pre></div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 4 ============ -->
+    <section class="chapter" id="ch4">
+      <div class="chapter-head"><div class="badge">4</div><h2>検証：正しいことを説明できる</h2></div>
+      <p>モデルは「計算できる」だけでは不十分で、<b>「正しく計算できていることを確認できる」</b>必要があります。</p>
+
+      <h3 id="ch4-1">4-1. チェックセルを設ける</h3>
+      <p>代表的なチェックです。<code>06_Check</code>シートに集約し、一つでも赤なら全体を疑います。</p>
+      <ul class="bullets">
+        <li>月次合計と年次合計が一致するか</li>
+        <li>部門別売上の合計が全社売上と一致するか</li>
+        <li>貸借対照表の資産＝負債＋純資産か</li>
+        <li>キャッシュフローと現預金増減が一致するか</li>
+        <li>元データの件数と集計後の件数が一致するか</li>
+        <li>税込・税抜が混在していないか</li>
+        <li>比率の合計が100%になっているか</li>
+        <li>稼働率が100%を超えていないか</li>
+        <li>在庫・借入残高が不合理なマイナスでないか</li>
+      </ul>
+      <div class="code"><div class="code-head"><span class="code-lang">EXCEL</span><button class="copy">コピー</button></div><pre><code>=IF(ABS(計算結果 - 正解値) &lt; 1, "OK", "ERROR")
+=IF(ROUND(資産,0)=ROUND(負債+純資産,0), "OK", "差異:"&amp;TEXT(資産-(負債+純資産),"#,##0"))</code></pre></div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>チェックは「差」を出す</div>
+        <p>OK/ERRORだけでなく、ズレの<b>金額そのもの</b>を横に出すと原因追跡が速くなります。<code>=資産-(負債+純資産)</code>が「＋1,000」なら、どこかで1,000だけ二重計上か計上漏れがある、と当たりを付けられます。</p>
+      </div>
+
+      <h3 id="ch4-2">4-2. クロスチェックする</h3>
+      <p>同じ結果を<b>別の計算方法</b>で確認します。両者が一致すれば集計精度への信頼が高まります。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">客室売上のクロスチェック</span><button class="copy">コピー</button></div><pre><code>方法A：予約明細を合計         =SUM(予約!E:E)          237,180,000
+方法B：販売室数 × ADR         =販売室数 * ADR         237,250,000
+差    ：=A - B                                        ▲70,000（要調査）
+→ 差が出たら、キャンセル・返金・免税分などの定義差を確認する</code></pre></div>
+
+      <h3 id="ch4-3">4-3. 常識との整合性を確認する</h3>
+      <p>数式が正しくても、前提が誤れば結論は誤ります。次は<b>Excelのエラーではなく事業ロジックのエラー</b>です。</p>
+      <ul class="bullets">
+        <li>客室10室なのに、1日15室販売している</li>
+        <li>料理原価率が5%になっている</li>
+        <li>人員を増やしても人件費が変わらない</li>
+        <li>売上が倍増しても運転資金が増えない</li>
+        <li>設備投資をしているのに減価償却がない</li>
+        <li>借入返済をしているのに利息が変わらない</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>「桁」と「率」を眺める習慣</div>
+        <p>完成したら、必ず主要指標の<b>率と桁</b>を目視します。原価率・人件費率・営業利益率が業界の常識レンジに入っているか。桁が一つずれる（千円と円の取り違え）事故は、率チェックで即座に見つかります。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 5 ============ -->
+    <section class="chapter" id="ch5">
+      <div class="chapter-head"><div class="badge">5</div><h2>伝達：意思決定につながる形にする</h2></div>
+      <p>コンサル・投資銀行のExcelは、単なる計算表ではなく<b>意思決定資料の土台</b>です。よい出力の特徴は次のとおりです。</p>
+      <ul class="bullets">
+        <li>結論が最初に分かる</li>
+        <li>重要KPIが絞られている</li>
+        <li>実績・予算・予測が区別されている</li>
+        <li>差異の原因が分解されている</li>
+        <li>どの前提が結果に大きく影響するか分かる</li>
+        <li>経営上の選択肢を比較できる</li>
+        <li>PowerPointに貼っても意味が伝わる</li>
+      </ul>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>「結論＋感応度」で語る</div>
+        <p>「利益が1,000万円になる」では不十分です。プロは次のように語ります：</p>
+        <p style="margin-top:8px"><b>「ADRを5%上げれば、稼働率が2ポイント下がっても営業利益は600万円改善する。ただし食事原価率が3ポイント悪化すると、改善効果の約半分が失われる。」</b></p>
+        <p style="margin-top:8px">結論・条件・リスクがセットになって初めて、経営判断に使えるモデルになります。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 6 ============ -->
+    <section class="chapter" id="ch6">
+      <div class="chapter-head"><div class="badge">6</div><h2>モデリングで大切なこと</h2></div>
+
+      <h3 id="ch6-1">6-1. 最初に「何を判断するモデルか」を決める</h3>
+      <p>モデルは精緻であるほど良いわけではありません。<b>目的に必要な精度と粒度</b>を決めます。「新規ホテルへ投資すべきか」「改修費を何年で回収できるか」「ADRを上げるべきか」では、必要なモデルが違います。着手前に次を明確にします。</p>
+      <ol class="steps">
+        <li>誰が判断するのか</li>
+        <li>何を判断するのか</li>
+        <li>比較する選択肢は何か</li>
+        <li>判断指標は何か（IRR？回収年数？営業利益？）</li>
+        <li>どの期間を見るのか</li>
+        <li>どこまでの精度が必要か</li>
+      </ol>
+
+      <h3 id="ch6-2">6-2. ファクトと置き値を分ける</h3>
+      <p>アサンプションには、少なくとも次の区分が必要です。<b>置き値を、あたかも事実のように扱わない</b>ことが最重要です。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>区分</th><th>内容</th><th>例</th></tr></thead>
+          <tbody>
+            <tr><td>実績値</td><td>社内で実際に発生した数字</td><td>2025年度ADR 42,300円</td></tr>
+            <tr><td>契約値</td><td>契約・見積で確定した数字</td><td>賃料月額200万円</td></tr>
+            <tr><td>外部ファクト</td><td>統計・公表資料の数字</td><td>市場成長率3.2%</td></tr>
+            <tr><td>計画値</td><td>経営計画・予算で決めた数字</td><td>来期稼働率75%</td></tr>
+            <tr><td>推計値</td><td>ファクトから計算した数字</td><td>市場シェア5%</td></tr>
+            <tr><td>置き値</td><td>情報不足のため仮定した数字</td><td>初年度稼働率60%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>アサンプション表は、次の項目を持たせるとレビューしやすくなります。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>項目</th><th>数値</th><th>区分</th><th>根拠・出典</th><th>基準日</th><th>確度</th></tr></thead>
+          <tbody>
+            <tr><td>ADR</td><td>50,000円</td><td>推計値</td><td>競合5施設の中央値</td><td>2026/6</td><td>中</td></tr>
+            <tr><td>稼働率</td><td>65%</td><td>置き値</td><td>類似施設実績を参考</td><td>2026/7</td><td>低</td></tr>
+            <tr><td>客室数</td><td>20室</td><td>計画値</td><td>基本設計図</td><td>2026/7</td><td>高</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="ch6-3">6-3. ファクトの押さえ方</h3>
+      <p>ファクトは<b>一次情報を優先</b>します。一般的な優先順位です。</p>
+      <ol class="steps">
+        <li>契約書・請求書・会計データ・予約明細</li>
+        <li>自社システムから抽出した実績データ</li>
+        <li>官公庁・業界団体・企業の公式資料</li>
+        <li>調査会社・専門データベース</li>
+        <li>ヒアリング</li>
+        <li>一般記事・検索結果</li>
+      </ol>
+      <p>そのうえで、対象期間／税込・税抜／対象範囲／定義／サンプル数／外れ値の影響／公表時点を確認します。同じ「ADR 5万円」でも、予約時点か宿泊実績か・サービス料や消費税込みか・2名1室か1室か・食事込みか素泊まりかで意味が変わります。</p>
+
+      <h3 id="ch6-4">6-4. 妥当な置き値の置き方</h3>
+      <p>置き値には代表的な6つの方法があります。</p>
+      <ul class="bullets">
+        <li><b>① 自社実績を基準にする</b>：最も近い施設・商品・期間の実績を使う（例：既存類似施設のADRに面積差・設備差を加味）</li>
+        <li><b>② 類似事例（ベンチマーク）</b>：平均だけでなく 最小・最大・中央値・上位25%・下位25% のレンジで見る</li>
+        <li><b>③ 要素分解して積み上げる</b>：<code>清掃費 = 清掃時間 × 時給 × 人数 + 消耗品費</code>。根拠のない「1室5,000円」より後から直しやすい</li>
+        <li><b>④ トップダウン×ボトムアップ</b>：市場規模×シェア と 客室数×稼働率×ADR の両方から出し、乖離を確認</li>
+        <li><b>⑤ レンジで置く</b>：確度が低い数字を一点で決め打ちしない（Downside/Base/Upside）</li>
+        <li><b>⑥ 逆算して妥当性を確認</b>：必要売上から達成条件を逆算（例：「黒字化には稼働率82%必要」が現実的か）</li>
+      </ul>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 7 ============ -->
+    <section class="chapter" id="ch7">
+      <div class="chapter-head"><div class="badge">7</div><h2>ロジックを考える際の基礎</h2></div>
+
+      <h3 id="ch7-1">7-1. 四則演算まで分解する</h3>
+      <p>複雑なロジックも、基本は次の要素の組み合わせです。<code>単価×数量</code> / <code>母数×比率</code> / <code>前期残高＋増加−減少</code> / <code>売上−費用</code> / <code>現在価値と将来価値</code> / <code>固定費＋変動費</code>。</p>
+      <div class="tree">飲食売上 = 宿泊者数 × 利用率 × 1人単価 + 外来客数 × 1人単価
+  └ 宿泊者数 = 販売室数 × 1室あたり宿泊人数
+      └ 販売室数 = 客室数 × 営業日数 × 稼働率</div>
+      <p>ここまで割れば、どの変数を動かせば結果が動くかが一目で分かります。</p>
+
+      <h3 id="ch7-2">7-2. ストックとフローを区別する</h3>
+      <p><b>ストック</b>＝ある時点の残高（現預金・借入金・在庫・客室数）、<b>フロー</b>＝一定期間の増減（売上・費用・返済額・仕入量）。混同が事故を生みます。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">ストックの基本形</span><button class="copy">コピー</button></div><pre><code>期末借入金 = 期首借入金 + 新規借入 − 元本返済
+期末在庫   = 期首在庫   + 仕入     − 出庫</code></pre></div>
+      <p>「返済額を費用として扱う」「借入残高から利息を直接引く」などの混同を避けます（元本返済はフローだが費用ではない／利息は損益、元本はBS）。</p>
+
+      <h3 id="ch7-3">7-3. 固定費と変動費を区別する</h3>
+      <p><b>固定費</b>＝短期的には売上に連動しない、<b>変動費</b>＝客数・売上・数量に応じて変化、<b>準変動費</b>＝一定範囲を超えると段階的に増える。人件費は完全な固定費とは限らず、稼働が一定水準を超えると追加人員・残業で増えます。</p>
+
+      <h3 id="ch7-4">7-4. 制約条件を入れる</h3>
+      <p>計算上は増やせても、現実には上限があります。需要だけでなく<b>供給能力</b>を必ず確認します。</p>
+      <ul class="bullets">
+        <li>稼働率は原則100%以下（<code>=MIN(需要室数/供給室数, 100%)</code>）</li>
+        <li>席数以上の客は同時に入れない／営業時間・調理能力に上限</li>
+        <li>スタッフ1人が担当できる客数に限界／設備容量を超える生産不可</li>
+      </ul>
+      <div class="code"><div class="code-head"><span class="code-lang">上限を式に入れる</span><button class="copy">コピー</button></div><pre><code>販売室数 = MIN(需要室数, 客室数 × 営業日数)   供給を超えて売らない
+稼働率   = MIN(需要 / 供給, 1)                 100%を超えさせない</code></pre></div>
+
+      <h3 id="ch7-5">7-5. 因果関係を二重計上しない</h3>
+      <p>広告費を増やした結果「予約数が増える→稼働率が上がる→売上が増える」なら、<b>「予約数増加」と「稼働率上昇」を別々の売上効果として足すと二重計上</b>です。どの変数がどの変数を動かすかを整理します。</p>
+
+      <h3 id="ch7-6">7-6. 循環参照を避ける</h3>
+      <p>「借入額は資金不足額で決まる → 金利負担は借入額で決まる → 資金不足額は金利負担で変わる」は循環します。可能なら計算順序を整理して回避します。どうしても必要なら、循環の意味と反復計算の設定を明示します（投資銀行の負債スケジュールで登場します）。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 8 ============ -->
+    <section class="chapter" id="ch8">
+      <div class="chapter-head"><div class="badge">8</div><h2>ロジックを組むコツ</h2></div>
+      <ol class="steps">
+        <li><b>先に紙や言葉で式を書く</b>：いきなり数式を入れず、<code>客室売上＝客室数×営業日数×稼働率×ADR</code>のように構造を言語化する。</li>
+        <li><b>結果から逆算して必要項目を洗い出す</b>：「営業利益を予測したい」なら、売上（客室・飲食・その他）と費用（原価・人件費・光熱・手数料・固定費）へ分解する。</li>
+        <li><b>重要なドライバーに集中する</b>：ホテルなら ADR・稼働率・客室数・人件費・食材原価率・OTA手数料率・修繕投資。影響の小さい費用を細かく作るより、重要変数の妥当性を上げる。</li>
+        <li><b>1セル1役割にする</b>：長大なIFを1セルに詰めず、「対象判定／単価選択／数量計算／金額計算」を分ける。検証しやすい。</li>
+        <li><b>説明できない数式を作らない</b>：「このセルは販売室数にADRを掛けて客室売上を出しています」と言えることが理想。</li>
+        <li><b>感度を確認する</b>：完成後、ADR+10%・稼働率−10pt・原価率+5pt・開業3か月遅延・工事費+20% などを動かし、結果が想定方向に動くか見る。数式ミスやロジック抜けの大半はこれで発見できる。</li>
+      </ol>
+      <div class="tree">営業利益
+├─ 売上
+│  ├─ 客室売上
+│  ├─ 飲食売上
+│  └─ その他売上
+└─ 費用
+   ├─ 原価
+   ├─ 人件費
+   ├─ 水道光熱費
+   ├─ 販売手数料
+   └─ 固定費</div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 9 ============ -->
+    <section class="chapter" id="ch9">
+      <div class="chapter-head"><div class="badge">9</div><h2>実践①：3表連動モデルとDCF（投資銀行の中核）</h2></div>
+      <p>ここからは投資銀行のコアスキルを、<b>数値付き</b>で体験します。まずは損益計算書（PL）・貸借対照表（BS）・キャッシュフロー計算書（CF）が連動する「3表モデル」です。</p>
+
+      <h3 id="ch9-1">9-1. 3表のつながり</h3>
+      <p>3表は独立ではなく、<b>1本の鎖</b>でつながっています。この連動を理解することが、モデリングの分水嶺です。</p>
+      <div class="tree">PL：当期純利益 ─────────────▶ BS：利益剰余金に積み上がる
+                └──────────▶ CF：営業CFの出発点
+CF：期末現金 ───────────────▶ BS：現金及び預金
+BS：借入金 ──▶ PL：支払利息 ──▶ CF：… （負債スケジュールで連動）
+設備投資(CAPEX) ─▶ BS：固定資産 ─▶ PL：減価償却費 ─▶ CF：非現金費用で足し戻す</div>
+      <p><b>具体例：簡易PL→CF→BSを1期分つなぐ。</b>売上1,000／営業費用700／減価償却100／税率30%とします。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">PL（単位：百万円）</span><button class="copy">コピー</button></div><pre><code>売上                1,000
+営業費用             △700
+減価償却             △100
+営業利益(EBIT)        200
+支払利息              △20
+税引前利益            180
+法人税(30%)          △54
+当期純利益            126</code></pre></div>
+      <div class="code"><div class="code-head"><span class="code-lang">CF（間接法）</span><button class="copy">コピー</button></div><pre><code>当期純利益            126
++ 減価償却(非現金)     100     ← PLで引いたが現金は出ていないので足し戻す
+− 運転資本の増加       △30     ← 売掛・在庫の増加は現金を圧迫
+営業CF                196
+− 設備投資(CAPEX)     △150
+投資CF               △150
+− 借入返済            △40
+財務CF                △40
+現金の純増             6       ← 期首現金 + 6 = 期末現金（BSの現金へ）</code></pre></div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>減価償却の往復が肝</div>
+        <p>減価償却はPLでは費用（利益を減らす）ですが、現金は出ていません。だからCFで<b>足し戻し</b>ます。一方でCAPEX（設備投資）は現金が出るのでCFで引きます。この「PLで引いてCFで戻す／PLに出ないがCFで引く」の往復が3表連動の心臓部です。</p>
+      </div>
+      <p>最後に必ず<b>BSが一致（資産＝負債＋純資産）</b>するかをチェックセルで確認します（4-1参照）。</p>
+
+      <h3 id="ch9-2">9-2. DCF評価の手順</h3>
+      <p>DCF（割引キャッシュフロー法）は、将来のフリーキャッシュフロー（FCF）を現在価値に割り引いて企業価値を求める、バリュエーションの王道です。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">FCFの定義</span><button class="copy">コピー</button></div><pre><code>FCF = EBIT × (1 − 税率) + 減価償却 − 設備投資 − 運転資本増加
+（税引後営業利益 NOPAT に、非現金の償却を戻し、投資と運転資本を引く）</code></pre></div>
+      <p><b>具体例：5年分のFCFを割引く。</b>割引率（WACC）8%、5年目以降は永久成長率 g=1% とします。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>年</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+          <tbody>
+            <tr><td>FCF（百万円）</td><td>100</td><td>110</td><td>120</td><td>130</td><td>140</td></tr>
+            <tr><td>割引係数 1/(1.08)^n</td><td>0.926</td><td>0.857</td><td>0.794</td><td>0.735</td><td>0.681</td></tr>
+            <tr><td>現在価値</td><td>92.6</td><td>94.3</td><td>95.3</td><td>95.6</td><td>95.3</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code"><div class="code-head"><span class="code-lang">計算</span><button class="copy">コピー</button></div><pre><code>予測期間の現在価値合計 ≒ 92.6+94.3+95.3+95.6+95.3 = 473.1
+
+継続価値(TV) = 5年目FCF ×(1+g) ÷ (WACC − g)
+            = 140 × 1.01 ÷ (0.08 − 0.01) = 141.4 ÷ 0.07 = 2,020
+TVの現在価値 = 2,020 × 0.681 = 1,375.6
+
+企業価値(EV) = 473.1 + 1,375.6 = 1,848.7 百万円
+株主価値     = EV − 純有利子負債（Net Debt）
+
+Excelなら：=NPV(8%, C2:G2) + TV/(1.08)^5</code></pre></div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>継続価値が価値の大半を占める</div>
+        <p>この例では企業価値1,849のうち約74%が継続価値（TV）です。DCFは<b>WACCと永久成長率gにきわめて敏感</b>で、gを1%→2%にするだけでTVが跳ね上がります。だからこそ、WACC×gの<b>感応度表</b>（2-4参照）を必ず添えます。単一の数字を信じないのがプロの流儀です。</p>
+      </div>
+
+      <h3 id="ch9-3">9-3. 感度・シナリオ・LBO</h3>
+      <p><b>感度分析・シナリオ分析：</b>主要前提（WACC・成長率・利益率）を動かし、価値のレンジを示します。1点の答えではなく「600〜900の範囲、中心750」のように語ります。</p>
+      <p><b>LBO（レバレッジド・バイアウト）の考え方：</b>買収額の大部分を借入で賄い、数年後に売却してエクイティの何倍になるかを見ます。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">LBOの骨格（数値例）</span><button class="copy">コピー</button></div><pre><code>買収時：企業価値(EV) 1,000 = 借入 700 + 自己資金(Equity) 300
+5年間で借入を 700 → 400 に返済（営業CFで圧縮）
+売却時：EV 1,300（EBITDA成長＋マルチプル維持）
+売却時Equity = 1,300 − 400 = 900
+
+投資倍率(MOIC) = 900 ÷ 300 = 3.0倍
+IRR ≒ 3.0^(1/5) − 1 ≒ 24.6% /年
+→ 「借入返済」と「EBITDA成長」がリターンの二大エンジン</code></pre></div>
+      <p>投資銀行が作る他のモデル：類似会社比較（EV/EBITDA等の倍率）／類似取引比較／M&amp;A統合（EPS増減＝アクリーション・ダイリューション）／資本構成・借入余力／デットスケジュール／シナジー分析／IPOバリュエーション。いずれも本章の「3表連動＋割引＋感応度」の応用です。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 10 ============ -->
+    <section class="chapter" id="ch10">
+      <div class="chapter-head"><div class="badge">10</div><h2>実践②：不動産・ホテル投資モデル</h2></div>
+      <p>不動産ファンドの評価軸は、事業会社とは少し異なります。中心は<b>NOI・キャップレート・レバードIRR・ウォーターフォール</b>です。</p>
+
+      <h3 id="ch10-1">10-1. NOIと物件収支</h3>
+      <p><b>NOI（純営業収益）</b>＝賃料等の収入から運営費を引いた、その物件が生む素の利益です。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">NOIと物件価格</span><button class="copy">コピー</button></div><pre><code>実効総収入(EGI) = 満室賃料 ×(1 − 空室率) + その他収入
+NOI            = EGI − 運営費(OPEX)   ※減価償却・金利・税は含めない
+物件価格        = NOI ÷ キャップレート(Cap Rate)
+
+例：満室賃料 100 / 空室率5% / その他5 / OPEX 40
+   EGI = 100×0.95 + 5 = 100
+   NOI = 100 − 40 = 60
+   Cap Rate 5% なら 物件価格 = 60 ÷ 0.05 = 1,200</code></pre></div>
+      <p>ホテルでは賃料の代わりに、客室・料飲・物販の売上から運営費を引いた<b>GOP（営業総利益）→NOI</b>を用います。ADR・稼働率・RevPAR（2-3, 2-4参照）がドライバーです。</p>
+
+      <h3 id="ch10-2">10-2. レバレッジとIRR</h3>
+      <p>借入（レバレッジ）を使うと、自己資金あたりのリターンが変わります。健全性は<b>LTV・DSCR</b>で見ます。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">レバレッジ指標</span><button class="copy">コピー</button></div><pre><code>LTV  = 借入額 ÷ 物件価格           （例 720 ÷ 1,200 = 60%）
+DSCR = NOI ÷ 年間元利返済額         （1.0未満は返済不能。通常1.3以上を要求）</code></pre></div>
+      <p><b>具体例：レバードIRRを求める。</b>自己資金480で取得、5年間の税引後キャッシュフローと売却額を受け取ります。IRRは「正味現在価値が0になる割引率」で、Excelの<code>IRR</code>関数で一発です。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>年</th><th>0（取得）</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5（売却含む）</th></tr></thead>
+          <tbody>
+            <tr><td>エクイティCF</td><td>△480</td><td>30</td><td>32</td><td>34</td><td>36</td><td>640</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code"><div class="code-head"><span class="code-lang">EXCEL</span><button class="copy">コピー</button></div><pre><code>=IRR(B2:H2)              → 約 12.4%（レバードIRR）
+=XIRR(金額範囲, 日付範囲)  日付が不定間隔ならこちら
+エクイティマルチプル = 受取合計 ÷ 投資額
+                    = (30+32+34+36+640) ÷ 480 = 772 ÷ 480 ≒ 1.61倍</code></pre></div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>アンレバード vs レバード</div>
+        <p><b>アンレバードIRR</b>は借入なしの物件そのものの利回り、<b>レバードIRR</b>は借入後の自己資金利回りです。借入金利がアンレバード利回りより低ければ、レバレッジはIRRを押し上げます（逆なら押し下げる）。出口価格は<code>売却時NOI ÷ 出口キャップレート</code>で置き、キャップレートの感応度表を必ず添えます。</p>
+      </div>
+
+      <h3 id="ch10-3">10-3. ウォーターフォール分配</h3>
+      <p>ファンドでは、生んだキャッシュを投資家（LP）と運用者（GP）へ段階的に分配します。これが<b>ウォーターフォール</b>です。典型は「優先分配→キャッチアップ→成功報酬（プロモート）」の順です。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">2ティアの例</span><button class="copy">コピー</button></div><pre><code>① 優先分配(Pref)：LPへ年8%の優先リターンまで先に配る
+② ハードル超過分：8%を超えた利益を LP 80% / GP 20%(プロモート) で分配
+
+例：分配可能 100、Pref充当後の超過分が 50 とすると
+   超過分 50 → LP 40 / GP 10
+GPは自己資金割合以上のリターンを、成功時のみ受け取る（インセンティブ設計）</code></pre></div>
+      <p>不動産ファンドが作る他のモデル：テナント別賃料ロール／修繕・CAPEX計画／取得・売却シミュレーション／借入返済スケジュール／キャッシュ・オン・キャッシュ利回り／投資家別分配。すべて本章の要素の組み合わせです。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 11 ============ -->
+    <section class="chapter" id="ch11">
+      <div class="chapter-head"><div class="badge">11</div><h2>Excelスキルの段階</h2></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>レベル</th><th>できること</th></tr></thead>
+          <tbody>
+            <tr><td>基礎</td><td>既存フォーマットへ正確に入力し、SUMや基本的な体裁調整ができる</td></tr>
+            <tr><td>実務</td><td>SUMIFS・XLOOKUP・ピボットで実績を集計できる</td></tr>
+            <tr><td>分析</td><td>差異の要因を分解し、グラフやKPIで示せる</td></tr>
+            <tr><td>モデリング</td><td>前提条件から予測PL・CFや事業シミュレーションを構築できる</td></tr>
+            <tr><td>設計</td><td>第三者が更新・検証できるファイル構造をゼロから設計できる</td></tr>
+            <tr><td>プロ</td><td>不確実性を扱い、意思決定に必要な論点・感度・リスクをモデルで示せる</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>プロレベルで重要なのは「関数をたくさん知っている」ことではなく、<b>何を計算すべきか／何を計算しなくてよいか／どの前提が重要か／どこにリスクがあるか／どの数字なら意思決定できるか</b>を判断できることです。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 12 ============ -->
+    <section class="chapter" id="ch12">
+      <div class="chapter-head"><div class="badge">12</div><h2>プロがExcelで作るもの</h2></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>領域</th><th>代表的な成果物</th></tr></thead>
+          <tbody>
+            <tr><td>コンサルティング会社</td><td>市場規模推計／売上・利益改善シミュレーション／事業計画／予算・実績管理／KPIダッシュボード／顧客・商品別収益性分析／拠点統廃合／人員配置・シフト最適化／価格改定／コスト削減効果試算／新規事業収支／投資回収／ベンチマーク／アンケート集計／PMO進捗管理</td></tr>
+            <tr><td>投資銀行</td><td>3表連動財務モデル（PL・BS・CF）／DCF評価／類似会社比較／類似取引比較／M&amp;A統合モデル／EPS増減分析／LBOモデル／資本構成・借入余力／デットスケジュール／株式価値・企業価値計算／シナジー分析／IPOバリュエーション／感度・シナリオ分析</td></tr>
+            <tr><td>不動産投資ファンド</td><td>物件単体収支／賃料収入予測／テナント別賃料ロール／稼働率・空室率予測／NOI計算／修繕・CAPEX計画／取得・売却シミュレーション／借入返済スケジュール／DSCR・LTV／レバード/アンレバードIRR／エクイティマルチプル／キャッシュ・オン・キャッシュ／出口価格・キャップレート感度／ウォーターフォール／投資家別分配</td></tr>
+            <tr><td>ホテル・旅館投資</td><td>客室タイプ別ADR・稼働率予測／月別・曜日別客室売上／RevPAR予測／宿泊・料飲・物販売上予測／部門別人件費／OTA・直販構成／GOP・NOI予測／改修前後の収益比較／FF&amp;E更新計画／運営委託料・ブランドフィー／開業前費用・運転資金／投資回収・IRR／売却価格・キャップレート感度／季節変動を考慮した資金繰り／施設別・客室別採算</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 13 ============ -->
+    <section class="chapter" id="ch13">
+      <div class="chapter-head"><div class="badge">13</div><h2>関数・ショートカット リファレンス</h2></div>
+      <p>本ガイドで登場した中核関数のまとめです。まずはこの範囲を確実に。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>目的</th><th>関数</th><th>ひとことメモ</th></tr></thead>
+          <tbody>
+            <tr><td>条件付き合計</td><td><code>SUMIFS</code></td><td>複数条件。実務で最も使う</td></tr>
+            <tr><td>条件付き件数/平均</td><td><code>COUNTIFS</code> / <code>AVERAGEIFS</code></td><td>SUMIFSと同じ引数順</td></tr>
+            <tr><td>照合（新）</td><td><code>XLOOKUP</code></td><td>既定で完全一致・左右自由・該当なし指定可</td></tr>
+            <tr><td>照合（堅牢）</td><td><code>INDEX + MATCH</code></td><td>列挿入に強い。旧環境の定番</td></tr>
+            <tr><td>エラー処理</td><td><code>IFERROR</code></td><td>照合とセットで多用</td></tr>
+            <tr><td>抽出・一意・並替</td><td><code>FILTER</code> / <code>UNIQUE</code> / <code>SORT</code></td><td>スピル（自動展開）</td></tr>
+            <tr><td>文字整形</td><td><code>TRIM</code> / <code>SUBSTITUTE</code> / <code>TEXT</code> / <code>LEFT/MID/RIGHT</code></td><td>クリーニングの主役</td></tr>
+            <tr><td>端数処理</td><td><code>ROUND</code> / <code>ROUNDDOWN</code> / <code>ROUNDUP</code></td><td>金額は必ず丸めを意識</td></tr>
+            <tr><td>上限・下限</td><td><code>MIN</code> / <code>MAX</code></td><td>制約条件の実装（7-4）</td></tr>
+            <tr><td>正味現在価値</td><td><code>NPV</code> / <code>XNPV</code></td><td>DCFで使用（9-2）</td></tr>
+            <tr><td>内部収益率</td><td><code>IRR</code> / <code>XIRR</code></td><td>投資評価で使用（10-2）</td></tr>
+            <tr><td>返済額</td><td><code>PMT</code> / <code>IPMT</code> / <code>PPMT</code></td><td>デットスケジュール</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>ショートカットは 1-2 の表を参照。加えて、What-If分析（データテーブル・ゴールシーク）と Power Query は、シミュレーションと定期処理の生産性を大きく変えます。</p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ summary ============ -->
+    <section class="chapter" id="summary">
+      <div class="chapter-head"><div class="badge">＃</div><h2>まとめ</h2></div>
+      <p>プロとして「Excelが使える」とは、次の状態です。</p>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>本質は「構造化・論理・検証・伝達」</div>
+        <p><b>複雑な事業を、検証可能な前提と論理に分解し、正確かつ更新可能な計算モデルに落とし込み、意思決定に必要な結論を短時間で示せること。</b></p>
+        <p style="margin-top:8px">関数やショートカットはそのための手段にすぎません。まず第1〜5章で土台を固め、第6〜8章で考え方を身につけ、第9〜10章の実践モデルを自分の手で再現してみてください。読むだけでなく一度作れば、確実に一段上がります。</p>
+      </div>
+    </section>
+
+    <footer>
+      コンサル・投資銀行水準のExcel 完全ガイド ／ 作成日：2026-07-20
+    </footer>
+
+  </main>
+</div>
+
+<button id="top-btn" aria-label="ページ先頭へ戻る">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---- build nav from headings ---- */
+  var NAV = [
+    {id:"intro", label:"「Excelが使える」とは", num:"◎", children:[]},
+    {id:"ch1", label:"所作：速く・きれいに・事故なく", num:"1", children:[
+      {id:"ch1-1", label:"1-1. 体裁を統一する"},
+      {id:"ch1-2", label:"1-2. 操作を速くする"},
+      {id:"ch1-3", label:"1-3. 壊しにくくする"}
+    ]},
+    {id:"ch2", label:"内容：集計・分析・予測", num:"2", children:[
+      {id:"ch2-1", label:"2-1. 実績集計"},
+      {id:"ch2-2", label:"2-2. データ加工・クリーニング"},
+      {id:"ch2-3", label:"2-3. 分析（要因分解）"},
+      {id:"ch2-4", label:"2-4. 予測・シミュレーション"}
+    ]},
+    {id:"ch3", label:"設計：更新できる構造", num:"3", children:[
+      {id:"ch3-1", label:"3-1. シート構成"},
+      {id:"ch3-2", label:"3-2. 入力・計算・出力の分離"},
+      {id:"ch3-3", label:"3-3. 時間軸を統一する"},
+      {id:"ch3-4", label:"3-4. 数式の一貫性"}
+    ]},
+    {id:"ch4", label:"検証：正しさを説明する", num:"4", children:[
+      {id:"ch4-1", label:"4-1. チェックセル"},
+      {id:"ch4-2", label:"4-2. クロスチェック"},
+      {id:"ch4-3", label:"4-3. 常識との整合性"}
+    ]},
+    {id:"ch5", label:"伝達：意思決定につなげる", num:"5", children:[]},
+    {id:"ch6", label:"モデリングの原則", num:"6", children:[
+      {id:"ch6-1", label:"6-1. 何を判断するモデルか"},
+      {id:"ch6-2", label:"6-2. ファクトと置き値を分ける"},
+      {id:"ch6-3", label:"6-3. ファクトの押さえ方"},
+      {id:"ch6-4", label:"6-4. 妥当な置き値の置き方"}
+    ]},
+    {id:"ch7", label:"ロジックの基礎", num:"7", children:[
+      {id:"ch7-1", label:"7-1. 四則演算まで分解"},
+      {id:"ch7-2", label:"7-2. ストックとフロー"},
+      {id:"ch7-3", label:"7-3. 固定費と変動費"},
+      {id:"ch7-4", label:"7-4. 制約条件を入れる"},
+      {id:"ch7-5", label:"7-5. 二重計上を避ける"},
+      {id:"ch7-6", label:"7-6. 循環参照を避ける"}
+    ]},
+    {id:"ch8", label:"ロジックを組むコツ", num:"8", children:[]},
+    {id:"ch9", label:"実践①：3表連動モデルとDCF", num:"9", children:[
+      {id:"ch9-1", label:"9-1. 3表のつながり"},
+      {id:"ch9-2", label:"9-2. DCF評価の手順"},
+      {id:"ch9-3", label:"9-3. 感度・シナリオ・LBO"}
+    ]},
+    {id:"ch10", label:"実践②：不動産・ホテル投資", num:"10", children:[
+      {id:"ch10-1", label:"10-1. NOIと物件収支"},
+      {id:"ch10-2", label:"10-2. レバレッジとIRR"},
+      {id:"ch10-3", label:"10-3. ウォーターフォール分配"}
+    ]},
+    {id:"ch11", label:"Excelスキルの6段階", num:"11", children:[]},
+    {id:"ch12", label:"プロが作る成果物", num:"12", children:[]},
+    {id:"ch13", label:"関数・ショートカット集", num:"13", children:[]},
+    {id:"summary", label:"まとめ", num:"＃", children:[]}
+  ];
+
+  function buildNav(host){
+    var frag = document.createDocumentFragment();
+    NAV.forEach(function(sec){
+      var a = document.createElement("a");
+      a.href = "#" + sec.id; a.className = "lv1"; a.textContent = sec.label;
+      a.dataset.target = sec.id;
+      frag.appendChild(a);
+      sec.children.forEach(function(c){
+        var b = document.createElement("a");
+        b.href = "#" + c.id; b.className = "lv2"; b.textContent = c.label;
+        b.dataset.target = c.id;
+        frag.appendChild(b);
+      });
+    });
+    host.appendChild(frag);
+  }
+  buildNav(document.getElementById("sideNav"));
+  buildNav(document.getElementById("drawerNav"));
+
+  var tocList = document.getElementById("tocCardList");
+  NAV.forEach(function(sec){
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = "#" + sec.id;
+    a.innerHTML = '<span class="num">' + sec.num + "</span>";
+    var t = document.createElement("span");
+    t.textContent = sec.label;
+    a.appendChild(t);
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  /* ---- drawer ---- */
+  var body = document.body;
+  var menuBtn = document.getElementById("menuBtn");
+  var closeBtn = document.getElementById("closeBtn");
+  var scrim = document.getElementById("scrim");
+  function openNav(){ body.classList.add("nav-open"); menuBtn.setAttribute("aria-expanded","true"); }
+  function closeNav(){ body.classList.remove("nav-open"); menuBtn.setAttribute("aria-expanded","false"); }
+  menuBtn.addEventListener("click", openNav);
+  closeBtn.addEventListener("click", closeNav);
+  scrim.addEventListener("click", closeNav);
+  document.getElementById("drawerNav").addEventListener("click", function(e){
+    if (e.target.closest("a")) closeNav();
+  });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeNav(); });
+
+  /* ---- copy buttons ---- */
+  document.querySelectorAll(".copy").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var code = btn.closest(".code").querySelector("code");
+      var text = code.innerText;
+      var done = function(){
+        btn.textContent = "コピー済み";
+        btn.classList.add("done");
+        setTimeout(function(){ btn.textContent = "コピー"; btn.classList.remove("done"); }, 1600);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else { fallback(); }
+      function fallback(){
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch(err){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  /* ---- scrollspy + progress + top button ---- */
+  var links = Array.prototype.slice.call(document.querySelectorAll("#sideNav a, #drawerNav a"));
+  var targets = links.map(function(a){ return document.getElementById(a.dataset.target); });
+  var progress = document.getElementById("progress");
+  var topBtn = document.getElementById("top-btn");
+  var ticking = false;
+  var headerH = 0;
+
+  function measure(){
+    headerH = document.querySelector("header").offsetHeight;
+  }
+  measure();
+  window.addEventListener("resize", measure);
+
+  function update(){
+    ticking = false;
+    var y = window.scrollY || window.pageYOffset;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (max > 0 ? Math.min(100, (y / max) * 100) : 0) + "%";
+    topBtn.classList.toggle("show", y > 500);
+
+    var line = y + headerH + 40;
+    var activeIdx = -1;
+    for (var i = 0; i < targets.length; i++){
+      var el = targets[i];
+      if (el && el.getBoundingClientRect().top + y <= line) activeIdx = i;
+    }
+    links.forEach(function(a, i){ a.classList.toggle("active", i === activeIdx); });
+
+    if (activeIdx > -1){
+      var act = links[activeIdx];
+      if (act.closest("#sideNav")){
+        var side = document.querySelector("aside.sidebar");
+        if (side && side.offsetParent !== null){
+          var r = act.getBoundingClientRect(), sr = side.getBoundingClientRect();
+          if (r.top < sr.top + 8 || r.bottom > sr.bottom - 8){
+            side.scrollTop += r.top - sr.top - side.clientHeight / 2;
+          }
+        }
+      }
+    }
+  }
+  window.addEventListener("scroll", function(){
+    if (!ticking){ ticking = true; requestAnimationFrame(update); }
+  }, {passive:true});
+  update();
+
+  topBtn.addEventListener("click", function(){
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+})();
+</script>
+</body>
+</html>

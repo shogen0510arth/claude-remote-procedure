@@ -536,7 +536,7 @@ body.nav-open nav.drawer{transform:translateX(0)}
       <h1>ドキュメント一覧</h1>
       <p class="lead">これまでに作成した手順書・ガイドの一覧です。テーマごとに整理しています。各ページのタイトルと概要から、目的のドキュメントを開いてください。</p>
       <div class="meta">
-        <span class="chip">全 <b>6</b> ドキュメント</span>
+        <span class="chip">全 <b>7</b> ドキュメント</span>
         <span class="chip">最終更新：<b>2026-07-20</b></span>
       </div>
     </div>
@@ -618,6 +618,27 @@ body.nav-open nav.drawer{transform:translateX(0)}
       </div>
     </section>
 
+    <hr class="rule">
+
+    <!-- ============ skills ============ -->
+    <section class="chapter" id="skills">
+      <div class="chapter-head">
+        <div class="badge">3</div>
+        <h2>業務スキル・ナレッジ</h2>
+      </div>
+      <p>業務で使う専門スキルを、初心者から実務・プロ水準まで体系的に身につけるための解説資料です。</p>
+      <div class="link-list">
+        <a class="link-card" href="/excel-mastery">
+          <div class="lc-body">
+            <div class="lc-title">コンサル・投資銀行水準のExcel 完全ガイド</div>
+            <div class="lc-desc">「Excelが使える」の本当の意味を、所作・集計・分析・設計・検証・伝達から、3表連動モデル・DCF・不動産IRRまで、具体的な数式とワークト例で解説。初心者がプロ水準へ到達するための資料。</div>
+            <div class="lc-url">/excel-mastery</div>
+          </div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+      </div>
+    </section>
+
     <footer>
       ドキュメント一覧 ／ 最終更新：2026-07-20
     </footer>
@@ -636,7 +657,8 @@ body.nav-open nav.drawer{transform:translateX(0)}
   /* ---- build nav from headings ---- */
   var NAV = [
     {id:"guide", label:"Claude Code 運用・活用", num:"1", children:[]},
-    {id:"basics", label:"環境・基礎スキル", num:"2", children:[]}
+    {id:"basics", label:"環境・基礎スキル", num:"2", children:[]},
+    {id:"skills", label:"業務スキル・ナレッジ", num:"3", children:[]}
   ];
 
   function buildNav(host){
