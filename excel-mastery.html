@@ -617,23 +617,35 @@ body.nav-open nav.drawer{transform:translateX(0)}
       </div>
 
       <h3 id="ch1-2">1-2. 操作が速い</h3>
-      <p>速さの本質は「入力速度」ではなく<b>「無駄な工程の少なさ」</b>です。マウスに持ち替えず思考を止めないことで、修正と検証を高速に繰り返せます。最低限、次のショートカットは指が覚えるまで使ってください（Windows / Mac）。</p>
+      <p>速さの本質は「入力速度」ではなく<b>「無駄な工程の少なさ」</b>です。マウスに持ち替えず思考を止めないことで、修正と検証を高速に繰り返せます。最低限、次のショートカットは指が覚えるまで使ってください（Windowsキー表記。Macは <code>Ctrl</code>→<code>⌘</code> に読み替え）。</p>
       <div class="table-scroll">
         <table>
-          <thead><tr><th>操作</th><th>Windows</th><th>Mac</th></tr></thead>
+          <thead><tr><th>ショートカット</th><th>動作</th></tr></thead>
           <tbody>
-            <tr><td>データの端まで移動</td><td><code>Ctrl + 方向キー</code></td><td><code>⌘ + 方向キー</code></td></tr>
-            <tr><td>端まで範囲選択</td><td><code>Ctrl + Shift + 方向キー</code></td><td><code>⌘ + Shift + 方向キー</code></td></tr>
-            <tr><td>表全体を選択</td><td><code>Ctrl + A</code></td><td><code>⌘ + A</code></td></tr>
-            <tr><td>セル編集</td><td><code>F2</code></td><td><code>Ctrl + U</code></td></tr>
-            <tr><td>形式を選択して貼り付け</td><td><code>Ctrl + Alt + V</code></td><td><code>⌘ + Ctrl + V</code></td></tr>
-            <tr><td>値のみ貼り付け</td><td><code>Ctrl+Alt+V → V</code></td><td>同上 → 値</td></tr>
-            <tr><td>合計を自動入力</td><td><code>Alt + Shift + =</code></td><td><code>⌘ + Shift + T</code></td></tr>
-            <tr><td>絶対/相対参照の切替</td><td><code>F4</code></td><td><code>⌘ + T</code></td></tr>
-            <tr><td>行/列の挿入</td><td><code>Ctrl + Shift + +</code></td><td><code>⌘ + Shift + +</code></td></tr>
-            <tr><td>フィルター</td><td><code>Ctrl + Shift + L</code></td><td><code>⌘ + Shift + F</code></td></tr>
-            <tr><td>直前の操作を繰り返す</td><td><code>Ctrl + Y</code> / <code>F4</code></td><td><code>⌘ + Y</code></td></tr>
-            <tr><td>参照元/参照先の追跡</td><td>数式タブ → トレース</td><td>同左</td></tr>
+            <tr><td colspan="2" style="font-weight:700;background:rgba(196,85,47,.07)">基本動作系</td></tr>
+            <tr><td><code>F2</code></td><td>セルの編集、編集mode切替</td></tr>
+            <tr><td><code>F4</code></td><td>絶対参照（$マーク）</td></tr>
+            <tr><td><code>Ctrl + 方向キー</code></td><td>データの端まで移動</td></tr>
+            <tr><td><code>Ctrl + Shift + 方向キー</code></td><td>端まで範囲選択</td></tr>
+            <tr><td><code>Ctrl + PgDn</code></td><td>右シートに移動</td></tr>
+            <tr><td><code>Ctrl + PgUp</code></td><td>左シートに移動</td></tr>
+            <tr><td colspan="2" style="font-weight:700;background:rgba(196,85,47,.07)">Copy&amp;Paste系</td></tr>
+            <tr><td><code>Ctrl + C</code></td><td>コピー</td></tr>
+            <tr><td><code>Ctrl + X</code></td><td>切り取り</td></tr>
+            <tr><td><code>Ctrl + Alt + S, V(value)</code></td><td>値の貼り付け</td></tr>
+            <tr><td><code>Ctrl + Alt + S, F(formula)</code></td><td>数式の貼り付け</td></tr>
+            <tr><td><code>Ctrl + Alt + S, L(link)</code></td><td>リンクの貼り付け</td></tr>
+            <tr><td colspan="2" style="font-weight:700;background:rgba(196,85,47,.07)">行・列の操作系</td></tr>
+            <tr><td><code>Shift + Space</code>（英数入力時）</td><td>行を選択</td></tr>
+            <tr><td><code>Ctrl + Space</code></td><td>列を選択</td></tr>
+            <tr><td><code>Ctrl + Shift + "+", R(raw)</code></td><td>行を挿入</td></tr>
+            <tr><td><code>Ctrl + Shift + "+", C(column)</code></td><td>列を挿入</td></tr>
+            <tr><td><code>Ctrl + "-", R(raw)</code></td><td>行を削除</td></tr>
+            <tr><td><code>Ctrl + "-", C(column)</code></td><td>列を削除</td></tr>
+            <tr><td colspan="2" style="font-weight:700;background:rgba(196,85,47,.07)">フィルタ系</td></tr>
+            <tr><td><code>Ctrl + Shift + L(list)</code></td><td>フィルタを付ける</td></tr>
+            <tr><td><code>Alt + "↓"</code></td><td>フィルタをプルダウン</td></tr>
+            <tr><td><code>Ctrl + Space</code></td><td>(↓で移動後)☑を選択</td></tr>
           </tbody>
         </table>
       </div>
