@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
+<meta name="description" content="コンサルティング会社で「PowerPointが使える」の本当の意味を、初心者がプロ水準へ到達できるように体系化。所作・内容・論理・スライド設計・ストーリー・説得・検証まで、具体的なメッセージ例とビフォーアフターで解説する完全ガイド。">
+<title>コンサル水準のPowerPoint 完全ガイド</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+<style>
+:root{
+  --bg:#faf9f7;
+  --bg-elev:#ffffff;
+  --bg-sunken:#f2f0ed;
+  --text:#1f1e1d;
+  --text-muted:#6b6862;
+  --text-faint:#918d85;
+  --border:#e5e1db;
+  --border-strong:#d6d1c9;
+  --accent:#c4552f;
+  --accent-soft:#fdf1ec;
+  --accent-border:#f0c9b8;
+  --warn:#a8620a;
+  --warn-soft:#fdf4e7;
+  --warn-border:#f0dcb8;
+  --info:#2b6a8f;
+  --info-soft:#eaf3f8;
+  --info-border:#c2ddeb;
+  --code-bg:#282521;
+  --code-text:#e8e3db;
+  --code-inline-bg:#f0ede8;
+  --code-inline-text:#a8442a;
+  --shadow-sm:0 1px 2px rgba(31,30,29,.05);
+  --shadow-md:0 4px 16px -4px rgba(31,30,29,.10),0 2px 4px rgba(31,30,29,.04);
+  --shadow-lg:0 16px 48px -12px rgba(31,30,29,.24);
+  --radius:14px;
+  --radius-sm:9px;
+  --font:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --header-h:56px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1917;
+    --bg-elev:#232120;
+    --bg-sunken:#141312;
+    --text:#eeebe6;
+    --text-muted:#a5a099;
+    --text-faint:#7d7871;
+    --border:#35322e;
+    --border-strong:#474340;
+    --accent:#e2825c;
+    --accent-soft:#2e211b;
+    --accent-border:#5a3d2e;
+    --warn:#d6a05a;
+    --warn-soft:#2b2317;
+    --warn-border:#54432a;
+    --info:#7db8d8;
+    --info-soft:#182630;
+    --info-border:#2f4a5c;
+    --code-bg:#121110;
+    --code-text:#ded9d1;
+    --code-inline-bg:#2c2926;
+    --code-inline-text:#e9a184;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+    --shadow-md:0 4px 16px -4px rgba(0,0,0,.5);
+    --shadow-lg:0 16px 48px -12px rgba(0,0,0,.7);
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 16px);-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.85;
+  font-size:16px;
+  letter-spacing:.01em;
+  -webkit-font-smoothing:antialiased;
+  overflow-wrap:break-word;
+  word-break:normal;
+  line-break:strict;
+}
+body.nav-open{overflow:hidden}
+
+/* ---------- progress ---------- */
+#progress{
+  position:fixed;top:0;left:0;height:2.5px;width:0;
+  background:linear-gradient(90deg,var(--accent),#e0a06f);
+  z-index:60;transition:width .1s linear;
+}
+
+/* ---------- header ---------- */
+header{
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  padding-top:env(safe-area-inset-top);
+  height:calc(var(--header-h) + env(safe-area-inset-top));
+  background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:saturate(180%) blur(14px);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--border);
+  z-index:50;
+  display:flex;align-items:center;gap:12px;
+  padding-left:max(16px,env(safe-area-inset-left));
+  padding-right:max(16px,env(safe-area-inset-right));
+}
+.header-inner{display:flex;align-items:center;gap:12px;width:100%;max-width:1200px;margin:0 auto;height:var(--header-h)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;letter-spacing:.02em;min-width:0}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.brand span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu-btn{
+  margin-left:auto;flex:none;
+  width:38px;height:38px;border-radius:10px;
+  border:1px solid var(--border-strong);background:var(--bg-elev);
+  color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.menu-btn:active{transform:scale(.94)}
+.menu-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round}
+
+/* ---------- layout ---------- */
+.wrap{
+  max-width:1200px;margin:0 auto;
+  padding:calc(var(--header-h) + env(safe-area-inset-top)) max(18px,env(safe-area-inset-left)) 0 max(18px,env(safe-area-inset-right));
+  display:block;
+}
+main{min-width:0;padding-bottom:64px}
+
+/* ---------- hero ---------- */
+.hero{padding:40px 0 30px;border-bottom:1px solid var(--border);margin-bottom:34px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;letter-spacing:.09em;
+  color:var(--accent);background:var(--accent-soft);
+  border:1px solid var(--accent-border);
+  padding:5px 11px;border-radius:999px;margin-bottom:16px;
+}
+.hero h1{
+  font-size:clamp(27px,7.6vw,44px);
+  line-height:1.32;font-weight:800;letter-spacing:-.01em;
+  margin-bottom:14px;
+}
+.hero p.lead{font-size:15px;color:var(--text-muted);line-height:1.8;margin-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-size:11.5px;font-weight:600;
+  background:var(--bg-elev);border:1px solid var(--border);
+  color:var(--text-muted);
+  padding:5px 10px;border-radius:8px;white-space:nowrap;
+}
+.chip b{color:var(--text);font-weight:700}
+.chip.link{color:var(--accent);border-color:var(--accent-border);background:var(--accent-soft);text-decoration:none}
+.chip.link:active{opacity:.6}
+
+/* ---------- toc card (mobile inline) ---------- */
+.toc-card{
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px 16px;margin-bottom:38px;
+  box-shadow:var(--shadow-sm);
+}
+.toc-card h2{font-size:12px;letter-spacing:.1em;color:var(--text-faint);font-weight:700;margin-bottom:12px}
+.toc-card ol{list-style:none;display:flex;flex-direction:column;gap:2px}
+.toc-card a{
+  display:flex;align-items:center;gap:11px;
+  padding:9px 8px;border-radius:9px;
+  color:var(--text);text-decoration:none;font-size:14.5px;font-weight:600;
+  -webkit-tap-highlight-color:transparent;
+}
+.toc-card a:active{background:var(--bg-sunken)}
+.toc-card .num{
+  flex:none;width:24px;height:24px;border-radius:7px;
+  background:var(--accent-soft);border:1px solid var(--accent-border);
+  color:var(--accent);font-size:11.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- sections ---------- */
+.chapter{margin-bottom:52px;scroll-margin-top:calc(var(--header-h) + 20px)}
+.chapter-head{
+  display:flex;align-items:center;gap:13px;
+  padding-bottom:14px;margin-bottom:26px;
+  border-bottom:2px solid var(--accent);
+}
+.chapter-head .badge{
+  flex:none;
+  min-width:34px;height:34px;padding:0 8px;border-radius:9px;
+  background:var(--accent);color:#fff;
+  font-size:15px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+  box-shadow:0 2px 8px -2px color-mix(in srgb,var(--accent) 60%,transparent);
+}
+.chapter-head h2{font-size:clamp(20px,5.4vw,27px);font-weight:800;letter-spacing:-.005em;line-height:1.4}
+
+h3{
+  font-size:clamp(17px,4.5vw,20px);font-weight:700;
+  margin:38px 0 14px;line-height:1.5;
+  scroll-margin-top:calc(var(--header-h) + 20px);
+  padding-left:13px;border-left:3.5px solid var(--accent);
+}
+h3:first-of-type{margin-top:0}
+h4{
+  font-size:15px;font-weight:700;color:var(--text);
+  margin:26px 0 10px;
+  display:flex;align-items:center;gap:8px;
+}
+h4::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--text-faint);flex:none}
+
+p{margin:0 0 14px}
+p:last-child{margin-bottom:0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-border)}
+a:active{opacity:.6}
+
+/* ---------- lists ---------- */
+ul.bullets,ol.steps{margin:0 0 16px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.bullets li{position:relative;padding-left:19px;line-height:1.8}
+ul.bullets li::before{
+  content:"";position:absolute;left:3px;top:.72em;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);opacity:.55;
+}
+ol.steps{counter-reset:s}
+ol.steps li{position:relative;padding-left:34px;counter-increment:s;line-height:1.8;min-height:24px}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:.28em;
+  width:23px;height:23px;border-radius:7px;
+  background:var(--bg-sunken);border:1px solid var(--border-strong);
+  color:var(--text-muted);
+  font-size:11.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- code ---------- */
+.code{
+  position:relative;
+  background:var(--code-bg);border-radius:var(--radius-sm);
+  margin:0 0 18px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:var(--shadow-sm);
+}
+.code-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 8px 0 13px;height:34px;
+  background:rgba(255,255,255,.04);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.code-lang{
+  font-family:var(--mono);font-size:10.5px;font-weight:600;
+  color:#a09a90;letter-spacing:.07em;
+}
+.copy{
+  font-family:var(--font);font-size:11px;font-weight:600;
+  background:transparent;border:1px solid rgba(255,255,255,.15);
+  color:#cec8bf;padding:4px 9px;border-radius:6px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.copy:active{transform:scale(.94)}
+.copy.done{color:#7fca8f;border-color:#3f6b48}
+.code pre{
+  margin:0;padding:14px 13px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  font-family:var(--mono);font-size:12.5px;line-height:1.75;
+  color:var(--code-text);
+  tab-size:2;
+}
+.code pre code{white-space:pre;font-family:inherit}
+code:not(pre code){
+  font-family:var(--mono);font-size:.855em;
+  background:var(--code-inline-bg);color:var(--code-inline-text);
+  padding:2px 5px;border-radius:5px;
+  border:1px solid var(--border);
+  white-space:nowrap;
+}
+
+/* prompt template variant */
+.code.prompt{background:var(--bg-sunken);border:1px solid var(--border-strong)}
+.code.prompt .code-head{background:transparent;border-bottom:1px dashed var(--border-strong)}
+.code.prompt .code-lang{color:var(--accent)}
+.code.prompt .copy{border-color:var(--border-strong);color:var(--text-muted)}
+.code.prompt pre{color:var(--text);font-size:13px;white-space:pre-wrap;word-break:break-word;line-break:strict}
+.code.prompt pre code{white-space:pre-wrap}
+
+/* ---------- callouts ---------- */
+.note{
+  border-radius:var(--radius-sm);
+  padding:14px 15px;margin:0 0 18px;
+  border:1px solid;font-size:14.5px;line-height:1.78;
+}
+.note .note-title{
+  display:flex;align-items:center;gap:7px;
+  font-weight:700;font-size:12.5px;letter-spacing:.03em;
+  margin-bottom:7px;
+}
+.note .note-title svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.note.warn{background:var(--warn-soft);border-color:var(--warn-border)}
+.note.warn .note-title{color:var(--warn)}
+.note.info{background:var(--info-soft);border-color:var(--info-border)}
+.note.info .note-title{color:var(--info)}
+.note.tip{background:var(--accent-soft);border-color:var(--accent-border)}
+.note.tip .note-title{color:var(--accent)}
+.note p:last-child{margin-bottom:0}
+.note code:not(pre code){background:color-mix(in srgb,var(--bg-elev) 70%,transparent)}
+
+/* ---------- table ---------- */
+.table-scroll{
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  margin:0 0 18px;
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--bg-elev);box-shadow:var(--shadow-sm);
+}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:440px}
+thead th{
+  background:var(--bg-sunken);
+  text-align:left;font-weight:700;font-size:11.5px;letter-spacing:.06em;
+  color:var(--text-faint);
+  padding:11px 14px;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.7}
+tbody tr:last-child td{border-bottom:none}
+tbody td:first-child{white-space:nowrap;font-weight:600}
+
+/* ---------- checklist / tree ---------- */
+.tree{
+  background:var(--bg-sunken);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 13px;margin:0 0 18px;
+  font-family:var(--mono);font-size:12.5px;line-height:1.85;
+  color:var(--text-muted);overflow-x:auto;white-space:pre;
+}
+.tree b{color:var(--text);font-weight:600}
+
+.status-grid{display:flex;flex-direction:column;gap:7px;margin:0 0 18px}
+.status-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:9px;padding:10px 12px;
+  font-family:var(--mono);font-size:12.5px;color:var(--text);
+}
+.status-item .ok{
+  flex:none;width:16px;height:16px;border-radius:50%;
+  background:#2f9e5a;display:flex;align-items:center;justify-content:center;
+}
+.status-item .ok svg{width:9px;height:9px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* path comparison */
+.path-cmp{display:flex;flex-direction:column;gap:8px;margin:0 0 18px}
+.path-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:9px;border:1px solid;
+  font-family:var(--mono);font-size:13px;
+}
+.path-row .tag{font-family:var(--font);font-size:11px;font-weight:800;flex:none;padding:2px 7px;border-radius:5px}
+.path-row.good{background:#eef7f0;border-color:#c6e3ce;color:#1e6b3c}
+.path-row.good .tag{background:#2f9e5a;color:#fff}
+.path-row.bad{background:#fdefee;border-color:#f2cdc9;color:#96382f}
+.path-row.bad .tag{background:#c0392b;color:#fff}
+@media (prefers-color-scheme:dark){
+  .path-row.good{background:#16261c;border-color:#2c4a36;color:#8ed6a6}
+  .path-row.bad{background:#2a1917;border-color:#4f2c28;color:#e59a91}
+}
+
+/* ---------- divider ---------- */
+.rule{height:1px;background:var(--border);border:none;margin:44px 0}
+
+/* ---------- links section ---------- */
+.link-list{display:flex;flex-direction:column;gap:9px;margin-bottom:8px}
+.link-card{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px;
+  text-decoration:none;color:var(--text);box-shadow:var(--shadow-sm);
+  -webkit-tap-highlight-color:transparent;
+}
+.link-card:active{background:var(--bg-sunken);transform:scale(.99)}
+.link-card .lc-body{min-width:0;flex:1}
+.link-card .lc-title{font-size:14.5px;font-weight:700;line-height:1.5}
+.link-card .lc-url{font-size:11.5px;color:var(--text-faint);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.link-card .lc-arrow{flex:none;color:var(--text-faint)}
+.link-card .lc-arrow svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- footer ---------- */
+footer{
+  border-top:1px solid var(--border);
+  padding:26px 0 calc(34px + env(safe-area-inset-bottom));
+  color:var(--text-faint);font-size:12.5px;line-height:1.8;
+}
+
+/* ---------- drawer nav (mobile) ---------- */
+.scrim{
+  position:fixed;inset:0;background:rgba(20,19,18,.42);
+  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:70;
+}
+body.nav-open .scrim{opacity:1;pointer-events:auto}
+nav.drawer{
+  position:fixed;top:0;right:0;bottom:0;
+  width:min(84vw,330px);
+  background:var(--bg-elev);
+  border-left:1px solid var(--border);
+  box-shadow:var(--shadow-lg);
+  transform:translateX(100%);
+  transition:transform .26s cubic-bezier(.32,.72,0,1);
+  z-index:80;
+  display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+body.nav-open nav.drawer{transform:translateX(0)}
+.drawer-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 14px 12px 18px;border-bottom:1px solid var(--border);flex:none;
+}
+.drawer-head span{font-size:12px;font-weight:700;letter-spacing:.09em;color:var(--text-faint)}
+.drawer-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 24px;flex:1}
+.drawer-body a{
+  display:block;padding:9px 12px;border-radius:8px;
+  color:var(--text-muted);text-decoration:none;border:none;
+  font-size:14px;line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+}
+.drawer-body a.lv1{font-weight:800;color:var(--text);font-size:14.5px;margin-top:10px}
+.drawer-body a.lv1:first-child{margin-top:0}
+.drawer-body a.lv2{padding-left:22px;font-size:13.5px}
+.drawer-body a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.drawer-body a:active{background:var(--bg-sunken)}
+
+/* ---------- back to top ---------- */
+#top-btn{
+  position:fixed;
+  right:max(16px,env(safe-area-inset-right));
+  bottom:calc(16px + env(safe-area-inset-bottom));
+  width:44px;height:44px;border-radius:50%;
+  background:var(--bg-elev);border:1px solid var(--border-strong);
+  box-shadow:var(--shadow-md);color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:40;
+  opacity:0;pointer-events:none;transform:translateY(8px);
+  transition:opacity .2s,transform .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+#top-btn.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+#top-btn:active{transform:scale(.92)}
+#top-btn svg{width:17px;height:17px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- desktop ---------- */
+@media (min-width:900px){
+  :root{--header-h:60px}
+  body{font-size:16.5px}
+  .wrap{display:grid;grid-template-columns:250px minmax(0,1fr);gap:52px;padding-left:32px;padding-right:32px}
+  .menu-btn{display:none}
+  .toc-card{display:none}
+  aside.sidebar{
+    position:sticky;
+    top:calc(var(--header-h) + env(safe-area-inset-top));
+    height:calc(100vh - var(--header-h) - env(safe-area-inset-top));
+    overflow-y:auto;
+    padding:34px 0 40px;
+    border-right:1px solid var(--border);
+    margin-right:-24px;padding-right:20px;
+  }
+  aside.sidebar .side-label{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--text-faint);margin-bottom:12px;padding-left:12px}
+  aside.sidebar a{
+    display:block;padding:6px 12px;border-radius:7px;
+    color:var(--text-muted);text-decoration:none;border:none;
+    font-size:13.5px;line-height:1.6;
+  }
+  aside.sidebar a.lv1{font-weight:800;color:var(--text);margin-top:12px;font-size:14px}
+  aside.sidebar a.lv1:first-of-type{margin-top:0}
+  aside.sidebar a.lv2{padding-left:22px;font-size:13px}
+  aside.sidebar a:hover{background:var(--bg-sunken);color:var(--text)}
+  aside.sidebar a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  main{padding-top:14px;padding-bottom:80px;max-width:780px}
+  .hero{padding-top:34px}
+  .copy:hover{background:rgba(255,255,255,.09)}
+  .code.prompt .copy:hover{background:var(--border)}
+  .link-card:hover{border-color:var(--accent-border);box-shadow:var(--shadow-md);transform:translateY(-1px);transition:.15s}
+  a:hover{border-bottom-color:var(--accent)}
+  #top-btn{right:32px;bottom:32px}
+}
+@media (max-width:899px){aside.sidebar{display:none}}
+@media (min-width:900px){nav.drawer,.scrim{display:none}}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="brand"><i class="dot"></i><span>コンサル水準のPowerPoint 完全ガイド</span></div>
+    <button class="menu-btn" id="menuBtn" aria-label="目次を開く" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="scrim" id="scrim"></div>
+<nav class="drawer" id="drawer" aria-label="目次">
+  <div class="drawer-head">
+    <span>目次</span>
+    <button class="menu-btn" id="closeBtn" style="display:flex" aria-label="目次を閉じる">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawerNav"></div>
+</nav>
+
+<div class="wrap">
+
+  <aside class="sidebar">
+    <div class="side-label">目次</div>
+    <div id="sideNav"></div>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <div class="eyebrow">スキルガイド</div>
+      <h1>コンサル水準の<br>PowerPoint 完全ガイド</h1>
+      <p class="lead">「PowerPointが使える」とは、見栄えのよいスライドを作れることではありません。<b>相手が何を判断すべきかを整理し、根拠を示し、短時間で理解・納得・意思決定できる資料にすること</b>です。式にすれば——<b>強い資料 ＝ 正しい問い × 明確な主張 × 十分な根拠 × 分かりやすい構造 × 意思決定のしやすさ</b>。初心者がプロ水準へ到達するために、具体的なメッセージ例・ビフォーアフター・チェックリストをふんだんに入れて体系化しました。</p>
+      <div class="meta">
+        <span class="chip">対象：<b>初心者〜実務者</b></span>
+        <span class="chip">到達目標：<b>プロ水準</b></span>
+        <span class="chip">具体例</span>
+        <span class="chip">論理 / 説得 / ストーリー</span>
+      </div>
+    </div>
+
+    <div class="toc-card">
+      <h2>目次</h2>
+      <ol id="tocCardList"></ol>
+    </div>
+
+    <!-- ============ intro ============ -->
+    <section class="chapter" id="intro">
+      <div class="chapter-head"><div class="badge">◎</div><h2>「PowerPointが使える」とは何か</h2></div>
+      <p>コンサルティング会社で「PowerPointが使える」とは、単に見栄えのよいスライドを作れることではありません。<b>相手が何を判断すべきかを整理し、根拠を示し、短時間で理解・納得・意思決定できる資料にすること</b>です。次の式で捉えられます。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">強い資料の方程式</span><button class="copy">コピー</button></div><pre><code>強い資料 = 正しい問い
+        × 明確な主張
+        × 十分な根拠
+        × 分かりやすい構造
+        × 意思決定のしやすさ
+
+どれか一つでも 0 なら、資料全体の価値も 0 に近づく（掛け算だから）</code></pre></div>
+      <p>この能力は、大きく次の領域で評価できます。本ガイドはこの順に、具体例とともに解説します。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>領域</th><th>問い</th><th>本ガイド</th></tr></thead>
+          <tbody>
+            <tr><td>所作</td><td>きれいに・速く・正確に作れるか</td><td>第1章</td></tr>
+            <tr><td>内容</td><td>何を載せ、何を削るか</td><td>第2章</td></tr>
+            <tr><td>論理</td><td>何を、どの順番で説明するか</td><td>第3章</td></tr>
+            <tr><td>スライド設計</td><td>1枚をどう作るか</td><td>第4章</td></tr>
+            <tr><td>ストーリー設計</td><td>資料全体をどう組むか</td><td>第5章</td></tr>
+            <tr><td>説得</td><td>相手を動かせるか</td><td>第6章</td></tr>
+            <tr><td>検証</td><td>完成前に何を確認するか</td><td>第7・8章</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>この資料の読み方</div>
+        <p>第1章で「土台の所作」を、第2〜3章で「中身と論理」を、第4〜5章で「1枚と全体の設計」を、第6章で「説得の条件」を、第7〜8章で「良し悪しの見分けと検証」を、第9〜10章で「実務の全体像と到達段階」をまとめます。メッセージ例やビフォーアフターはそのまま自分の資料に当てはめて使えます。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 1 ============ -->
+    <section class="chapter" id="ch1">
+      <div class="chapter-head"><div class="badge">1</div><h2>所作：きれいに、速く、正確に作る</h2></div>
+
+      <h3 id="ch1-1">1-1. 体裁を整える</h3>
+      <p>最低限、次のことが<b>無意識にできる</b>状態を目指します。体裁の乱れは「中身も雑では」という不信を生み、内容以前に減点されます。</p>
+      <ul class="bullets">
+        <li>フォント・文字サイズ・色を統一する</li>
+        <li>オブジェクトの位置・幅・間隔をそろえる</li>
+        <li>ページごとにタイトル位置がずれない</li>
+        <li>図形や表の余白をそろえる</li>
+        <li>数字・単位・小数点・桁区切りを統一する</li>
+        <li>図形や線を必要以上に増やさない</li>
+        <li>色を役割別に使う</li>
+        <li>出所・注記・ページ番号を決められた位置に置く</li>
+        <li>スライドマスターや既存テンプレートを崩さない</li>
+      </ul>
+      <p>特に重要なのは、<b>「なんとなく中央」「なんとなく同じ幅」ではなく、整列・均等配置・ガイドを使って正確に配置する</b>ことです。手作業でドラッグして揃えるのは素人の作業です。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>やること</th><th>機能・ショートカット</th></tr></thead>
+          <tbody>
+            <tr><td>複数オブジェクトを整列</td><td>配置 → 左/右/上/下/中央そろえ</td></tr>
+            <tr><td>間隔を均等にする</td><td>配置 → 左右/上下に整列（等間隔）</td></tr>
+            <tr><td>グリッド・ガイドを表示</td><td><code>Alt + F9</code>（ガイド）／表示 → ガイド</td></tr>
+            <tr><td>複製して等間隔に並べる</td><td><code>Ctrl + D</code>（1つ動かして繰り返すと等間隔複製）</td></tr>
+            <tr><td>水平/垂直を保って移動</td><td>ドラッグ中に <code>Shift</code></td></tr>
+            <tr><td>グループ化 / 解除</td><td><code>Ctrl + G</code> / <code>Ctrl + Shift + G</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>実務では<b>色にも役割を持たせます</b>。むやみに色数を増やさず、意味を固定します。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>色</th><th>役割の例</th></tr></thead>
+          <tbody>
+            <tr><td>ベース（黒／濃グレー）</td><td>本文・通常の要素</td></tr>
+            <tr><td>アクセント1（濃色）</td><td>結論・推奨案・注目させたい数字</td></tr>
+            <tr><td>薄グレー</td><td>比較対象・背景・補足（あえて目立たせない）</td></tr>
+            <tr><td>赤</td><td>問題・リスク・警告</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>プロの流儀：色数を絞る</div>
+        <p>1つの資料で使う色は<b>ベース＋アクセント＋グレー＋警告色の3〜4色</b>まで。虹のように色を使うと、どこが重要か分からなくなります。「色は装飾ではなく、視線を誘導する道具」と考えます。</p>
+      </div>
+
+      <h3 id="ch1-2">1-2. 文字の扱い</h3>
+      <p>文字を小さくして情報を詰め込むのではなく、<b>情報の優先順位をつけて削ることもPowerPointの能力</b>です。</p>
+      <ul class="bullets">
+        <li>原則として1つの資料内でフォントを統一する</li>
+        <li>本文・注記・タイトルなどの文字サイズにルールを持たせる</li>
+        <li>むやみに太字を使わない</li>
+        <li>強調箇所を1ページにつき1〜3か所程度に絞る</li>
+        <li>長い文章をそのまま貼らず、意味の単位で短くする</li>
+        <li>改行位置を意図的に決める（読点や意味の切れ目で折る）</li>
+        <li>体言止めと文章表現を混在させない</li>
+      </ul>
+      <div class="code"><div class="code-head"><span class="code-lang">悪い例 → 良い例（箇条書きの整え方）</span><button class="copy">コピー</button></div><pre><code>× 当社の強みとしては既存の顧客基盤があることが挙げられ、また
+   販売網も全国に広がっているという点も強みだと考えられます。
+
+○ 当社の強み
+   ・ 既存顧客基盤（○万件）
+   ・ 全国○拠点の販売網
+   ・ △△分野での実績（導入○社）
+   ┗ 体言止めで統一し、長文を要素に分解する</code></pre></div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>文字サイズの階層を決めておく</div>
+        <p>例：メッセージタイトル 20pt／小見出し 14pt／本文 12pt／注記・出所 9pt。この階層を資料全体で固定すると、読み手は文字の大きさだけで「どれが重要か」を判断できます。投影を考えると本文は<b>最低でも10〜12pt以上</b>が目安です。</p>
+      </div>
+
+      <h3 id="ch1-3">1-3. 作業スピード</h3>
+      <p>コンサルタントには、一定品質のスライドを<b>短時間で作る</b>能力が求められます。</p>
+      <ul class="bullets">
+        <li>コピー・複製・整列・グループ化をショートカットで行う</li>
+        <li>既存スライドの型を再利用する</li>
+        <li>ページを作る前に、紙やテキストで構造を考える</li>
+        <li>図表を一から描き直さず、適切な部品を流用する</li>
+        <li>Excelの表やグラフを用途に応じて貼り分ける</li>
+        <li>修正指示を漏れなく反映する</li>
+        <li>全ページの表記を一括して確認する</li>
+      </ul>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>操作</th><th>ショートカット（Windows）</th></tr></thead>
+          <tbody>
+            <tr><td>複製</td><td><code>Ctrl + D</code></td></tr>
+            <tr><td>コピー / 貼り付け / 書式のコピー</td><td><code>Ctrl+C</code> / <code>Ctrl+V</code> / <code>Ctrl+Shift+C→V</code></td></tr>
+            <tr><td>グループ化 / 解除</td><td><code>Ctrl+G</code> / <code>Ctrl+Shift+G</code></td></tr>
+            <tr><td>最前面 / 最背面へ</td><td>右クリック → 順序、または <code>Ctrl+Shift+]</code>/<code>[</code></td></tr>
+            <tr><td>直前の操作を繰り返す</td><td><code>Ctrl + Y</code>（整列や書式適用の連打に有効）</td></tr>
+            <tr><td>新しいスライド</td><td><code>Ctrl + M</code></td></tr>
+            <tr><td>スライド一覧で構成を見る</td><td>表示 → アウトライン / スライド一覧</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>速い人は「考えてから作る」</div>
+        <p>速い人は、操作が速いだけではありません。<b>紙やテキストで構造（各ページの主張）を先に決めてから作る</b>ため、手戻りが少ないのが特徴です。いきなりPowerPointを開いて作り始めると、途中で構成が破綻して作り直しになります（→第5章）。</p>
+      </div>
+
+      <h3 id="ch1-4">1-4. ファイル管理・レビュー対応</h3>
+      <ul class="bullets">
+        <li>ファイル名とバージョンを統一する（例：<code>案件名_資料名_v3_20260720.pptx</code>）</li>
+        <li>最新版がどれか分かるようにする</li>
+        <li>コメントや修正履歴を管理する</li>
+        <li>レビュー指示を一覧化する（漏れ防止）</li>
+        <li>修正したページだけでなく、関連ページへの影響も確認する</li>
+        <li>PDF化した状態でもレイアウトを確認する（フォント崩れ・図ずれ）</li>
+        <li>投影用・印刷用・配布用を使い分ける</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>「どれが最新か分からない」は事故のもと</div>
+        <p><code>最終版.pptx</code>／<code>最終版_修正.pptx</code>／<code>最終版_修正2.pptx</code> のような命名は必ず混乱します。<b>日付＋バージョン番号</b>で機械的に並ぶようにし、古い版は別フォルダに退避します。レビュー指示は「対応済み／未対応」を一覧で管理し、反映漏れをゼロにします。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 2 ============ -->
+    <section class="chapter" id="ch2">
+      <div class="chapter-head"><div class="badge">2</div><h2>内容：何を載せるか</h2></div>
+      <p>PowerPointは「情報を並べる箱」ではありません。<b>情報から意味を導き、相手に伝えるもの</b>です。</p>
+
+      <h3 id="ch2-1">2-1. ファクト・解釈・提案を分ける</h3>
+      <p>資料内では、次の3つを混同しないことが重要です。弱い資料はファクトを並べて終わり、強い資料は提案まで進みます。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>区分</th><th>内容</th><th>例</th></tr></thead>
+          <tbody>
+            <tr><td>ファクト</td><td>客観的に確認できる事実</td><td>市場規模は過去5年で年率8%成長している</td></tr>
+            <tr><td>解釈・示唆</td><td>ファクトから読み取れる意味</td><td>市場は拡大しているが、成長は都市部に偏っている</td></tr>
+            <tr><td>提案</td><td>取るべき行動</td><td>まず都市部の高価格帯セグメントに参入すべき</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code"><div class="code-head"><span class="code-lang">強い資料の思考の流れ</span><button class="copy">コピー</button></div><pre><code>ファクト  →  だから何が言えるか（示唆）  →  何をすべきか（提案）
+  市場8%成長      成長は都市部・高価格帯に集中      都市部の高価格帯に参入すべき
+
+弱い資料は最初の「ファクト」で止まる。強い資料は必ず「提案」まで進む。</code></pre></div>
+
+      <h3 id="ch2-2">2-2. 定量的な裏付け</h3>
+      <p>市場規模・成長率・シェア・売上/利益への影響・投資額・回収期間・実行期間・必要人員・リスクの大きさ——などを、<b>可能な限り数字で示します</b>。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">定性 → 定量</span><button class="copy">コピー</button></div><pre><code>× 「大きな効果が期待できる」
+○ 「年間約3億円の利益改善が見込まれ、初期投資は約18か月で回収できる」
+
+数字が入るだけで、主張は検証可能になり、説得力が跳ね上がる。</code></pre></div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>数字の精度を過度に装わない</div>
+        <p>推計にすぎない数字を「3.14億円」と書くと、あたかも精密に計算したように見えて誤解を招きます。<b>事実・推計・仮定を分けて示し</b>、推計なら「約3億円」「3〜3.5億円」のように精度を正直に表現します。前提を注記に明記するのがプロの流儀です。</p>
+      </div>
+
+      <h3 id="ch2-3">2-3. 定性的な情報</h3>
+      <p>数字だけでは説明できない場合は、次のような情報を使います。顧客インタビュー／従業員インタビュー／現場観察／有識者の見解／競合事例／顧客の発言／業務プロセス／組織上の課題／制度・規制。</p>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>インタビューは「並べず、整理する」</div>
+        <p>インタビュー結果は発言をそのまま羅列するのではなく、<b>共通するパターンや原因に整理</b>します。「A氏はこう言った、B氏はこう言った」ではなく、「現場からは<b>3つの共通課題</b>——①引継ぎ不足 ②システムの二重入力 ③評価基準の不透明——が挙がった」とまとめて初めて、示唆になります。</p>
+      </div>
+
+      <h3 id="ch2-4">2-4. 図表の選択</h3>
+      <p>重要なのはグラフを作ることではなく、<b>「この図表で何を読み取ってほしいか」が明確であること</b>です。伝えたいことから図表を選びます。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>伝えたいこと</th><th>適した表現</th></tr></thead>
+          <tbody>
+            <tr><td>時系列の変化</td><td>折れ線グラフ</td></tr>
+            <tr><td>項目間の比較</td><td>棒グラフ</td></tr>
+            <tr><td>構成比</td><td>積み上げ棒、ウォーターフォール</td></tr>
+            <tr><td>2変数の関係</td><td>散布図</td></tr>
+            <tr><td>プロセス</td><td>フロー図</td></tr>
+            <tr><td>因果関係</td><td>ロジックツリー、因果図</td></tr>
+            <tr><td>役割分担</td><td>体制図、RACI</td></tr>
+            <tr><td>時間軸（計画）</td><td>ロードマップ、ガントチャート</td></tr>
+            <tr><td>選択肢の評価</td><td>評価表、マトリクス</td></tr>
+            <tr><td>市場や競合の位置づけ</td><td>ポジショニングマップ</td></tr>
+            <tr><td>収益構造</td><td>ドライバーツリー、収益ブリッジ</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>グラフは「読ませたい1点」を強調する</div>
+        <p>棒グラフなら、注目してほしい系列だけ濃い色にして残りをグレーにする。折れ線なら、転換点に注記を添える。<b>「タイトルで結論を言い、図で示す」</b>——タイトルが「都市部が成長の7割を占める」なら、都市部の棒だけを目立たせます（→4-4）。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 3 ============ -->
+    <section class="chapter" id="ch3">
+      <div class="chapter-head"><div class="badge">3</div><h2>論理：何を、どの順番で説明するか</h2></div>
+
+      <h3 id="ch3-1">3-1. 問いを明確にする</h3>
+      <p>資料作成の前に、まず<b>「この資料で答える問い」</b>を決めます。問いが曖昧なまま作ると、情報は多いが結論のない資料になります。</p>
+      <ul class="bullets">
+        <li>この市場に参入すべきか</li>
+        <li>どの顧客層を狙うべきか</li>
+        <li>なぜ利益率が低下しているのか</li>
+        <li>どの施策を優先すべきか</li>
+        <li>この投資を承認すべきか</li>
+        <li>どの組織体制で実行すべきか</li>
+      </ul>
+
+      <h3 id="ch3-2">3-2. 結論と根拠を構造化する</h3>
+      <p>基本は<b>ピラミッド構造</b>です。頂点に結論を置き、それを複数の根拠が支え、各根拠をファクトと分析が支えます。</p>
+      <div class="tree">結論：A市場へ参入すべきである
+├─ 根拠1：市場の成長性が高い
+│   ├─ ファクト：市場規模は年率8%成長
+│   └─ 分析：都市部・高価格帯が成長の7割
+├─ 根拠2：自社の強みを活用できる
+│   ├─ ファクト：既存顧客○万件・全国○拠点
+│   └─ 分析：新規参入コストを△割圧縮できる
+├─ 根拠3：競争優位を構築できる
+│   └─ 競合が未充足のニーズが存在
+└─ 根拠4：十分な投資リターンが見込める
+    └─ 5年目に営業利益○億円、IRR○%</div>
+      <p>この構造ができていれば、資料の骨格は完成しています。あとは各枝を1〜数枚のスライドに展開するだけです。</p>
+
+      <h3 id="ch3-3">3-3. MECEに整理する</h3>
+      <p>漏れや重複を減らし、論点を整理します。指標を構造で分解します。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">MECEな分解の例</span><button class="copy">コピー</button></div><pre><code>利益   = 売上 − 費用
+売上   = 顧客数 × 購入頻度 × 単価
+ホテル = 客室数 × 稼働率 × ADR + 飲食売上 + その他売上
+
+分解すると「どこを改善すれば効くか」が構造で見える。</code></pre></div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>MECEは目的ではなく手段</div>
+        <p>きれいに分けること自体が目的ではありません。<b>問題の原因や施策の優先順位を見つけるため</b>に分解します。分けたのに「で、結局どこが問題なのか」が示せなければ、その分解は意味がありません。</p>
+      </div>
+
+      <h3 id="ch3-4">3-4. 「So What?」を繰り返す</h3>
+      <p>ファクトを見たら、次の問いを繰り返します——<b>だから何なのか／クライアントにとって何が問題なのか／意思決定にどう影響するのか／次に何をすべきなのか</b>。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">So What? で示唆まで進める</span><button class="copy">コピー</button></div><pre><code>△ 事実だけ：
+   「競合3社が新店舗を出店している」
+
+○ So What? を重ねた後：
+   「競合3社が主要都市で出店を加速しており、現在の出店計画では
+    2年以内に有望立地の確保が難しくなる。
+    そのため、出店判断を半年以内に行う必要がある。」
+   ┗ ここまで来て初めて、意思決定につながる。</code></pre></div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 4 ============ -->
+    <section class="chapter" id="ch4">
+      <div class="chapter-head"><div class="badge">4</div><h2>スライド設計：1枚をどう作るか</h2></div>
+
+      <h3 id="ch4-1">4-1. 1スライド・1メッセージ</h3>
+      <p>1枚の中で伝える主張を<b>原則1つ</b>に絞ります。タイトルを読んだだけで、そのページの結論が分かる状態が理想です。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">タイトルは「項目名」でなく「結論」に</span><button class="copy">コピー</button></div><pre><code>× 「市場分析」                       ← 項目名。何が言いたいか不明
+○ 「国内市場は年率8%で拡大しているが、
+    成長の約7割は都市部の高価格帯が占める」  ← 結論。読めば主張が分かる</code></pre></div>
+
+      <h3 id="ch4-2">4-2. 基本構成</h3>
+      <p>コンサル資料の1ページは、概ね次の構造です。要素の位置を全ページで固定すると、読み手は迷いません。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>要素</th><th>役割</th></tr></thead>
+          <tbody>
+            <tr><td>メッセージタイトル</td><td>このページで言いたいこと（＝結論）</td></tr>
+            <tr><td>ボディ</td><td>主張を説明する図表・文章</td></tr>
+            <tr><td>強調箇所</td><td>特に見てほしい数字や部分</td></tr>
+            <tr><td>出所</td><td>データの出典</td></tr>
+            <tr><td>注記</td><td>前提条件や定義</td></tr>
+            <tr><td>ページ番号</td><td>資料内の位置</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="ch4-3">4-3. タイトルとボディを一致させる</h3>
+      <p>タイトルが「A市場に参入すべき」と言っているのに、ボディが市場規模しか示していない場合、<b>根拠が不足</b>しています。参入を主張するなら、少なくとも次の根拠が必要です。</p>
+      <ul class="bullets">
+        <li>市場性（伸びているか）</li>
+        <li>自社との適合性（強みが活きるか）</li>
+        <li>競争環境（勝てるか）</li>
+        <li>収益性（儲かるか）</li>
+        <li>リスク（何が危ういか、対応できるか）</li>
+      </ul>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>「タイトルの主張＝ボディの中身」を必ず点検</div>
+        <p>各ページで「このタイトルを証明するのに、この図表で足りているか？」を自問します。タイトルが約束したことをボディが果たしていないページは、<b>読み手の中に疑問だけを残します</b>。</p>
+      </div>
+
+      <h3 id="ch4-4">4-4. 強調に意味を持たせる</h3>
+      <p>強調は、相手の<b>視線を誘導する</b>ために使います。</p>
+      <ul class="bullets">
+        <li>結論だけを太字にする</li>
+        <li>注目する系列だけ色をつける</li>
+        <li>比較対象をグレーにする（あえて目立たせない）</li>
+        <li>重要な数字を大きくする</li>
+        <li>問題箇所を赤、推奨案を青など、役割を統一する</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>すべてを強調すると、何も強調されない</div>
+        <p>全部を太字・全部を赤・全部を大きくすると、視線の行き先が消え、強調はゼロと同じになります。1ページで<b>「まずここを見て」という1点</b>を決め、それ以外は静かにします。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 5 ============ -->
+    <section class="chapter" id="ch5">
+      <div class="chapter-head"><div class="badge">5</div><h2>ストーリー設計：資料全体をどう組むか</h2></div>
+
+      <h3 id="ch5-1">5-1. 誰に、何を決めてもらうか</h3>
+      <p>資料を作る前に、次を決めます。読み手が変われば、必要な情報も変わります。</p>
+      <ul class="bullets">
+        <li>読み手は誰か</li>
+        <li>読み手は何を知っているか</li>
+        <li>何に反対しそうか</li>
+        <li>何を不安に思うか</li>
+        <li>最後に何を決めてもらいたいか</li>
+        <li>読後に何をしてほしいか</li>
+      </ul>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>読み手</th><th>重視する情報</th></tr></thead>
+          <tbody>
+            <tr><td>社長・経営層</td><td>投資効果・リスク・意思決定事項</td></tr>
+            <tr><td>現場責任者</td><td>具体的な業務変更・役割・スケジュール</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="ch5-2">5-2. ストーリーラインを先に作る</h3>
+      <p>PowerPointを開く前に、<b>各ページのメッセージ（タイトル）だけを並べます</b>。このタイトルだけを読んで主張がつながっていれば、資料の骨格はできています。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">ストーリーライン例：新規事業への参入提案</span><button class="copy">コピー</button></div><pre><code>1. 本日の意思決定事項
+2. 市場は今後5年間で年率8%成長する
+3. 高価格帯が市場成長の約7割を占める
+4. 自社の既存顧客・販売網を活用できる
+5. 競合が未充足の顧客ニーズが存在する
+6. 参入により5年目に営業利益10億円を見込める
+7. 最大のリスクは人材確保だが、提携によって軽減できる
+8. まず3地域で実証を行うべきである
+9. 投資承認とプロジェクト開始をお願いしたい
+
+タイトルを上から読むだけで、話が一本につながっているかを確認する。</code></pre></div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>「タイトルだけ音読」テスト</div>
+        <p>完成後、各ページのタイトルだけを順に音読してみます。それだけで<b>提案の要旨が伝わり、論理が飛んでいない</b>なら合格。途中で「なぜ急にこの話？」となる箇所が、論理の穴です。</p>
+      </div>
+
+      <h3 id="ch5-3">5-3. よく使われる全体構成</h3>
+      <p>提案資料の基本形です。すべての案件でこの順を使うのではなく、<b>相手の関心と意思決定に合わせて組み替えます</b>。</p>
+      <ol class="steps">
+        <li>エグゼクティブサマリー</li>
+        <li>背景・目的</li>
+        <li>現状認識</li>
+        <li>課題</li>
+        <li>課題の原因</li>
+        <li>解決方針</li>
+        <li>具体的施策</li>
+        <li>効果</li>
+        <li>リスクと対応策</li>
+        <li>実行計画</li>
+        <li>意思決定事項</li>
+        <li>Appendix</li>
+      </ol>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>最初に結論（エグゼクティブサマリー）</div>
+        <p>忙しい経営層は最初の1〜2枚しか読まないこともあります。<b>結論・根拠の要約・依頼事項を冒頭に置く</b>のが鉄則です。詳細な分析はAppendixに回し、本編は意思決定に必要な最小限に絞ります。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 6 ============ -->
+    <section class="chapter" id="ch6">
+      <div class="chapter-head"><div class="badge">6</div><h2>説得：強い資料とは何か</h2></div>
+      <p>クライアントを説得する資料には、次の6条件があります。</p>
+
+      <h3 id="ch6-1">6-1. 結論が明確</h3>
+      <p><b>何を提案しているのか／何を決めてほしいのか／なぜ今決める必要があるのか</b>が明確です。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">曖昧 → 明確</span><button class="copy">コピー</button></div><pre><code>× 「検討が必要です」
+○ 「A案を採用し、2027年4月の導入に向けて
+    今月中に実行準備を開始すべき」
+   ┗ 何を・いつ・今何をするか、まで具体化する</code></pre></div>
+
+      <h3 id="ch6-2">6-2. 根拠が十分</h3>
+      <p>強い資料は、主張を<b>複数の根拠</b>で支えます。社内実績／顧客データ／市場データ／競合事例／インタビュー／現場観察／財務シミュレーション／小規模な実証実験。<b>1つのデータだけで大きな結論を出さない</b>ことが重要です。</p>
+
+      <h3 id="ch6-3">6-3. 反論を先回りしている</h3>
+      <p>説得力のある資料は、都合のよい情報だけを並べません。想定される反論を先に挙げ、資料内で答えます。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>想定反論</th><th>資料内で答えるべきこと</th></tr></thead>
+          <tbody>
+            <tr><td>費用が高いのでは</td><td>回収期間・費用対効果の試算</td></tr>
+            <tr><td>現場が対応できないのでは</td><td>移行計画・教育・体制</td></tr>
+            <tr><td>売上予測が楽観的では</td><td>Downside前提でも成立することの提示</td></tr>
+            <tr><td>競合に模倣されないか</td><td>模倣困難性・先行優位</td></tr>
+            <tr><td>失敗した場合の損失は</td><td>最大損失額と撤退条件</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="ch6-4">6-4. 選択肢と評価基準が明確</h3>
+      <p>最初から1案だけを押しつけるより、<b>複数案を共通の基準で評価し、推奨案を示す</b>方が説得力があります。A案／B案／C案／現状維持 を並べます。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>評価基準</th><th>A案</th><th>B案</th><th>現状維持</th></tr></thead>
+          <tbody>
+            <tr><td>売上・利益への効果</td><td>◎</td><td>○</td><td>×</td></tr>
+            <tr><td>実現可能性</td><td>○</td><td>◎</td><td>◎</td></tr>
+            <tr><td>必要な投資</td><td>△（大）</td><td>○（中）</td><td>◎（無）</td></tr>
+            <tr><td>実行スピード</td><td>○</td><td>◎</td><td>—</td></tr>
+            <tr><td>リスク</td><td>中</td><td>低</td><td>—</td></tr>
+            <tr><td>戦略との整合性</td><td>◎</td><td>○</td><td>×</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>評価基準の例：売上・利益への効果／実現可能性／必要な投資／実行スピード／リスク／戦略との整合性／顧客への影響。<b>基準を先に示し、その基準で公平に比較した結果として推奨案を導く</b>と、押しつけ感がなくなります。</p>
+
+      <h3 id="ch6-5">6-5. 実行可能性がある</h3>
+      <p>戦略だけで終わらせず、次まで示すと提案が現実的になります。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">実行計画に落とす6要素</span><button class="copy">コピー</button></div><pre><code>誰が   ・ 何を   ・ いつまでに
+どの順番で   ・ いくらかけて   ・ どのKPIで管理するか
+
+これが埋まって初めて「絵に描いた餅」ではなくなる。</code></pre></div>
+
+      <h3 id="ch6-6">6-6. 相手の言葉で書かれている</h3>
+      <p>クライアントが日常的に使う用語・組織名・KPIに合わせます。抽象的なコンサル用語より、相手の現場の言葉が伝わります。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">抽象 → 相手の言葉</span><button class="copy">コピー</button></div><pre><code>× 「顧客体験を高度化する」
+○ 「チェックイン待ち時間を平均12分から5分以内に短縮する」
+   ┗ 相手が測れる・イメージできる言葉に翻訳する</code></pre></div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 7 ============ -->
+    <section class="chapter" id="ch7">
+      <div class="chapter-head"><div class="badge">7</div><h2>弱い資料と強い資料の違い</h2></div>
+      <p>これまでの内容を一覧にすると、良し悪しは次の対比に集約されます。自分の資料を点検するチェックリストとして使ってください。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>弱い資料</th><th>強い資料</th></tr></thead>
+          <tbody>
+            <tr><td>情報が多い</td><td>意思決定に必要な情報に絞られている</td></tr>
+            <tr><td>タイトルが項目名</td><td>タイトルが結論になっている</td></tr>
+            <tr><td>ファクトを並べる</td><td>ファクトから示唆を導いている</td></tr>
+            <tr><td>定性的な表現が多い</td><td>数字で効果や規模を示している</td></tr>
+            <tr><td>1案だけ提示する</td><td>選択肢を比較して推奨案を示す</td></tr>
+            <tr><td>メリットだけ示す</td><td>リスクと対応策も示す</td></tr>
+            <tr><td>戦略で終わる</td><td>実行計画まで落とし込む</td></tr>
+            <tr><td>誰向けか分からない</td><td>読み手と意思決定事項が明確</td></tr>
+            <tr><td>すべてが強調されている</td><td>視線の順番が設計されている</td></tr>
+            <tr><td>読まないと分からない</td><td>タイトルを追うだけで概要が分かる</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 8 ============ -->
+    <section class="chapter" id="ch8">
+      <div class="chapter-head"><div class="badge">8</div><h2>検証：完成前に何を確認するか</h2></div>
+      <p>提出前に、3つの観点で必ず点検します。一つでも引っかかれば、その資料はまだ提出できません。</p>
+
+      <h3 id="ch8-1">8-1. 内容の検証</h3>
+      <ul class="bullets">
+        <li>結論は問いに答えているか</li>
+        <li>主張に十分な根拠があるか</li>
+        <li>ファクトと推計が区別されているか</li>
+        <li>数字の出所があるか</li>
+        <li>数字の合計や比率が合っているか</li>
+        <li>ExcelとPowerPointの数字が一致しているか</li>
+        <li>前提条件が明示されているか</li>
+        <li>反対意見に答えられるか</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>ExcelとPowerPointの数字ずれ</div>
+        <p>元のExcelを更新したのにスライドの数字が古いまま、というのは頻発する事故です。<b>提出前に、スライド上のすべての数字を元データと突き合わせます</b>。グラフの軸・単位・合計が本文の主張と矛盾していないかも確認します。</p>
+      </div>
+
+      <h3 id="ch8-2">8-2. ストーリーの検証</h3>
+      <ul class="bullets">
+        <li>タイトルだけを読んで話がつながるか（→5-2の音読テスト）</li>
+        <li>同じ説明を複数ページで繰り返していないか</li>
+        <li>途中で論点が変わっていないか</li>
+        <li>結論が突然出てきていないか</li>
+        <li>読み手が知りたい順番になっているか</li>
+      </ul>
+
+      <h3 id="ch8-3">8-3. 体裁の検証</h3>
+      <ul class="bullets">
+        <li>フォント・色・線・余白が統一されているか</li>
+        <li>図表や文章が切れていないか</li>
+        <li>単位・小数点・日付表記が統一されているか</li>
+        <li>出所・注記・ページ番号があるか</li>
+        <li>投影したときに読める大きさか</li>
+        <li>白黒印刷でも意味が伝わるか</li>
+      </ul>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>白黒印刷・投影を必ず想定する</div>
+        <p>画面ではきれいでも、白黒印刷すると色分けが潰れて区別できないことがあります。<b>濃淡・パターン・ラベルでも区別できる</b>ようにします。投影ではさらに文字が小さく見えるため、後方の席から読めるかを実際に確認します。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 9 ============ -->
+    <section class="chapter" id="ch9">
+      <div class="chapter-head"><div class="badge">9</div><h2>コンサルティング会社が作るPowerPointの全体像</h2></div>
+      <p>実務では大きく「営業」「調査・分析」「戦略・提言」「M&amp;A・投資」「実行支援」「経営・意思決定」の資料に分かれます。どんな案件でどんな資料が使われるかを俯瞰しておきます。</p>
+
+      <h3>営業・案件獲得</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>資料</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td>会社紹介資料</td><td>会社概要、強み、実績、サービス</td></tr>
+            <tr><td>提案書</td><td>クライアント課題、アプローチ、体制、期間、費用</td></tr>
+            <tr><td>プロジェクト計画書</td><td>目的、スコープ、成果物、進め方</td></tr>
+            <tr><td>RFP回答書</td><td>発注要件への回答、方法論、実績、見積</td></tr>
+            <tr><td>ピッチ資料</td><td>短時間で案件や事業の魅力を伝える</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>調査・分析</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>資料</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td>市場調査</td><td>市場規模、成長性、構造、トレンド</td></tr>
+            <tr><td>競合分析</td><td>競合の戦略、商品、価格、ポジション</td></tr>
+            <tr><td>顧客分析</td><td>セグメント、ニーズ、購買行動</td></tr>
+            <tr><td>ベンチマーク調査</td><td>他社・他業界との比較</td></tr>
+            <tr><td>海外事例調査</td><td>海外企業・制度・先進事例</td></tr>
+            <tr><td>現状分析</td><td>業績、組織、業務、システムの課題</td></tr>
+            <tr><td>インタビュー報告</td><td>経営者、従業員、顧客の意見整理</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>戦略・提言</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>資料</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td>全社戦略</td><td>成長領域、事業ポートフォリオ、資源配分</td></tr>
+            <tr><td>事業戦略</td><td>市場、顧客、競争優位、収益モデル</td></tr>
+            <tr><td>新規事業計画</td><td>市場機会、事業モデル、収支、参入計画</td></tr>
+            <tr><td>営業戦略</td><td>顧客区分、営業プロセス、KPI</td></tr>
+            <tr><td>マーケティング戦略</td><td>ターゲット、ポジショニング、施策</td></tr>
+            <tr><td>ブランド戦略</td><td>ブランド価値、顧客体験、表現方針</td></tr>
+            <tr><td>DX・IT戦略</td><td>システム構想、導入優先順位、ロードマップ</td></tr>
+            <tr><td>組織・人事戦略</td><td>組織設計、人員計画、評価制度</td></tr>
+            <tr><td>コスト削減計画</td><td>削減余地、施策、効果、実行方法</td></tr>
+            <tr><td>事業再生計画</td><td>課題、改善施策、資金・収益計画</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>M&amp;A・投資関連</h3>
+      <ul class="bullets">
+        <li>買収候補企業の分析／ビジネス・デューデリジェンス</li>
+        <li>市場性・競争力評価／シナジー分析</li>
+        <li>PMI計画／投資委員会向け資料</li>
+        <li>事業価値向上計画／売却戦略／経営改善計画</li>
+      </ul>
+
+      <h3>実行支援・PMO</h3>
+      <ul class="bullets">
+        <li>キックオフ資料／プロジェクト管理資料／進捗報告</li>
+        <li>課題・リスク管理／体制図／業務フロー／要件定義資料</li>
+        <li>施策実行計画／KPIモニタリング／ロードマップ／会議体設計</li>
+        <li>チェンジマネジメント計画／社内説明資料・研修資料</li>
+      </ul>
+
+      <h3>経営・意思決定</h3>
+      <ul class="bullets">
+        <li>経営会議資料／取締役会資料／ステアリングコミッティ資料</li>
+        <li>月次・四半期業績報告／投資判断資料</li>
+        <li>予算・中期経営計画／エグゼクティブサマリー／意思決定メモ／最終報告書</li>
+      </ul>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 10 ============ -->
+    <section class="chapter" id="ch10">
+      <div class="chapter-head"><div class="badge">10</div><h2>スキルレベルで見る「PowerPointが使える」</h2></div>
+      <p>自分が今どの段階にいて、次に何を伸ばすべきかを把握しましょう。上の段階ほど、技術より<b>「設計する力」</b>が問われます。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>レベル</th><th>状態</th><th>できること</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>操作できる</td><td>文字・図形・画像を配置、グラフや表を貼る、既存資料を修正</td></tr>
+            <tr><td>2</td><td>きれいに作れる</td><td>位置・余白・フォント・色を統一、テンプレートに沿って速く、読みやすい図表</td></tr>
+            <tr><td>3</td><td>論理的に作れる</td><td>1ページ1メッセージ、タイトルを結論に、ファクトから示唆、結論と根拠の構造化</td></tr>
+            <tr><td>4</td><td>説得できる</td><td>相手の関心・反論を想定、選択肢を比較し推奨、数字/事例/インタビューの組合せ、意思決定につながるストーリー</td></tr>
+            <tr><td>5</td><td>意思決定を動かせる</td><td>経営者が短時間で判断できる資料を設計、複雑な議論を単純化、資料で会議を進行、合意形成の障害を織り込む、戦略から実行まで一貫説明</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>レベル5：意思決定を動かせる</div>
+        <ul class="bullets" style="margin-top:6px">
+          <li>経営者が短時間で判断できる資料を設計できる</li>
+          <li>複雑な議論を単純化できる</li>
+          <li>資料を使って会議を進行できる</li>
+          <li>合意形成の障害を予測して資料に織り込める</li>
+          <li>戦略から実行計画まで一貫して説明できる</li>
+        </ul>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ summary ============ -->
+    <section class="chapter" id="summary">
+      <div class="chapter-head"><div class="badge">＃</div><h2>まとめ</h2></div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>最も重要なのは「技術」ではなく「設計」</div>
+        <p>最終的には、PowerPointの技術よりも——</p>
+        <p style="margin-top:8px"><b>「誰に、何を決めてもらうために、どの事実を、どの順番で示すか」</b></p>
+        <p style="margin-top:8px">を設計する力が、コンサルタントにとって最も重要です。整列やフォントといった所作（第1章）は土台にすぎません。その上で、ファクトから示唆を導き（第2〜3章）、1枚と全体を設計し（第4〜5章）、反論に備えて選択肢と実行計画まで示し（第6章）、提出前に必ず検証する（第8章）。この一連を回せるようになれば、資料は「作るもの」から「意思決定を動かすもの」へ変わります。</p>
+      </div>
+    </section>
+
+    <footer>
+      コンサル水準のPowerPoint 完全ガイド ／ 作成日：2026-07-20
+    </footer>
+
+  </main>
+</div>
+
+<button id="top-btn" aria-label="ページ先頭へ戻る">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---- build nav from headings ---- */
+  var NAV = [
+    {id:"intro", label:"「PowerPointが使える」とは", num:"◎", children:[]},
+    {id:"ch1", label:"所作：きれいに・速く・正確に", num:"1", children:[
+      {id:"ch1-1", label:"1-1. 体裁を整える"},
+      {id:"ch1-2", label:"1-2. 文字の扱い"},
+      {id:"ch1-3", label:"1-3. 作業スピード"},
+      {id:"ch1-4", label:"1-4. ファイル管理・レビュー"}
+    ]},
+    {id:"ch2", label:"内容：何を載せるか", num:"2", children:[
+      {id:"ch2-1", label:"2-1. ファクト・解釈・提案"},
+      {id:"ch2-2", label:"2-2. 定量的な裏付け"},
+      {id:"ch2-3", label:"2-3. 定性的な情報"},
+      {id:"ch2-4", label:"2-4. 図表の選択"}
+    ]},
+    {id:"ch3", label:"論理：何をどの順で説明するか", num:"3", children:[
+      {id:"ch3-1", label:"3-1. 問いを明確にする"},
+      {id:"ch3-2", label:"3-2. 結論と根拠の構造化"},
+      {id:"ch3-3", label:"3-3. MECEに整理する"},
+      {id:"ch3-4", label:"3-4. So What?を繰り返す"}
+    ]},
+    {id:"ch4", label:"スライド設計：1枚をどう作るか", num:"4", children:[
+      {id:"ch4-1", label:"4-1. 1スライド・1メッセージ"},
+      {id:"ch4-2", label:"4-2. 基本構成"},
+      {id:"ch4-3", label:"4-3. タイトルとボディの一致"},
+      {id:"ch4-4", label:"4-4. 強調に意味を持たせる"}
+    ]},
+    {id:"ch5", label:"ストーリー設計：全体をどう組むか", num:"5", children:[
+      {id:"ch5-1", label:"5-1. 誰に何を決めてもらうか"},
+      {id:"ch5-2", label:"5-2. ストーリーラインを先に"},
+      {id:"ch5-3", label:"5-3. よく使う全体構成"}
+    ]},
+    {id:"ch6", label:"説得：強い資料の6条件", num:"6", children:[
+      {id:"ch6-1", label:"6-1. 結論が明確"},
+      {id:"ch6-2", label:"6-2. 根拠が十分"},
+      {id:"ch6-3", label:"6-3. 反論を先回りする"},
+      {id:"ch6-4", label:"6-4. 選択肢と評価基準"},
+      {id:"ch6-5", label:"6-5. 実行可能性がある"},
+      {id:"ch6-6", label:"6-6. 相手の言葉で書く"}
+    ]},
+    {id:"ch7", label:"弱い資料と強い資料の違い", num:"7", children:[]},
+    {id:"ch8", label:"検証：完成前に確認する", num:"8", children:[
+      {id:"ch8-1", label:"8-1. 内容の検証"},
+      {id:"ch8-2", label:"8-2. ストーリーの検証"},
+      {id:"ch8-3", label:"8-3. 体裁の検証"}
+    ]},
+    {id:"ch9", label:"コンサルが作る資料の全体像", num:"9", children:[]},
+    {id:"ch10", label:"スキルの5段階", num:"10", children:[]},
+    {id:"summary", label:"まとめ", num:"＃", children:[]}
+  ];
+
+  function buildNav(host){
+    var frag = document.createDocumentFragment();
+    NAV.forEach(function(sec){
+      var a = document.createElement("a");
+      a.href = "#" + sec.id; a.className = "lv1"; a.textContent = sec.label;
+      a.dataset.target = sec.id;
+      frag.appendChild(a);
+      sec.children.forEach(function(c){
+        var b = document.createElement("a");
+        b.href = "#" + c.id; b.className = "lv2"; b.textContent = c.label;
+        b.dataset.target = c.id;
+        frag.appendChild(b);
+      });
+    });
+    host.appendChild(frag);
+  }
+  buildNav(document.getElementById("sideNav"));
+  buildNav(document.getElementById("drawerNav"));
+
+  var tocList = document.getElementById("tocCardList");
+  NAV.forEach(function(sec){
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = "#" + sec.id;
+    a.innerHTML = '<span class="num">' + sec.num + "</span>";
+    var t = document.createElement("span");
+    t.textContent = sec.label;
+    a.appendChild(t);
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  /* ---- drawer ---- */
+  var body = document.body;
+  var menuBtn = document.getElementById("menuBtn");
+  var closeBtn = document.getElementById("closeBtn");
+  var scrim = document.getElementById("scrim");
+  function openNav(){ body.classList.add("nav-open"); menuBtn.setAttribute("aria-expanded","true"); }
+  function closeNav(){ body.classList.remove("nav-open"); menuBtn.setAttribute("aria-expanded","false"); }
+  menuBtn.addEventListener("click", openNav);
+  closeBtn.addEventListener("click", closeNav);
+  scrim.addEventListener("click", closeNav);
+  document.getElementById("drawerNav").addEventListener("click", function(e){
+    if (e.target.closest("a")) closeNav();
+  });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeNav(); });
+
+  /* ---- copy buttons ---- */
+  document.querySelectorAll(".copy").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var code = btn.closest(".code").querySelector("code");
+      var text = code.innerText;
+      var done = function(){
+        btn.textContent = "コピー済み";
+        btn.classList.add("done");
+        setTimeout(function(){ btn.textContent = "コピー"; btn.classList.remove("done"); }, 1600);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else { fallback(); }
+      function fallback(){
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch(err){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  /* ---- scrollspy + progress + top button ---- */
+  var links = Array.prototype.slice.call(document.querySelectorAll("#sideNav a, #drawerNav a"));
+  var targets = links.map(function(a){ return document.getElementById(a.dataset.target); });
+  var progress = document.getElementById("progress");
+  var topBtn = document.getElementById("top-btn");
+  var ticking = false;
+  var headerH = 0;
+
+  function measure(){
+    headerH = document.querySelector("header").offsetHeight;
+  }
+  measure();
+  window.addEventListener("resize", measure);
+
+  function update(){
+    ticking = false;
+    var y = window.scrollY || window.pageYOffset;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (max > 0 ? Math.min(100, (y / max) * 100) : 0) + "%";
+    topBtn.classList.toggle("show", y > 500);
+
+    var line = y + headerH + 40;
+    var activeIdx = -1;
+    for (var i = 0; i < targets.length; i++){
+      var el = targets[i];
+      if (el && el.getBoundingClientRect().top + y <= line) activeIdx = i;
+    }
+    links.forEach(function(a, i){ a.classList.toggle("active", i === activeIdx); });
+
+    if (activeIdx > -1){
+      var act = links[activeIdx];
+      if (act.closest("#sideNav")){
+        var side = document.querySelector("aside.sidebar");
+        if (side && side.offsetParent !== null){
+          var r = act.getBoundingClientRect(), sr = side.getBoundingClientRect();
+          if (r.top < sr.top + 8 || r.bottom > sr.bottom - 8){
+            side.scrollTop += r.top - sr.top - side.clientHeight / 2;
+          }
+        }
+      }
+    }
+  }
+  window.addEventListener("scroll", function(){
+    if (!ticking){ ticking = true; requestAnimationFrame(update); }
+  }, {passive:true});
+  update();
+
+  topBtn.addEventListener("click", function(){
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+})();
+</script>
+</body>
+</html>
