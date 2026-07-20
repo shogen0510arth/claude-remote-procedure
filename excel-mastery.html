@@ -599,11 +599,18 @@ body.nav-open nav.drawer{transform:translateX(0)}
         </table>
       </div>
       <p>表示形式は「見た目だけ」を変え、元の値は保持します。代表的なユーザー定義書式の例です。</p>
-      <div class="code"><div class="code-head"><span class="code-lang">表示形式（ユーザー定義）</span><button class="copy">コピー</button></div><pre><code>#,##0        → 12345 を 12,345
-#,##0"千円"  → 12345 を 12,345千円
-0.0%         → 0.653 を 65.3%
-#,##0;[赤]▲#,##0   → 負数を ▲ と赤で表示
-0"室"        → 20 を 20室</code></pre></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>用途</th><th>書式コード</th><th>表示例</th></tr></thead>
+          <tbody>
+            <tr><td>桁区切り</td><td><code>#,##0</code></td><td>12345 → <b>12,345</b></td></tr>
+            <tr><td>千円単位</td><td><code>#,##0"千円"</code></td><td>12345 → <b>12,345千円</b></td></tr>
+            <tr><td>パーセント</td><td><code>0.0%</code></td><td>0.653 → <b>65.3%</b></td></tr>
+            <tr><td>負数を強調</td><td><code>#,##0;[赤]▲#,##0</code></td><td>-12500 → <b style="color:#d33a2c">▲12,500</b></td></tr>
+            <tr><td>単位を付ける</td><td><code>0"室"</code></td><td>20 → <b>20室</b></td></tr>
+          </tbody>
+        </table>
+      </div>
       <div class="note tip">
         <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>プロの流儀：色は「出所」を表す</div>
         <p>青＝人が入れた値、黒＝計算、緑＝他シート参照。この3色を徹底するだけで、レビュー担当は「どこを触れば結果が変わるか」を一瞬で判断できます。ただし会社・チームのルールがあればそれを優先します。</p>
