@@ -761,10 +761,16 @@ body.nav-open nav.drawer{transform:translateX(0)}
 
       <h3 id="ch2-3">2-3. 分析（要因分解）</h3>
       <p>集計から一段進み、<b>「なぜそうなったか」を説明できる</b>状態が分析です。まず指標を掛け算・足し算に分解します。</p>
-      <div class="code"><div class="code-head"><span class="code-lang">構造式</span><button class="copy">コピー</button></div><pre><code>売上 = 客数 × 客単価
-客室売上 = 販売可能室数 × 稼働率 × ADR
-       （＝ 客室数 × 営業日数 × 稼働率 × ADR）
-RevPAR（販売可能客室1室あたり売上）= ADR × 稼働率</code></pre></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>指標</th><th>計算式</th><th>補足</th></tr></thead>
+          <tbody>
+            <tr><td>売上</td><td><code>客数 × 客単価</code></td><td>—</td></tr>
+            <tr><td>客室売上</td><td><code>販売可能室数 × 稼働率 × ADR</code></td><td><code>＝ 客室数 × 営業日数 × 稼働率 × ADR</code></td></tr>
+            <tr><td>RevPAR</td><td><code>ADR × 稼働率</code></td><td>販売可能客室1室あたり売上</td></tr>
+          </tbody>
+        </table>
+      </div>
       <p><b>具体例：売上が前年 1,000万円 → 今年 920万円（▲80万円）。なぜ下がったのか。</b>客数と単価に分解します。</p>
       <div class="table-scroll">
         <table>
