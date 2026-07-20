@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Tailscale経由で、MacBook AirからオフィスのMac miniにmacOS標準の「画面共有」で接続する手順。前提条件・Tailscale IPの確認方法・接続手順・つながらない時の対処までをまとめた操作ガイド。">
+<title>MacBook Airから画面共有でMac miniに接続する手順</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖥️</text></svg>">
+<style>
+:root{
+  --bg:#faf9f7;
+  --bg-elev:#ffffff;
+  --bg-sunken:#f2f0ed;
+  --text:#1f1e1d;
+  --text-muted:#6b6862;
+  --text-faint:#918d85;
+  --border:#e5e1db;
+  --border-strong:#d6d1c9;
+  --accent:#c4552f;
+  --accent-soft:#fdf1ec;
+  --accent-border:#f0c9b8;
+  --warn:#a8620a;
+  --warn-soft:#fdf4e7;
+  --warn-border:#f0dcb8;
+  --info:#2b6a8f;
+  --info-soft:#eaf3f8;
+  --info-border:#c2ddeb;
+  --code-bg:#282521;
+  --code-text:#e8e3db;
+  --code-inline-bg:#f0ede8;
+  --code-inline-text:#a8442a;
+  --shadow-sm:0 1px 2px rgba(31,30,29,.05);
+  --shadow-md:0 4px 16px -4px rgba(31,30,29,.10),0 2px 4px rgba(31,30,29,.04);
+  --shadow-lg:0 16px 48px -12px rgba(31,30,29,.24);
+  --radius:14px;
+  --radius-sm:9px;
+  --font:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --header-h:56px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1917;
+    --bg-elev:#232120;
+    --bg-sunken:#141312;
+    --text:#eeebe6;
+    --text-muted:#a5a099;
+    --text-faint:#7d7871;
+    --border:#35322e;
+    --border-strong:#474340;
+    --accent:#e2825c;
+    --accent-soft:#2e211b;
+    --accent-border:#5a3d2e;
+    --warn:#d6a05a;
+    --warn-soft:#2b2317;
+    --warn-border:#54432a;
+    --info:#7db8d8;
+    --info-soft:#182630;
+    --info-border:#2f4a5c;
+    --code-bg:#121110;
+    --code-text:#ded9d1;
+    --code-inline-bg:#2c2926;
+    --code-inline-text:#e9a184;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+    --shadow-md:0 4px 16px -4px rgba(0,0,0,.5);
+    --shadow-lg:0 16px 48px -12px rgba(0,0,0,.7);
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 16px);-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.85;
+  font-size:16px;
+  letter-spacing:.01em;
+  -webkit-font-smoothing:antialiased;
+  overflow-wrap:break-word;
+  word-break:normal;
+  line-break:strict;
+}
+body.nav-open{overflow:hidden}
+
+/* ---------- progress ---------- */
+#progress{
+  position:fixed;top:0;left:0;height:2.5px;width:0;
+  background:linear-gradient(90deg,var(--accent),#e0a06f);
+  z-index:60;transition:width .1s linear;
+}
+
+/* ---------- header ---------- */
+header{
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  padding-top:env(safe-area-inset-top);
+  height:calc(var(--header-h) + env(safe-area-inset-top));
+  background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:saturate(180%) blur(14px);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--border);
+  z-index:50;
+  display:flex;align-items:center;gap:12px;
+  padding-left:max(16px,env(safe-area-inset-left));
+  padding-right:max(16px,env(safe-area-inset-right));
+}
+.header-inner{display:flex;align-items:center;gap:12px;width:100%;max-width:1200px;margin:0 auto;height:var(--header-h)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;letter-spacing:.02em;min-width:0}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.brand span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu-btn{
+  margin-left:auto;flex:none;
+  width:38px;height:38px;border-radius:10px;
+  border:1px solid var(--border-strong);background:var(--bg-elev);
+  color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.menu-btn:active{transform:scale(.94)}
+.menu-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round}
+
+/* ---------- layout ---------- */
+.wrap{
+  max-width:1200px;margin:0 auto;
+  padding:calc(var(--header-h) + env(safe-area-inset-top)) max(18px,env(safe-area-inset-left)) 0 max(18px,env(safe-area-inset-right));
+  display:block;
+}
+main{min-width:0;padding-bottom:64px}
+
+/* ---------- hero ---------- */
+.hero{padding:40px 0 30px;border-bottom:1px solid var(--border);margin-bottom:34px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;letter-spacing:.09em;
+  color:var(--accent);background:var(--accent-soft);
+  border:1px solid var(--accent-border);
+  padding:5px 11px;border-radius:999px;margin-bottom:16px;
+}
+.hero h1{
+  font-size:clamp(27px,7.6vw,44px);
+  line-height:1.32;font-weight:800;letter-spacing:-.01em;
+  margin-bottom:14px;
+}
+.hero p.lead{font-size:15px;color:var(--text-muted);line-height:1.8;margin-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-size:11.5px;font-weight:600;
+  background:var(--bg-elev);border:1px solid var(--border);
+  color:var(--text-muted);
+  padding:5px 10px;border-radius:8px;white-space:nowrap;
+}
+.chip b{color:var(--text);font-weight:700}
+.chip.link{color:var(--accent);border-color:var(--accent-border);background:var(--accent-soft);text-decoration:none}
+.chip.link:active{opacity:.6}
+
+/* ---------- toc card (mobile inline) ---------- */
+.toc-card{
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px 16px;margin-bottom:38px;
+  box-shadow:var(--shadow-sm);
+}
+.toc-card h2{font-size:12px;letter-spacing:.1em;color:var(--text-faint);font-weight:700;margin-bottom:12px}
+.toc-card ol{list-style:none;display:flex;flex-direction:column;gap:2px}
+.toc-card a{
+  display:flex;align-items:center;gap:11px;
+  padding:9px 8px;border-radius:9px;
+  color:var(--text);text-decoration:none;font-size:14.5px;font-weight:600;
+  -webkit-tap-highlight-color:transparent;
+}
+.toc-card a:active{background:var(--bg-sunken)}
+.toc-card .num{
+  flex:none;width:24px;height:24px;border-radius:7px;
+  background:var(--accent-soft);border:1px solid var(--accent-border);
+  color:var(--accent);font-size:11.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- sections ---------- */
+.chapter{margin-bottom:52px;scroll-margin-top:calc(var(--header-h) + 20px)}
+.chapter-head{
+  display:flex;align-items:center;gap:13px;
+  padding-bottom:14px;margin-bottom:26px;
+  border-bottom:2px solid var(--accent);
+}
+.chapter-head .badge{
+  flex:none;
+  min-width:34px;height:34px;padding:0 8px;border-radius:9px;
+  background:var(--accent);color:#fff;
+  font-size:15px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+  box-shadow:0 2px 8px -2px color-mix(in srgb,var(--accent) 60%,transparent);
+}
+.chapter-head h2{font-size:clamp(20px,5.4vw,27px);font-weight:800;letter-spacing:-.005em;line-height:1.4}
+
+h3{
+  font-size:clamp(17px,4.5vw,20px);font-weight:700;
+  margin:38px 0 14px;line-height:1.5;
+  scroll-margin-top:calc(var(--header-h) + 20px);
+  padding-left:13px;border-left:3.5px solid var(--accent);
+}
+h3:first-of-type{margin-top:0}
+h4{
+  font-size:15px;font-weight:700;color:var(--text);
+  margin:26px 0 10px;
+  display:flex;align-items:center;gap:8px;
+}
+h4::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--text-faint);flex:none}
+
+p{margin:0 0 14px}
+p:last-child{margin-bottom:0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-border)}
+a:active{opacity:.6}
+
+/* ---------- lists ---------- */
+ul.bullets,ol.steps{margin:0 0 16px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.bullets li{position:relative;padding-left:19px;line-height:1.8}
+ul.bullets li::before{
+  content:"";position:absolute;left:3px;top:.72em;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);opacity:.55;
+}
+ol.steps{counter-reset:s}
+ol.steps li{position:relative;padding-left:34px;counter-increment:s;line-height:1.8;min-height:24px}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:.28em;
+  width:23px;height:23px;border-radius:7px;
+  background:var(--bg-sunken);border:1px solid var(--border-strong);
+  color:var(--text-muted);
+  font-size:11.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- code ---------- */
+.code{
+  position:relative;
+  background:var(--code-bg);border-radius:var(--radius-sm);
+  margin:0 0 18px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:var(--shadow-sm);
+}
+.code-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 8px 0 13px;height:34px;
+  background:rgba(255,255,255,.04);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.code-lang{
+  font-family:var(--mono);font-size:10.5px;font-weight:600;
+  color:#a09a90;letter-spacing:.07em;
+}
+.copy{
+  font-family:var(--font);font-size:11px;font-weight:600;
+  background:transparent;border:1px solid rgba(255,255,255,.15);
+  color:#cec8bf;padding:4px 9px;border-radius:6px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.copy:active{transform:scale(.94)}
+.copy.done{color:#7fca8f;border-color:#3f6b48}
+.code pre{
+  margin:0;padding:14px 13px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  font-family:var(--mono);font-size:12.5px;line-height:1.75;
+  color:var(--code-text);
+  tab-size:2;
+}
+.code pre code{white-space:pre;font-family:inherit}
+code:not(pre code){
+  font-family:var(--mono);font-size:.855em;
+  background:var(--code-inline-bg);color:var(--code-inline-text);
+  padding:2px 5px;border-radius:5px;
+  border:1px solid var(--border);
+  white-space:nowrap;
+}
+
+/* prompt template variant */
+.code.prompt{background:var(--bg-sunken);border:1px solid var(--border-strong)}
+.code.prompt .code-head{background:transparent;border-bottom:1px dashed var(--border-strong)}
+.code.prompt .code-lang{color:var(--accent)}
+.code.prompt .copy{border-color:var(--border-strong);color:var(--text-muted)}
+.code.prompt pre{color:var(--text);font-size:13px;white-space:pre-wrap;word-break:break-word;line-break:strict}
+.code.prompt pre code{white-space:pre-wrap}
+
+/* ---------- callouts ---------- */
+.note{
+  border-radius:var(--radius-sm);
+  padding:14px 15px;margin:0 0 18px;
+  border:1px solid;font-size:14.5px;line-height:1.78;
+}
+.note .note-title{
+  display:flex;align-items:center;gap:7px;
+  font-weight:700;font-size:12.5px;letter-spacing:.03em;
+  margin-bottom:7px;
+}
+.note .note-title svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.note.warn{background:var(--warn-soft);border-color:var(--warn-border)}
+.note.warn .note-title{color:var(--warn)}
+.note.info{background:var(--info-soft);border-color:var(--info-border)}
+.note.info .note-title{color:var(--info)}
+.note.tip{background:var(--accent-soft);border-color:var(--accent-border)}
+.note.tip .note-title{color:var(--accent)}
+.note p:last-child{margin-bottom:0}
+.note code:not(pre code){background:color-mix(in srgb,var(--bg-elev) 70%,transparent)}
+
+/* ---------- table ---------- */
+.table-scroll{
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  margin:0 0 18px;
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--bg-elev);box-shadow:var(--shadow-sm);
+}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:440px}
+thead th{
+  background:var(--bg-sunken);
+  text-align:left;font-weight:700;font-size:11.5px;letter-spacing:.06em;
+  color:var(--text-faint);
+  padding:11px 14px;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.7}
+tbody tr:last-child td{border-bottom:none}
+tbody td:first-child{white-space:nowrap;font-weight:600}
+
+/* ---------- checklist / tree ---------- */
+.tree{
+  background:var(--bg-sunken);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 13px;margin:0 0 18px;
+  font-family:var(--mono);font-size:12.5px;line-height:1.85;
+  color:var(--text-muted);overflow-x:auto;white-space:pre;
+}
+.tree b{color:var(--text);font-weight:600}
+
+.status-grid{display:flex;flex-direction:column;gap:7px;margin:0 0 18px}
+.status-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:9px;padding:10px 12px;
+  font-family:var(--mono);font-size:12.5px;color:var(--text);
+}
+.status-item .ok{
+  flex:none;width:16px;height:16px;border-radius:50%;
+  background:#2f9e5a;display:flex;align-items:center;justify-content:center;
+}
+.status-item .ok svg{width:9px;height:9px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* path comparison */
+.path-cmp{display:flex;flex-direction:column;gap:8px;margin:0 0 18px}
+.path-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:9px;border:1px solid;
+  font-family:var(--mono);font-size:13px;
+}
+.path-row .tag{font-family:var(--font);font-size:11px;font-weight:800;flex:none;padding:2px 7px;border-radius:5px}
+.path-row.good{background:#eef7f0;border-color:#c6e3ce;color:#1e6b3c}
+.path-row.good .tag{background:#2f9e5a;color:#fff}
+.path-row.bad{background:#fdefee;border-color:#f2cdc9;color:#96382f}
+.path-row.bad .tag{background:#c0392b;color:#fff}
+@media (prefers-color-scheme:dark){
+  .path-row.good{background:#16261c;border-color:#2c4a36;color:#8ed6a6}
+  .path-row.bad{background:#2a1917;border-color:#4f2c28;color:#e59a91}
+}
+
+/* ---------- divider ---------- */
+.rule{height:1px;background:var(--border);border:none;margin:44px 0}
+
+/* ---------- links section ---------- */
+.link-list{display:flex;flex-direction:column;gap:9px;margin-bottom:8px}
+.link-card{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg-elev);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px;
+  text-decoration:none;color:var(--text);box-shadow:var(--shadow-sm);
+  -webkit-tap-highlight-color:transparent;
+}
+.link-card:active{background:var(--bg-sunken);transform:scale(.99)}
+.link-card .lc-body{min-width:0;flex:1}
+.link-card .lc-title{font-size:14.5px;font-weight:700;line-height:1.5}
+.link-card .lc-url{font-size:11.5px;color:var(--text-faint);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.link-card .lc-arrow{flex:none;color:var(--text-faint)}
+.link-card .lc-arrow svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- footer ---------- */
+footer{
+  border-top:1px solid var(--border);
+  padding:26px 0 calc(34px + env(safe-area-inset-bottom));
+  color:var(--text-faint);font-size:12.5px;line-height:1.8;
+}
+
+/* ---------- drawer nav (mobile) ---------- */
+.scrim{
+  position:fixed;inset:0;background:rgba(20,19,18,.42);
+  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:70;
+}
+body.nav-open .scrim{opacity:1;pointer-events:auto}
+nav.drawer{
+  position:fixed;top:0;right:0;bottom:0;
+  width:min(84vw,330px);
+  background:var(--bg-elev);
+  border-left:1px solid var(--border);
+  box-shadow:var(--shadow-lg);
+  transform:translateX(100%);
+  transition:transform .26s cubic-bezier(.32,.72,0,1);
+  z-index:80;
+  display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+body.nav-open nav.drawer{transform:translateX(0)}
+.drawer-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 14px 12px 18px;border-bottom:1px solid var(--border);flex:none;
+}
+.drawer-head span{font-size:12px;font-weight:700;letter-spacing:.09em;color:var(--text-faint)}
+.drawer-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 24px;flex:1}
+.drawer-body a{
+  display:block;padding:9px 12px;border-radius:8px;
+  color:var(--text-muted);text-decoration:none;border:none;
+  font-size:14px;line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+}
+.drawer-body a.lv1{font-weight:800;color:var(--text);font-size:14.5px;margin-top:10px}
+.drawer-body a.lv1:first-child{margin-top:0}
+.drawer-body a.lv2{padding-left:22px;font-size:13.5px}
+.drawer-body a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.drawer-body a:active{background:var(--bg-sunken)}
+
+/* ---------- back to top ---------- */
+#top-btn{
+  position:fixed;
+  right:max(16px,env(safe-area-inset-right));
+  bottom:calc(16px + env(safe-area-inset-bottom));
+  width:44px;height:44px;border-radius:50%;
+  background:var(--bg-elev);border:1px solid var(--border-strong);
+  box-shadow:var(--shadow-md);color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:40;
+  opacity:0;pointer-events:none;transform:translateY(8px);
+  transition:opacity .2s,transform .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+#top-btn.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+#top-btn:active{transform:scale(.92)}
+#top-btn svg{width:17px;height:17px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- desktop ---------- */
+@media (min-width:900px){
+  :root{--header-h:60px}
+  body{font-size:16.5px}
+  .wrap{display:grid;grid-template-columns:250px minmax(0,1fr);gap:52px;padding-left:32px;padding-right:32px}
+  .menu-btn{display:none}
+  .toc-card{display:none}
+  aside.sidebar{
+    position:sticky;
+    top:calc(var(--header-h) + env(safe-area-inset-top));
+    height:calc(100vh - var(--header-h) - env(safe-area-inset-top));
+    overflow-y:auto;
+    padding:34px 0 40px;
+    border-right:1px solid var(--border);
+    margin-right:-24px;padding-right:20px;
+  }
+  aside.sidebar .side-label{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--text-faint);margin-bottom:12px;padding-left:12px}
+  aside.sidebar a{
+    display:block;padding:6px 12px;border-radius:7px;
+    color:var(--text-muted);text-decoration:none;border:none;
+    font-size:13.5px;line-height:1.6;
+  }
+  aside.sidebar a.lv1{font-weight:800;color:var(--text);margin-top:12px;font-size:14px}
+  aside.sidebar a.lv1:first-of-type{margin-top:0}
+  aside.sidebar a.lv2{padding-left:22px;font-size:13px}
+  aside.sidebar a:hover{background:var(--bg-sunken);color:var(--text)}
+  aside.sidebar a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  main{padding-top:14px;padding-bottom:80px;max-width:780px}
+  .hero{padding-top:34px}
+  .copy:hover{background:rgba(255,255,255,.09)}
+  .code.prompt .copy:hover{background:var(--border)}
+  .link-card:hover{border-color:var(--accent-border);box-shadow:var(--shadow-md);transform:translateY(-1px);transition:.15s}
+  a:hover{border-bottom-color:var(--accent)}
+  #top-btn{right:32px;bottom:32px}
+}
+@media (max-width:899px){aside.sidebar{display:none}}
+@media (min-width:900px){nav.drawer,.scrim{display:none}}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="brand"><i class="dot"></i><span>画面共有 接続手順 — MacBook Air → Mac mini</span></div>
+    <button class="menu-btn" id="menuBtn" aria-label="目次を開く" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="scrim" id="scrim"></div>
+<nav class="drawer" id="drawer" aria-label="目次">
+  <div class="drawer-head">
+    <span>目次</span>
+    <button class="menu-btn" id="closeBtn" style="display:flex" aria-label="目次を閉じる">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawerNav"></div>
+</nav>
+
+<div class="wrap">
+
+  <aside class="sidebar">
+    <div class="side-label">目次</div>
+    <div id="sideNav"></div>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <div class="eyebrow">操作ガイド</div>
+      <h1>MacBook Airから<br>画面共有でMac miniに接続する</h1>
+      <p class="lead">別室や外出先のMacBook Airから、オフィスのMac miniの画面をそのまま操作する手順です。VPNサービス「Tailscale」を使うことで、同じネットワークにいなくても、macOS標準の「画面共有」で安全につながります。</p>
+      <div class="meta">
+        <span class="chip">接続元：<b>MacBook Air</b></span>
+        <span class="chip">接続先：<b>Mac mini</b></span>
+        <span class="chip">経由：<b>Tailscale</b></span>
+        <span class="chip">macOS標準「画面共有」</span>
+      </div>
+    </div>
+
+    <div class="toc-card">
+      <h2>目次</h2>
+      <ol id="tocCardList"></ol>
+    </div>
+
+    <!-- ============ intro ============ -->
+    <section class="chapter" id="intro">
+      <div class="chapter-head">
+        <div class="badge">◎</div>
+        <h2>このページの目的</h2>
+      </div>
+      <p>手元の <b>MacBook Air</b> から、オフィスに置いた <b>Mac mini</b> の画面を「画面共有」で操作できるようにします。これにより、Mac miniの前にいなくても、Claude Codeの実行やファイルの確認などをそのまま続けられます。</p>
+      <p>全体の流れは次の3ステップです。</p>
+      <ul class="bullets">
+        <li><b>事前準備</b>：両方の端末にTailscale、Mac miniの「画面共有」をオン（第1章）</li>
+        <li><b>ステップ1</b>：Mac miniのTailscale IPアドレスを確認する（第2章）</li>
+        <li><b>ステップ2</b>：MacBook Airの「画面共有」アプリで接続する（第3章）</li>
+      </ul>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Tailscaleとは</div>
+        <p>複数の端末を、インターネット越しでも「同じLAN内にいるかのように」つなぐVPNサービスです。接続できるのは自分のアカウントに登録した端末（tailnet）だけなので、外部からは見えません。各端末には <code>100.x.x.x</code> という専用のIPアドレスが割り当てられます。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 1 ============ -->
+    <section class="chapter" id="ch1">
+      <div class="chapter-head">
+        <div class="badge">1</div>
+        <h2>前提条件（事前準備）</h2>
+      </div>
+      <p>接続を始める前に、次の準備ができているか確認します。ここが整っていないと、後の手順で接続できません。</p>
+
+      <h3 id="ch1-1">1-1. 両方の端末にTailscaleを入れ、同じアカウントでログイン</h3>
+      <p>Mac mini と MacBook Air の<b>両方</b>に Tailscale をインストールし、<b>同じアカウント</b>でログインしておきます。両方が同じ tailnet（自分の端末ネットワーク）に入っていることが前提です。</p>
+
+      <h3 id="ch1-2">1-2. Mac miniの「画面共有」をオンにする</h3>
+      <p>Mac mini側で、次の設定をオンにします。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">Mac miniの設定</span><button class="copy">コピー</button></div><pre><code>システム設定 ＞ 一般 ＞ 共有 ＞ 画面共有</code></pre></div>
+      <p>ここがオフだと、Tailscaleでつながっていても画面共有では接続できません。</p>
+
+      <h3 id="ch1-3">1-3. Mac miniをスリープさせない</h3>
+      <p>Tailscale経由であっても、<b>Mac mini本体がスリープしていると応答できません</b>。Tailscaleには遠隔でスリープを解除する機能（Wake-on-LAN）はないため、Mac miniは常時起動しておくか、スリープしない設定にしておきます。</p>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>ディスプレイがオフでもスリープさせない</div>
+        <p>システム設定の「ロック画面」や「エネルギー」で、一定時間後に本体が自動スリープしないよう設定します（「ディスプレイをオフにする」だけならOK、本体のスリープは避ける）。詳しくはAppleのエネルギー設定ガイドを参照してください（参考リンク）。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 2 ============ -->
+    <section class="chapter" id="ch2">
+      <div class="chapter-head">
+        <div class="badge">2</div>
+        <h2>ステップ1：Mac miniのTailscale IPを確認する</h2>
+      </div>
+      <p>接続には、Mac miniの <b>Tailscale IPアドレス</b>（<code>100.x.x.x</code> のような数字）が必要です。次のいずれかの方法で確認します。</p>
+
+      <h3 id="ch2-1">2-1. メニューバーから確認する（Mac miniを操作できる場合）</h3>
+      <p>Mac miniの画面右上メニューバーにある <b>Tailscaleアイコン</b> をクリックすると、Mac mini自体のIPアドレス（<code>100.</code> で始まるアドレス）が表示されます。事前に控えておくと、接続時にスムーズです。</p>
+
+      <h3 id="ch2-2">2-2. Admin Consoleから確認する（手元にMac miniが無い場合）</h3>
+      <p>MacBook Airのブラウザで <b>Tailscale Admin Console</b> にログインすると、登録されているMac miniのTailscale IPアドレス（またはマシン名）を確認できます。Mac miniが手元に無いときに便利です。</p>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>IPアドレスとマシン名</div>
+        <p>Tailscaleでは、IPアドレス（<code>100.x.x.x</code>）のほかに、マシン名（例：<code>mac-mini.tailxxxx.ts.net</code>）でも接続できます（MagicDNS機能）。まずはIPアドレスを控えておくのが確実です。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 3 ============ -->
+    <section class="chapter" id="ch3">
+      <div class="chapter-head">
+        <div class="badge">3</div>
+        <h2>ステップ2：MacBook Airから接続する</h2>
+      </div>
+      <p>MacBook Airで、次の手順で接続します。</p>
+      <ol class="steps">
+        <li><code>Command + Space</code> を押し、Spotlight検索で <b>「画面共有」</b> と入力してアプリを起動します。</li>
+        <li>上部メニューの <b>「ファイル」＞「新規接続」</b> を選択します（または「＋」ボタン）。</li>
+        <li>アドレス入力欄に、ステップ1で確認した <b>Mac miniのTailscale IPアドレス</b>（またはマシン名。例：<code>mac-mini.tailxxxx.ts.net</code>）を入力して <b>「接続」</b> を押します。</li>
+        <li>Mac miniの <b>ユーザー名</b> と <b>パスワード</b> を入力してログインします。</li>
+      </ol>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>まずはIPアドレスで</div>
+        <p>接続がうまくいかないときの切り分けのためにも、最初はマシン名ではなく <b>IPアドレス（<code>100.x.x.x</code>）で直接接続</b>してみるのが確実です。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 4 ============ -->
+    <section class="chapter" id="ch4">
+      <div class="chapter-head">
+        <div class="badge">4</div>
+        <h2>うまく接続できない場合の確認ポイント</h2>
+      </div>
+      <p>接続できないときは、上から順に確認してください。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>確認ポイント</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td>画面共有がオンか</td><td>Mac miniの「システム設定 ＞ 一般 ＞ 共有 ＞ 画面共有」がオンになっている必要があります。</td></tr>
+            <tr><td>スリープしていないか</td><td>Tailscale経由でも、Mac mini本体がスリープしていると応答できません（Wake-on-LANは不可）。</td></tr>
+            <tr><td>Tailscaleの接続状態</td><td>両方の端末でTailscaleが起動・ログイン済みか。マシン名（MagicDNS）で不調なら、IPアドレス（<code>100.x.x.x</code>）で直接接続を試します。</td></tr>
+            <tr><td>ユーザー名・パスワード</td><td>Mac miniのログインアカウントの情報が正しいか。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>一番確実な切り分け</div>
+        <p>マシン名でつながらないときは、<b>IPアドレス（<code>100.x.x.x</code>）で直接接続</b>してみるのが一番確実です。これでつながれば、原因はMagicDNS（名前解決）側にあると分かります。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 5 ============ -->
+    <section class="chapter" id="ch5">
+      <div class="chapter-head">
+        <div class="badge">5</div>
+        <h2>接続の終了と便利なTips</h2>
+      </div>
+      <ul class="bullets">
+        <li><b>終了する</b>：画面共有のウインドウを閉じるか、メニューから接続を切断します。Mac mini側の作業（Claude Codeのセッションなど）は動き続けます。</li>
+        <li><b>2回目以降</b>：「画面共有」アプリの「よく使う項目」や履歴に残るので、次回はIPアドレスを入力し直さずに接続できます。</li>
+        <li><b>操作が重いとき</b>：画面共有メニューの表示品質を下げると、動作が軽くなることがあります。</li>
+        <li><b>クリップボード共有</b>：画面共有では、MacBook AirとMac miniの間でコピー＆ペーストを共有できます（設定で切り替え可能）。</li>
+      </ul>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>セキュリティ</div>
+        <p>Tailscaleで接続できるのは、自分のアカウントに登録した端末（tailnet）だけです。加えてMac miniのユーザー名・パスワードでもログインが必要なため、二重に保護されています。共有端末では認証情報を保存しないよう注意してください。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ links ============ -->
+    <section class="chapter" id="links">
+      <div class="chapter-head">
+        <div class="badge">＃</div>
+        <h2>参考リンク</h2>
+      </div>
+      <div class="link-list">
+        <a class="link-card" href="https://login.tailscale.com/admin/machines" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Tailscale Admin Console（端末一覧）</div><div class="lc-url">login.tailscale.com/admin/machines</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://tailscale.com/kb/1017/install" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Tailscale：インストール手順</div><div class="lc-url">tailscale.com/kb/1017/install</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://support.apple.com/ja-jp/guide/mac-help/mchlp1066/mac" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Apple：Mac の画面を共有する</div><div class="lc-url">support.apple.com/ja-jp/guide/mac-help/mchlp1066</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+        <a class="link-card" href="https://support.apple.com/guide/mac-help/change-energy-settings-mchlp1168/mac" target="_blank" rel="noopener">
+          <div class="lc-body"><div class="lc-title">Apple：Macデスクトップのエネルギー設定</div><div class="lc-url">support.apple.com/guide/mac-help/...</div></div>
+          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      画面共有 接続手順（MacBook Air → Mac mini / Tailscale経由） ／ 作成日：2026-07-20
+    </footer>
+
+  </main>
+</div>
+
+<button id="top-btn" aria-label="ページ先頭へ戻る">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---- build nav from headings ---- */
+  var NAV = [
+    {id:"intro", label:"このページの目的", num:"◎", children:[]},
+    {id:"ch1", label:"前提条件（事前準備）", num:"1", children:[
+      {id:"ch1-1", label:"1-1. 両方にTailscale"},
+      {id:"ch1-2", label:"1-2. 画面共有をオン"},
+      {id:"ch1-3", label:"1-3. スリープさせない"}
+    ]},
+    {id:"ch2", label:"ステップ1：Tailscale IPを確認", num:"2", children:[
+      {id:"ch2-1", label:"2-1. メニューバーから"},
+      {id:"ch2-2", label:"2-2. Admin Consoleから"}
+    ]},
+    {id:"ch3", label:"ステップ2：MacBook Airから接続", num:"3", children:[]},
+    {id:"ch4", label:"うまく接続できない場合", num:"4", children:[]},
+    {id:"ch5", label:"接続の終了と便利なTips", num:"5", children:[]},
+    {id:"links", label:"参考リンク", num:"＃", children:[]}
+  ];
+
+  function buildNav(host){
+    var frag = document.createDocumentFragment();
+    NAV.forEach(function(sec){
+      var a = document.createElement("a");
+      a.href = "#" + sec.id; a.className = "lv1"; a.textContent = sec.label;
+      a.dataset.target = sec.id;
+      frag.appendChild(a);
+      sec.children.forEach(function(c){
+        var b = document.createElement("a");
+        b.href = "#" + c.id; b.className = "lv2"; b.textContent = c.label;
+        b.dataset.target = c.id;
+        frag.appendChild(b);
+      });
+    });
+    host.appendChild(frag);
+  }
+  buildNav(document.getElementById("sideNav"));
+  buildNav(document.getElementById("drawerNav"));
+
+  var tocList = document.getElementById("tocCardList");
+  NAV.forEach(function(sec){
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = "#" + sec.id;
+    a.innerHTML = '<span class="num">' + sec.num + "</span>";
+    var t = document.createElement("span");
+    t.textContent = sec.label;
+    a.appendChild(t);
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  /* ---- drawer ---- */
+  var body = document.body;
+  var menuBtn = document.getElementById("menuBtn");
+  var closeBtn = document.getElementById("closeBtn");
+  var scrim = document.getElementById("scrim");
+  function openNav(){ body.classList.add("nav-open"); menuBtn.setAttribute("aria-expanded","true"); }
+  function closeNav(){ body.classList.remove("nav-open"); menuBtn.setAttribute("aria-expanded","false"); }
+  menuBtn.addEventListener("click", openNav);
+  closeBtn.addEventListener("click", closeNav);
+  scrim.addEventListener("click", closeNav);
+  document.getElementById("drawerNav").addEventListener("click", function(e){
+    if (e.target.closest("a")) closeNav();
+  });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeNav(); });
+
+  /* ---- copy buttons ---- */
+  document.querySelectorAll(".copy").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var code = btn.closest(".code").querySelector("code");
+      var text = code.innerText;
+      var done = function(){
+        btn.textContent = "コピー済み";
+        btn.classList.add("done");
+        setTimeout(function(){ btn.textContent = "コピー"; btn.classList.remove("done"); }, 1600);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else { fallback(); }
+      function fallback(){
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch(err){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  /* ---- scrollspy + progress + top button ---- */
+  var links = Array.prototype.slice.call(document.querySelectorAll("#sideNav a, #drawerNav a"));
+  var targets = links.map(function(a){ return document.getElementById(a.dataset.target); });
+  var progress = document.getElementById("progress");
+  var topBtn = document.getElementById("top-btn");
+  var ticking = false;
+  var headerH = 0;
+
+  function measure(){
+    headerH = document.querySelector("header").offsetHeight;
+  }
+  measure();
+  window.addEventListener("resize", measure);
+
+  function update(){
+    ticking = false;
+    var y = window.scrollY || window.pageYOffset;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (max > 0 ? Math.min(100, (y / max) * 100) : 0) + "%";
+    topBtn.classList.toggle("show", y > 500);
+
+    var line = y + headerH + 40;
+    var activeIdx = -1;
+    for (var i = 0; i < targets.length; i++){
+      var el = targets[i];
+      if (el && el.getBoundingClientRect().top + y <= line) activeIdx = i;
+    }
+    links.forEach(function(a, i){ a.classList.toggle("active", i === activeIdx); });
+
+    if (activeIdx > -1){
+      var act = links[activeIdx];
+      if (act.closest("#sideNav")){
+        var side = document.querySelector("aside.sidebar");
+        if (side && side.offsetParent !== null){
+          var r = act.getBoundingClientRect(), sr = side.getBoundingClientRect();
+          if (r.top < sr.top + 8 || r.bottom > sr.bottom - 8){
+            side.scrollTop += r.top - sr.top - side.clientHeight / 2;
+          }
+        }
+      }
+    }
+  }
+  window.addEventListener("scroll", function(){
+    if (!ticking){ ticking = true; requestAnimationFrame(update); }
+  }, {passive:true});
+  update();
+
+  topBtn.addEventListener("click", function(){
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+})();
+</script>
+</body>
+</html>
