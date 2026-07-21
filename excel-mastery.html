@@ -598,7 +598,7 @@ body.nav-open nav.drawer{transform:translateX(0)}
       <a class="dl" href="/files/excel-mastery-full.xlsx" download>
         <span class="dl-icon">XLSX</span>
         <span class="dl-body">
-          <span class="dl-title">全演習ファイル（16シート一括）</span>
+          <span class="dl-title">解説ファイル：全16シート一括</span>
           <span class="dl-meta">本ガイドの全シートを1ブックに収録／ Excel 39KB</span>
         </span>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
@@ -658,7 +658,7 @@ body.nav-open nav.drawer{transform:translateX(0)}
       <a class="dl" href="/files/excel-mastery-1-1.xlsx" download>
         <span class="dl-icon">XLSX</span>
         <span class="dl-body">
-          <span class="dl-title">演習ファイル：1-1 体裁を統一できる</span>
+          <span class="dl-title">解説ファイル：1-1 体裁を統一できる</span>
           <span class="dl-meta">シート「1-1_体裁の対比」／ Excel 8KB</span>
         </span>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
@@ -717,7 +717,7 @@ body.nav-open nav.drawer{transform:translateX(0)}
       <a class="dl" href="/files/excel-mastery-1-2.xlsx" download>
         <span class="dl-icon">XLSX</span>
         <span class="dl-body">
-          <span class="dl-title">演習ファイル：1-2 操作が速い</span>
+          <span class="dl-title">解説ファイル：1-2 操作が速い</span>
           <span class="dl-meta">シート「1-2_操作イメージ」／ Excel 8KB</span>
         </span>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
@@ -772,15 +772,38 @@ body.nav-open nav.drawer{transform:translateX(0)}
         </table>
       </div>
       <p>「西伊豆・7月の売上合計」と「スイートの平均単価」「7月の予約件数」は次のように書きます。</p>
-      <div class="code"><div class="code-head"><span class="code-lang">EXCEL</span><button class="copy">コピー</button></div><pre><code>=SUMIFS(予約!E:E, 予約!A:A,"西伊豆", 予約!B:B,7)      → 116,000
-=AVERAGEIFS(予約!E:E, 予約!C:C,"スイート")            → 85,000
-=COUNTIFS(予約!B:B,7)                                  → 3</code></pre></div>
-      <p><b>具体例：マスタから原価を引く（XLOOKUP）。</b><code>Master</code>シートに商品コード→原価の対応表があるとき、明細の各行に原価を付与します。</p>
-      <div class="code"><div class="code-head"><span class="code-lang">EXCEL</span><button class="copy">コピー</button></div><pre><code>=XLOOKUP(B2, Master!$A:$A, Master!$C:$C, "該当なし")
-   ┗ 検索値  ┗探す列       ┗返す列        ┗見つからない時
-
-旧環境なら INDEX+MATCH（VLOOKUPより堅牢）：
-=INDEX(Master!$C:$C, MATCH(B2, Master!$A:$A, 0))</code></pre></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>求めるもの</th><th>数式</th><th>結果</th></tr></thead>
+          <tbody>
+            <tr><td>西伊豆・7月の売上合計</td><td><code>=SUMIFS(予約!E:E, 予約!A:A,"西伊豆", 予約!B:B,7)</code></td><td>116,000</td></tr>
+            <tr><td>スイートの平均単価</td><td><code>=AVERAGEIFS(予約!E:E, 予約!C:C,"スイート")</code></td><td>85,000</td></tr>
+            <tr><td>7月の予約件数</td><td><code>=COUNTIFS(予約!B:B,7)</code></td><td>3</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><b>具体例：マスタから原価を引く（XLOOKUP）。</b><code>Master</code>シートに商品コード→原価の対応表があるとき、明細の各行に原価を付与します。引数の役割は次のとおりです。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>引数</th><th>役割</th><th>指定値</th><th>意味</th></tr></thead>
+          <tbody>
+            <tr><td>第1</td><td>検索値</td><td><code>B2</code></td><td>明細行の商品コード</td></tr>
+            <tr><td>第2</td><td>探す列</td><td><code>Master!$A:$A</code></td><td>マスタ側の商品コード列</td></tr>
+            <tr><td>第3</td><td>返す列</td><td><code>Master!$C:$C</code></td><td>マスタ側の原価列</td></tr>
+            <tr><td>第4</td><td>見つからない時</td><td><code>"該当なし"</code></td><td>一致しない場合の表示</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>つなげると <code>=XLOOKUP(B2, Master!$A:$A, Master!$C:$C, "該当なし")</code> です。<code>XLOOKUP</code>が使えない旧環境では、<code>VLOOKUP</code>より堅牢な<code>INDEX+MATCH</code>を使います（列の挿入で参照がずれないため）。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>環境</th><th>数式</th></tr></thead>
+          <tbody>
+            <tr><td>Microsoft 365 / 2021以降</td><td><code>=XLOOKUP(B2, Master!$A:$A, Master!$C:$C, "該当なし")</code></td></tr>
+            <tr><td>旧環境</td><td><code>=INDEX(Master!$C:$C, MATCH(B2, Master!$A:$A, 0))</code></td></tr>
+          </tbody>
+        </table>
+      </div>
       <p>プロは関数を書けるだけでなく、照合の前に次を判断します。</p>
       <ul class="bullets">
         <li>キーは一意か（重複があると合計がずれる）</li>
@@ -794,7 +817,7 @@ body.nav-open nav.drawer{transform:translateX(0)}
       <a class="dl" href="/files/excel-mastery-2-1.xlsx" download>
         <span class="dl-icon">XLSX</span>
         <span class="dl-body">
-          <span class="dl-title">演習ファイル：2-1 実績集計</span>
+          <span class="dl-title">解説ファイル：2-1 実績集計</span>
           <span class="dl-meta">シート「2-1_実績集計」／ Excel 8KB</span>
         </span>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
@@ -830,7 +853,7 @@ body.nav-open nav.drawer{transform:translateX(0)}
       <a class="dl" href="/files/excel-mastery-2-2.xlsx" download>
         <span class="dl-icon">XLSX</span>
         <span class="dl-body">
-          <span class="dl-title">演習ファイル：2-2 データ加工・クリーニング</span>
+          <span class="dl-title">解説ファイル：2-2 データ加工・クリーニング</span>
           <span class="dl-meta">シート「2-2_クリーニング」／ Excel 8KB</span>
         </span>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
@@ -900,7 +923,7 @@ RevPAR  = 50,000 × 65% = 32,500 円</code></pre></div>
       <a class="dl" href="/files/excel-mastery-2-4.xlsx" download>
         <span class="dl-icon">XLSX</span>
         <span class="dl-body">
-          <span class="dl-title">演習ファイル：2-4 予測・シミュレーション</span>
+          <span class="dl-title">解説ファイル：2-4 予測・シミュレーション</span>
           <span class="dl-meta">2-4_PL①Input〜③Output の3シート／ Excel 10KB</span>
         </span>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
@@ -935,7 +958,7 @@ RevPAR  = 50,000 × 65% = 32,500 円</code></pre></div>
       <a class="dl" href="/files/excel-mastery-ch3.xlsx" download>
         <span class="dl-icon">XLSX</span>
         <span class="dl-body">
-          <span class="dl-title">演習ファイル：第3章 シート構成の雛形</span>
+          <span class="dl-title">解説ファイル：第3章 シート構成の雛形</span>
           <span class="dl-meta">00_Index〜06_Check の7シート／ Excel 14KB</span>
         </span>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
@@ -1013,7 +1036,7 @@ RevPAR  = 50,000 × 65% = 32,500 円</code></pre></div>
       <a class="dl" href="/files/excel-mastery-4-1.xlsx" download>
         <span class="dl-icon">XLSX</span>
         <span class="dl-body">
-          <span class="dl-title">演習ファイル：4-1 チェックセルを設ける</span>
+          <span class="dl-title">解説ファイル：4-1 チェックセルを設ける</span>
           <span class="dl-meta">シート「4-1_チェックセル」／ Excel 7KB</span>
         </span>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
@@ -1043,7 +1066,7 @@ RevPAR  = 50,000 × 65% = 32,500 円</code></pre></div>
       <a class="dl" href="/files/excel-mastery-4-3.xlsx" download>
         <span class="dl-icon">XLSX</span>
         <span class="dl-body">
-          <span class="dl-title">演習ファイル：4-3 常識との整合性を確認する</span>
+          <span class="dl-title">解説ファイル：4-3 常識との整合性を確認する</span>
           <span class="dl-meta">シート「4-3_常識チェック」／ Excel 7KB</span>
         </span>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
