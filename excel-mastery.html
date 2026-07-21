@@ -782,22 +782,22 @@ body.nav-open nav.drawer{transform:translateX(0)}
           </tbody>
         </table>
       </div>
-      <p><b>具体例：マスタから原価を引く（XLOOKUP）。</b>まず「何ができるか」から見ます。飲食の売上明細には商品コードしか入っておらず、原価がありません。一方、原価は<code>Master</code>シートに一覧で持っています。</p>
+      <p><b>具体例：マスタから商品名と原価を引く（XLOOKUP）。</b>まず「何ができるか」から見ます。飲食の売上明細には、レジから出力された<b>商品コード・数量・売上</b>しか入っていません。商品名も原価も空欄のままです。一方、商品名と原価は<code>Master</code>シートに一覧で持っています。</p>
       <p>手元にあるのは、この2つの表です。</p>
       <div class="table-scroll">
         <table>
-          <thead><tr><th colspan="3">明細シート（原価がない）</th></tr><tr><th>行</th><th>B 商品コード</th><th>C 数量</th></tr></thead>
+          <thead><tr><th colspan="6">明細シート（C列・E列が空欄）</th></tr><tr><th>行</th><th>B 商品コード</th><th>C 商品名</th><th>D 数量</th><th>E 原価(円)</th><th>F 売上(円)</th></tr></thead>
           <tbody>
-            <tr><td>2</td><td>F-102</td><td>4</td></tr>
-            <tr><td>3</td><td>F-101</td><td>6</td></tr>
-            <tr><td>4</td><td>F-103</td><td>5</td></tr>
-            <tr><td>5</td><td>F-999</td><td>2</td></tr>
+            <tr><td>2</td><td>F-102</td><td>—</td><td>4</td><td>—</td><td>32,000</td></tr>
+            <tr><td>3</td><td>F-101</td><td>—</td><td>6</td><td>—</td><td>27,000</td></tr>
+            <tr><td>4</td><td>F-103</td><td>—</td><td>5</td><td>—</td><td>19,000</td></tr>
+            <tr><td>5</td><td>F-999</td><td>—</td><td>2</td><td>—</td><td>12,000</td></tr>
           </tbody>
         </table>
       </div>
       <div class="table-scroll">
         <table>
-          <thead><tr><th colspan="3">Masterシート（原価の一覧）</th></tr><tr><th>A 商品コード</th><th>B 商品名</th><th>C 原価(円)</th></tr></thead>
+          <thead><tr><th colspan="3">Masterシート（商品名・原価の一覧）</th></tr><tr><th>A 商品コード</th><th>B 商品名</th><th>C 原価(円)</th></tr></thead>
           <tbody>
             <tr><td>F-101</td><td>金目鯛煮付</td><td>1,800</td></tr>
             <tr><td>F-102</td><td>鮑ステーキ</td><td>3,200</td></tr>
@@ -805,22 +805,24 @@ body.nav-open nav.drawer{transform:translateX(0)}
           </tbody>
         </table>
       </div>
-      <p><b>XLOOKUPを使うと、商品コードをたどってD列に原価を自動で埋められます。</b>手作業の転記もマスタの目視も不要で、マスタの原価を直せば明細側も一斉に更新されます。結果はこうなります。</p>
+      <p><b>XLOOKUPを使うと、商品コードをたどってC列とE列を自動で埋められます。</b>手作業の転記もマスタの目視も不要で、マスタを直せば明細側も一斉に更新されます。結果はこうなります。</p>
       <div class="table-scroll">
         <table>
-          <thead><tr><th colspan="4">明細シート（D列に原価が付いた状態）</th></tr><tr><th>行</th><th>B 商品コード</th><th>C 数量</th><th>D 原価(円)</th></tr></thead>
+          <thead><tr><th colspan="6">明細シート（C列・E列が埋まった状態）</th></tr><tr><th>行</th><th>B 商品コード</th><th>C 商品名</th><th>D 数量</th><th>E 原価(円)</th><th>F 売上(円)</th></tr></thead>
           <tbody>
-            <tr><td>2</td><td>F-102</td><td>4</td><td>3,200</td></tr>
-            <tr><td>3</td><td>F-101</td><td>6</td><td>1,800</td></tr>
-            <tr><td>4</td><td>F-103</td><td>5</td><td>1,500</td></tr>
-            <tr><td>5</td><td>F-999</td><td>2</td><td>該当なし</td></tr>
+            <tr><td>2</td><td>F-102</td><td>鮑ステーキ</td><td>4</td><td>3,200</td><td>32,000</td></tr>
+            <tr><td>3</td><td>F-101</td><td>金目鯛煮付</td><td>6</td><td>1,800</td><td>27,000</td></tr>
+            <tr><td>4</td><td>F-103</td><td>地魚刺身盛</td><td>5</td><td>1,500</td><td>19,000</td></tr>
+            <tr><td>5</td><td>F-999</td><td>該当なし</td><td>2</td><td>該当なし</td><td>12,000</td></tr>
           </tbody>
         </table>
       </div>
       <p>5行目の<code>F-999</code>はマスタに存在しないため<code>該当なし</code>と表示されています。<b>エラーではなく意味のある文字を返せる</b>のがXLOOKUPの利点で、マスタ登録漏れをその場で発見できます。</p>
-      <p>これを実現する数式が次の1本です。D2に入れて下までコピーするだけです。</p>
-      <div class="code"><div class="code-head"><span class="code-lang">EXCEL</span><button class="copy">コピー</button></div><pre><code>=XLOOKUP(B2, Master!$A:$A, Master!$C:$C, "該当なし")</code></pre></div>
-      <p>そのために設定する引数は4つです。</p>
+      <p>原価と売上が横に並ぶと、<code>=E2*D2/F2</code>で<b>原価率</b>まで一気に出せます（2行目なら12,800÷32,000＝40.0%）。マスタから引いた値と明細の実績を同じ行に揃えることが、以降の分析の土台になります。</p>
+      <p>これを実現する数式が次の2本です。それぞれC2・E2に入れて、下までコピーするだけです。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">EXCEL</span><button class="copy">コピー</button></div><pre><code>C2（商品名） =XLOOKUP(B2, Master!$A:$A, Master!$B:$B, "該当なし")
+E2（原価）   =XLOOKUP(B2, Master!$A:$A, Master!$C:$C, "該当なし")</code></pre></div>
+      <p>違いは<b>3つ目の「返す列」だけ</b>です。同じ検索値でも、返す列を変えれば別の項目を引けます。E2（原価）を例に、設定する引数は4つです。</p>
       <div class="table-scroll">
         <table>
           <thead><tr><th>引数</th><th>役割</th><th>指定値</th><th>この例での意味</th></tr></thead>
