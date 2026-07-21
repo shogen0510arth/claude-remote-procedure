@@ -598,7 +598,7 @@ body.nav-open nav.drawer{transform:translateX(0)}
       <a class="dl" href="/files/excel-mastery-full.xlsx" download>
         <span class="dl-icon">XLSX</span>
         <span class="dl-body">
-          <span class="dl-title">解説ファイル：全16シート一括</span>
+          <span class="dl-title">解説ファイル：全17シート一括</span>
           <span class="dl-meta">本ガイドの全シートを1ブックに収録／ Excel 39KB</span>
         </span>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
@@ -782,6 +782,15 @@ body.nav-open nav.drawer{transform:translateX(0)}
           </tbody>
         </table>
       </div>
+      <a class="dl" href="/files/excel-mastery-2-1-sumifs.xlsx" download>
+        <span class="dl-icon">XLSX</span>
+        <span class="dl-body">
+          <span class="dl-title">解説ファイル：2-1 実績集計（SUMIFS）</span>
+          <span class="dl-meta">シート「2-1_実績集計_SUMIFS」／ Excel 8KB</span>
+        </span>
+        <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      </a>
+
       <p><b>具体例：マスタから商品名と原価単価を引く（XLOOKUP）。</b>まず「何ができるか」から見ます。飲食の明細には、レジから出力された<b>商品コードと数量</b>しか入っていません。商品名も原価単価も、掛け算して出す原価計も空欄のままです。一方、商品名と原価単価は<code>Master</code>シートに一覧で持っています。</p>
       <p>手元にあるのは、この2つの表です。</p>
       <div class="table-scroll">
@@ -839,6 +848,15 @@ F2（原価計）   =D2*E2</code></pre></div>
         </table>
       </div>
       <p>探す列と返す列は<b><code>$</code>付きの絶対参照</b>にします。相対参照のまま下にコピーすると参照範囲がずれ、下の行ほど探し漏れが起きます。</p>
+      <a class="dl" href="/files/excel-mastery-2-1-xlookup.xlsx" download>
+        <span class="dl-icon">XLSX</span>
+        <span class="dl-body">
+          <span class="dl-title">解説ファイル：2-1 実績集計（XLOOKUP）</span>
+          <span class="dl-meta">シート「2-1_実績集計_XLOOKUP」／ Excel 8KB</span>
+        </span>
+        <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      </a>
+
       <p><code>XLOOKUP</code>が使えない旧環境では、<code>VLOOKUP</code>より堅牢な<code>INDEX+MATCH</code>を使います（列の挿入で参照がずれないため）。</p>
       <div class="table-scroll">
         <table>
@@ -858,15 +876,6 @@ F2（原価計）   =D2*E2</code></pre></div>
         <li>マスタ更新時に参照が壊れないか</li>
       </ul>
       <p><b>ホテルでの典型的な集計軸：</b>施設別・月別売上／客室タイプ別ADR／予約経路別の宿泊人数／曜日別稼働率／国籍別平均単価／プラン別キャンセル率／部門別人件費率。これらはすべて<code>SUMIFS</code>と割り算だけで作れます。</p>
-
-      <a class="dl" href="/files/excel-mastery-2-1.xlsx" download>
-        <span class="dl-icon">XLSX</span>
-        <span class="dl-body">
-          <span class="dl-title">解説ファイル：2-1 実績集計</span>
-          <span class="dl-meta">シート「2-1_実績集計」／ Excel 8KB</span>
-        </span>
-        <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
-      </a>
 
       <h3 id="ch2-2">2-2. データ加工・クリーニング</h3>
       <p>分析の前段、データ整備もExcelスキルの一部です。汚いデータのままでは集計が合いません。</p>
