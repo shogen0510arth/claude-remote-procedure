@@ -782,22 +782,22 @@ body.nav-open nav.drawer{transform:translateX(0)}
           </tbody>
         </table>
       </div>
-      <p><b>具体例：マスタから商品名と原価を引く（XLOOKUP）。</b>まず「何ができるか」から見ます。飲食の売上明細には、レジから出力された<b>商品コード・数量・売上</b>しか入っていません。商品名も原価も空欄のままです。一方、商品名と原価は<code>Master</code>シートに一覧で持っています。</p>
+      <p><b>具体例：マスタから商品名と原価単価を引く（XLOOKUP）。</b>まず「何ができるか」から見ます。飲食の明細には、レジから出力された<b>商品コードと数量</b>しか入っていません。商品名も原価単価も、掛け算して出す原価計も空欄のままです。一方、商品名と原価単価は<code>Master</code>シートに一覧で持っています。</p>
       <p>手元にあるのは、この2つの表です。</p>
       <div class="table-scroll">
         <table>
-          <thead><tr><th colspan="6">明細シート（C列・E列が空欄）</th></tr><tr><th>行</th><th>B 商品コード</th><th>C 商品名</th><th>D 数量</th><th>E 原価(円)</th><th>F 売上(円)</th></tr></thead>
+          <thead><tr><th colspan="6">明細シート（C列・E列・F列が空欄）</th></tr><tr><th>行</th><th>B 商品コード</th><th>C 商品名</th><th>D 数量</th><th>E 原価単価(円)</th><th>F 原価計(円)</th></tr></thead>
           <tbody>
-            <tr><td>2</td><td>F-102</td><td>—</td><td>4</td><td>—</td><td>32,000</td></tr>
-            <tr><td>3</td><td>F-101</td><td>—</td><td>6</td><td>—</td><td>27,000</td></tr>
-            <tr><td>4</td><td>F-103</td><td>—</td><td>5</td><td>—</td><td>19,000</td></tr>
-            <tr><td>5</td><td>F-999</td><td>—</td><td>2</td><td>—</td><td>12,000</td></tr>
+            <tr><td>2</td><td>F-102</td><td>—</td><td>4</td><td>—</td><td>—</td></tr>
+            <tr><td>3</td><td>F-101</td><td>—</td><td>6</td><td>—</td><td>—</td></tr>
+            <tr><td>4</td><td>F-103</td><td>—</td><td>5</td><td>—</td><td>—</td></tr>
+            <tr><td>5</td><td>F-999</td><td>—</td><td>2</td><td>—</td><td>—</td></tr>
           </tbody>
         </table>
       </div>
       <div class="table-scroll">
         <table>
-          <thead><tr><th colspan="3">Masterシート（商品名・原価の一覧）</th></tr><tr><th>A 商品コード</th><th>B 商品名</th><th>C 原価(円)</th></tr></thead>
+          <thead><tr><th colspan="3">Masterシート（商品名・原価単価の一覧）</th></tr><tr><th>A 商品コード</th><th>B 商品名</th><th>C 原価単価(円)</th></tr></thead>
           <tbody>
             <tr><td>F-101</td><td>金目鯛煮付</td><td>1,800</td></tr>
             <tr><td>F-102</td><td>鮑ステーキ</td><td>3,200</td></tr>
@@ -805,31 +805,35 @@ body.nav-open nav.drawer{transform:translateX(0)}
           </tbody>
         </table>
       </div>
-      <p><b>XLOOKUPを使うと、商品コードをたどってC列とE列を自動で埋められます。</b>手作業の転記もマスタの目視も不要で、マスタを直せば明細側も一斉に更新されます。結果はこうなります。</p>
+      <p><b>XLOOKUPを使うと、商品コードをたどってC列とE列を自動で埋められます。</b>手作業の転記もマスタの目視も不要で、マスタを直せば明細側も一斉に更新されます。あとはF列で<code>数量 × 原価単価</code>を掛けるだけです。</p>
       <div class="table-scroll">
         <table>
-          <thead><tr><th colspan="6">明細シート（C列・E列が埋まった状態）</th></tr><tr><th>行</th><th>B 商品コード</th><th>C 商品名</th><th>D 数量</th><th>E 原価(円)</th><th>F 売上(円)</th></tr></thead>
+          <thead><tr><th colspan="6">明細シート（C列・E列を引き、F列で掛け算した状態）</th></tr><tr><th>行</th><th>B 商品コード</th><th>C 商品名</th><th>D 数量</th><th>E 原価単価(円)</th><th>F 原価計(円)</th></tr></thead>
           <tbody>
-            <tr><td>2</td><td>F-102</td><td>鮑ステーキ</td><td>4</td><td>3,200</td><td>32,000</td></tr>
-            <tr><td>3</td><td>F-101</td><td>金目鯛煮付</td><td>6</td><td>1,800</td><td>27,000</td></tr>
-            <tr><td>4</td><td>F-103</td><td>地魚刺身盛</td><td>5</td><td>1,500</td><td>19,000</td></tr>
-            <tr><td>5</td><td>F-999</td><td>該当なし</td><td>2</td><td>該当なし</td><td>12,000</td></tr>
+            <tr><td>2</td><td>F-102</td><td>鮑ステーキ</td><td>4</td><td>3,200</td><td>12,800</td></tr>
+            <tr><td>3</td><td>F-101</td><td>金目鯛煮付</td><td>6</td><td>1,800</td><td>10,800</td></tr>
+            <tr><td>4</td><td>F-103</td><td>地魚刺身盛</td><td>5</td><td>1,500</td><td>7,500</td></tr>
+            <tr><td>5</td><td>F-999</td><td>該当なし</td><td>2</td><td>該当なし</td><td>#VALUE!</td></tr>
           </tbody>
         </table>
       </div>
       <p>5行目の<code>F-999</code>はマスタに存在しないため<code>該当なし</code>と表示されています。<b>エラーではなく意味のある文字を返せる</b>のがXLOOKUPの利点で、マスタ登録漏れをその場で発見できます。</p>
-      <p>原価と売上が横に並ぶと、<code>=E2*D2/F2</code>で<b>原価率</b>まで一気に出せます（2行目なら12,800÷32,000＝40.0%）。マスタから引いた値と明細の実績を同じ行に揃えることが、以降の分析の土台になります。</p>
-      <p>これを実現する数式が次の2本です。それぞれC2・E2に入れて、下までコピーするだけです。</p>
-      <div class="code"><div class="code-head"><span class="code-lang">EXCEL</span><button class="copy">コピー</button></div><pre><code>C2（商品名） =XLOOKUP(B2, Master!$A:$A, Master!$B:$B, "該当なし")
-E2（原価）   =XLOOKUP(B2, Master!$A:$A, Master!$C:$C, "該当なし")</code></pre></div>
-      <p>違いは<b>3つ目の「返す列」だけ</b>です。同じ検索値でも、返す列を変えれば別の項目を引けます。E2（原価）を例に、設定する引数は4つです。</p>
+      <p>これを実現する数式が次の3本です。それぞれC2・E2・F2に入れて、下までコピーするだけです。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">EXCEL</span><button class="copy">コピー</button></div><pre><code>C2（商品名）   =XLOOKUP(B2, Master!$A:$A, Master!$B:$B, "該当なし")
+E2（原価単価） =XLOOKUP(B2, Master!$A:$A, Master!$C:$C, "該当なし")
+F2（原価計）   =D2*E2</code></pre></div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>文字を返す列を計算に使わない</div>
+        <p>F5が<code>#VALUE!</code>になるのは、E5の<code>"該当なし"</code>という<b>文字</b>に数量を掛けようとしたためです。<b>表示用の列は文字、計算に使う列は数値</b>と使い分けます。E列を計算に回すなら第4引数を<code>0</code>にして<code>=XLOOKUP(B2, Master!$A:$A, Master!$C:$C, 0)</code>とするか、F列側で<code>=IFERROR(D2*E2, 0)</code>と受けます。ただし<b>0で埋めると登録漏れが見えなくなる</b>ため、4-1のチェックセルで「原価0円の明細が何件あるか」を必ず数えます。</p>
+      </div>
+      <p>C2とE2の違いは<b>3つ目の「返す列」だけ</b>です。同じ検索値でも、返す列を変えれば別の項目を引けます（F2はXLOOKUPではなく単純な掛け算です）。E2（原価単価）を例に、設定する引数は4つです。</p>
       <div class="table-scroll">
         <table>
           <thead><tr><th>引数</th><th>役割</th><th>指定値</th><th>この例での意味</th></tr></thead>
           <tbody>
             <tr><td>第1</td><td>検索値</td><td><code>B2</code></td><td>探したい商品コード（<code>F-102</code>）</td></tr>
             <tr><td>第2</td><td>探す列</td><td><code>Master!$A:$A</code></td><td>マスタの商品コード列。ここから一致行を探す</td></tr>
-            <tr><td>第3</td><td>返す列</td><td><code>Master!$C:$C</code></td><td>一致した行の原価列を返す</td></tr>
+            <tr><td>第3</td><td>返す列</td><td><code>Master!$C:$C</code></td><td>一致した行の原価単価列を返す</td></tr>
             <tr><td>第4</td><td>見つからない時</td><td><code>"該当なし"</code></td><td>一致がない場合の表示（省略すると<code>#N/A</code>）</td></tr>
           </tbody>
         </table>
