@@ -305,6 +305,36 @@ code:not(pre code){
 .note p:last-child{margin-bottom:0}
 .note code:not(pre code){background:color-mix(in srgb,var(--bg-elev) 70%,transparent)}
 
+/* ---------- download ---------- */
+.dl{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;margin:0 0 18px;
+  border:1px solid var(--border-strong);border-radius:var(--radius-sm);
+  background:var(--bg-elev);box-shadow:var(--shadow-sm);
+  text-decoration:none;color:var(--text);
+  transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease;
+}
+.dl:hover{border-color:var(--accent);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.dl:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dl .dl-icon{
+  width:32px;height:32px;flex:none;border-radius:7px;
+  background:#1d6f42;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10.5px;font-weight:800;letter-spacing:.02em;
+}
+.dl .dl-body{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.dl .dl-title{font-weight:700;font-size:14.5px;line-height:1.5}
+.dl .dl-meta{font-size:12.5px;color:var(--text-muted);line-height:1.5}
+.dl .dl-arrow{
+  width:17px;height:17px;flex:none;fill:none;
+  stroke:var(--text-faint);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+}
+.dl:hover .dl-arrow{stroke:var(--accent)}
+@media (max-width:520px){
+  .dl .dl-title{font-size:13.5px}
+  .dl .dl-meta{font-size:11.5px}
+}
+
 /* ---------- table ---------- */
 .table-scroll{
   overflow-x:auto;-webkit-overflow-scrolling:touch;
@@ -565,6 +595,15 @@ body.nav-open nav.drawer{transform:translateX(0)}
         <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>この資料の読み方</div>
         <p>第1〜5章で「プロの土台」を、第6〜8章で「モデリングの考え方」を、第9〜10章で投資銀行・不動産ファンドの<b>実践モデル（数値付き）</b>を、第11〜13章で到達段階・成果物・リファレンスをまとめます。具体例のセル番地や数字はそのまま手を動かして再現できます。</p>
       </div>
+      <a class="dl" href="/files/excel-mastery-full.xlsx" download>
+        <span class="dl-icon">XLSX</span>
+        <span class="dl-body">
+          <span class="dl-title">全演習ファイル（16シート一括）</span>
+          <span class="dl-meta">本ガイドの全シートを1ブックに収録／ Excel 39KB</span>
+        </span>
+        <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      </a>
+
     </section>
 
     <hr class="rule">
@@ -616,6 +655,15 @@ body.nav-open nav.drawer{transform:translateX(0)}
         <p>青＝人が入れた値、黒＝計算、緑＝他シート参照。この3色を徹底するだけで、レビュー担当は「どこを触れば結果が変わるか」を一瞬で判断できます。ただし会社・チームのルールがあればそれを優先します。</p>
       </div>
 
+      <a class="dl" href="/files/excel-mastery-1-1.xlsx" download>
+        <span class="dl-icon">XLSX</span>
+        <span class="dl-body">
+          <span class="dl-title">演習ファイル：1-1 体裁を統一できる</span>
+          <span class="dl-meta">シート「1-1_体裁の対比」／ Excel 8KB</span>
+        </span>
+        <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      </a>
+
       <h3 id="ch1-2">1-2. 操作が速い</h3>
       <p>速さの本質は「入力速度」ではなく<b>「無駄な工程の少なさ」</b>です。マウスに持ち替えず思考を止めないことで、修正と検証を高速に繰り返せます。最低限、次のショートカットは指が覚えるまで使ってください（Windowsキー表記。Macは <code>Ctrl</code>→<code>⌘</code> に読み替え）。</p>
       <div class="table-scroll">
@@ -665,6 +713,15 @@ body.nav-open nav.drawer{transform:translateX(0)}
         <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>$の使い分け（複合参照）</div>
         <p>感応度表のように「行方向は同じ列を、列方向は同じ行を」参照したいとき、<code>$</code>を片方だけ固定します。例：単価の行 <code>$B4</code>（列B固定）と数量の列 <code>C$3</code>（行3固定）を掛けると、1つの数式を全マスにコピーするだけで表が完成します。<code>F4</code>（Macは<code>⌘T</code>）を押すたびに <code>A1 → $A$1 → A$1 → $A1</code> と循環します。</p>
       </div>
+
+      <a class="dl" href="/files/excel-mastery-1-2.xlsx" download>
+        <span class="dl-icon">XLSX</span>
+        <span class="dl-body">
+          <span class="dl-title">演習ファイル：1-2 操作が速い</span>
+          <span class="dl-meta">シート「1-2_操作イメージ」／ Excel 8KB</span>
+        </span>
+        <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      </a>
 
       <h3 id="ch1-3">1-3. 壊しにくい</h3>
       <p>プロにとって速さ以上に重要なのが、<b>既存の数式や参照を壊さずに修正できる</b>ことです。</p>
@@ -734,6 +791,15 @@ body.nav-open nav.drawer{transform:translateX(0)}
       </ul>
       <p><b>ホテルでの典型的な集計軸：</b>施設別・月別売上／客室タイプ別ADR／予約経路別の宿泊人数／曜日別稼働率／国籍別平均単価／プラン別キャンセル率／部門別人件費率。これらはすべて<code>SUMIFS</code>と割り算だけで作れます。</p>
 
+      <a class="dl" href="/files/excel-mastery-2-1.xlsx" download>
+        <span class="dl-icon">XLSX</span>
+        <span class="dl-body">
+          <span class="dl-title">演習ファイル：2-1 実績集計</span>
+          <span class="dl-meta">シート「2-1_実績集計」／ Excel 8KB</span>
+        </span>
+        <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      </a>
+
       <h3 id="ch2-2">2-2. データ加工・クリーニング</h3>
       <p>分析の前段、データ整備もExcelスキルの一部です。汚いデータのままでは集計が合いません。</p>
       <div class="table-scroll">
@@ -760,6 +826,15 @@ body.nav-open nav.drawer{transform:translateX(0)}
         <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>繰り返すなら Power Query</div>
         <p>毎月同じ形で届くCSVの結合・整形は、関数よりPower Queryが正解です。手順を「記録」しておけば、翌月は新ファイルを差し替えて<b>更新ボタン一つ</b>で完了します。属人化と手作業ミスを同時に無くせます。</p>
       </div>
+
+      <a class="dl" href="/files/excel-mastery-2-2.xlsx" download>
+        <span class="dl-icon">XLSX</span>
+        <span class="dl-body">
+          <span class="dl-title">演習ファイル：2-2 データ加工・クリーニング</span>
+          <span class="dl-meta">シート「2-2_クリーニング」／ Excel 8KB</span>
+        </span>
+        <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      </a>
 
       <h3 id="ch2-3">2-3. 分析（要因分解）</h3>
       <p>集計から一段進み、<b>「なぜそうなったか」を説明できる</b>状態が分析です。まず指標を掛け算・足し算に分解します。</p>
@@ -822,6 +897,15 @@ RevPAR  = 50,000 × 65% = 32,500 円</code></pre></div>
         <p>「稼働率×ADRで営業利益がどう動くか」の一覧は、Excelの<b>What-If分析 → データテーブル</b>で自動生成できます。左上に結果セルを参照し、行に稼働率、列にADRを並べ、範囲選択して実行するだけ。1-2の複合参照と並ぶ、シミュレーションの必須技術です。</p>
       </div>
       <p>シミュレーションの目的は「数字を当てる」ことではなく、<b>「何が変わると、結果がどの程度変わるか」を見えるようにする</b>ことです。</p>
+      <a class="dl" href="/files/excel-mastery-2-4.xlsx" download>
+        <span class="dl-icon">XLSX</span>
+        <span class="dl-body">
+          <span class="dl-title">演習ファイル：2-4 予測・シミュレーション</span>
+          <span class="dl-meta">2-4_PL①Input〜③Output の3シート／ Excel 10KB</span>
+        </span>
+        <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      </a>
+
     </section>
 
     <hr class="rule">
@@ -847,6 +931,15 @@ RevPAR  = 50,000 × 65% = 32,500 円</code></pre></div>
         </table>
       </div>
       <p>小規模ファイルでここまで分ける必要はありませんが、少なくとも <b>入力 → 計算 → 出力</b> の流れを混在させないことが大切です。</p>
+
+      <a class="dl" href="/files/excel-mastery-ch3.xlsx" download>
+        <span class="dl-icon">XLSX</span>
+        <span class="dl-body">
+          <span class="dl-title">演習ファイル：第3章 シート構成の雛形</span>
+          <span class="dl-meta">00_Index〜06_Check の7シート／ Excel 14KB</span>
+        </span>
+        <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      </a>
 
       <h3 id="ch3-2">3-2. 入力・計算・出力を分ける</h3>
       <p>悪いモデルは、同じ表の中に「実績値・手入力の予測・数式・外部データ・最終結果」が混ざり、<b>どの数字を変えてよいか分かりません</b>。良いモデルは一方向の構造です。</p>
@@ -917,6 +1010,15 @@ RevPAR  = 50,000 × 65% = 32,500 円</code></pre></div>
         <p>OK/ERRORだけでなく、ズレの<b>金額そのもの</b>を横に出すと原因追跡が速くなります。<code>=資産-(負債+純資産)</code>が「＋1,000」なら、どこかで1,000だけ二重計上か計上漏れがある、と当たりを付けられます。</p>
       </div>
 
+      <a class="dl" href="/files/excel-mastery-4-1.xlsx" download>
+        <span class="dl-icon">XLSX</span>
+        <span class="dl-body">
+          <span class="dl-title">演習ファイル：4-1 チェックセルを設ける</span>
+          <span class="dl-meta">シート「4-1_チェックセル」／ Excel 7KB</span>
+        </span>
+        <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      </a>
+
       <h3 id="ch4-2">4-2. クロスチェックする</h3>
       <p>同じ結果を<b>別の計算方法</b>で確認します。両者が一致すれば集計精度への信頼が高まります。</p>
       <div class="code"><div class="code-head"><span class="code-lang">客室売上のクロスチェック</span><button class="copy">コピー</button></div><pre><code>方法A：予約明細を合計         =SUM(予約!E:E)          237,180,000
@@ -938,6 +1040,15 @@ RevPAR  = 50,000 × 65% = 32,500 円</code></pre></div>
         <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>「桁」と「率」を眺める習慣</div>
         <p>完成したら、必ず主要指標の<b>率と桁</b>を目視します。原価率・人件費率・営業利益率が業界の常識レンジに入っているか。桁が一つずれる（千円と円の取り違え）事故は、率チェックで即座に見つかります。</p>
       </div>
+      <a class="dl" href="/files/excel-mastery-4-3.xlsx" download>
+        <span class="dl-icon">XLSX</span>
+        <span class="dl-body">
+          <span class="dl-title">演習ファイル：4-3 常識との整合性を確認する</span>
+          <span class="dl-meta">シート「4-3_常識チェック」／ Excel 7KB</span>
+        </span>
+        <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      </a>
+
     </section>
 
     <hr class="rule">
