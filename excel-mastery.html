@@ -782,19 +782,58 @@ body.nav-open nav.drawer{transform:translateX(0)}
           </tbody>
         </table>
       </div>
-      <p><b>具体例：マスタから原価を引く（XLOOKUP）。</b><code>Master</code>シートに商品コード→原価の対応表があるとき、明細の各行に原価を付与します。引数の役割は次のとおりです。</p>
+      <p><b>具体例：マスタから原価を引く（XLOOKUP）。</b>まず「何ができるか」から見ます。飲食の売上明細には商品コードしか入っておらず、原価がありません。一方、原価は<code>Master</code>シートに一覧で持っています。</p>
+      <p>手元にあるのは、この2つの表です。</p>
       <div class="table-scroll">
         <table>
-          <thead><tr><th>引数</th><th>役割</th><th>指定値</th><th>意味</th></tr></thead>
+          <thead><tr><th colspan="3">明細シート（原価がない）</th></tr><tr><th>行</th><th>B 商品コード</th><th>C 数量</th></tr></thead>
           <tbody>
-            <tr><td>第1</td><td>検索値</td><td><code>B2</code></td><td>明細行の商品コード</td></tr>
-            <tr><td>第2</td><td>探す列</td><td><code>Master!$A:$A</code></td><td>マスタ側の商品コード列</td></tr>
-            <tr><td>第3</td><td>返す列</td><td><code>Master!$C:$C</code></td><td>マスタ側の原価列</td></tr>
-            <tr><td>第4</td><td>見つからない時</td><td><code>"該当なし"</code></td><td>一致しない場合の表示</td></tr>
+            <tr><td>2</td><td>F-102</td><td>4</td></tr>
+            <tr><td>3</td><td>F-101</td><td>6</td></tr>
+            <tr><td>4</td><td>F-103</td><td>5</td></tr>
+            <tr><td>5</td><td>F-999</td><td>2</td></tr>
           </tbody>
         </table>
       </div>
-      <p>つなげると <code>=XLOOKUP(B2, Master!$A:$A, Master!$C:$C, "該当なし")</code> です。<code>XLOOKUP</code>が使えない旧環境では、<code>VLOOKUP</code>より堅牢な<code>INDEX+MATCH</code>を使います（列の挿入で参照がずれないため）。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th colspan="3">Masterシート（原価の一覧）</th></tr><tr><th>A 商品コード</th><th>B 商品名</th><th>C 原価(円)</th></tr></thead>
+          <tbody>
+            <tr><td>F-101</td><td>金目鯛煮付</td><td>1,800</td></tr>
+            <tr><td>F-102</td><td>鮑ステーキ</td><td>3,200</td></tr>
+            <tr><td>F-103</td><td>地魚刺身盛</td><td>1,500</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><b>XLOOKUPを使うと、商品コードをたどってD列に原価を自動で埋められます。</b>手作業の転記もマスタの目視も不要で、マスタの原価を直せば明細側も一斉に更新されます。結果はこうなります。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th colspan="4">明細シート（D列に原価が付いた状態）</th></tr><tr><th>行</th><th>B 商品コード</th><th>C 数量</th><th>D 原価(円)</th></tr></thead>
+          <tbody>
+            <tr><td>2</td><td>F-102</td><td>4</td><td>3,200</td></tr>
+            <tr><td>3</td><td>F-101</td><td>6</td><td>1,800</td></tr>
+            <tr><td>4</td><td>F-103</td><td>5</td><td>1,500</td></tr>
+            <tr><td>5</td><td>F-999</td><td>2</td><td>該当なし</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>5行目の<code>F-999</code>はマスタに存在しないため<code>該当なし</code>と表示されています。<b>エラーではなく意味のある文字を返せる</b>のがXLOOKUPの利点で、マスタ登録漏れをその場で発見できます。</p>
+      <p>これを実現する数式が次の1本です。D2に入れて下までコピーするだけです。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">EXCEL</span><button class="copy">コピー</button></div><pre><code>=XLOOKUP(B2, Master!$A:$A, Master!$C:$C, "該当なし")</code></pre></div>
+      <p>そのために設定する引数は4つです。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>引数</th><th>役割</th><th>指定値</th><th>この例での意味</th></tr></thead>
+          <tbody>
+            <tr><td>第1</td><td>検索値</td><td><code>B2</code></td><td>探したい商品コード（<code>F-102</code>）</td></tr>
+            <tr><td>第2</td><td>探す列</td><td><code>Master!$A:$A</code></td><td>マスタの商品コード列。ここから一致行を探す</td></tr>
+            <tr><td>第3</td><td>返す列</td><td><code>Master!$C:$C</code></td><td>一致した行の原価列を返す</td></tr>
+            <tr><td>第4</td><td>見つからない時</td><td><code>"該当なし"</code></td><td>一致がない場合の表示（省略すると<code>#N/A</code>）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>探す列と返す列は<b><code>$</code>付きの絶対参照</b>にします。相対参照のまま下にコピーすると参照範囲がずれ、下の行ほど探し漏れが起きます。</p>
+      <p><code>XLOOKUP</code>が使えない旧環境では、<code>VLOOKUP</code>より堅牢な<code>INDEX+MATCH</code>を使います（列の挿入で参照がずれないため）。</p>
       <div class="table-scroll">
         <table>
           <thead><tr><th>環境</th><th>数式</th></tr></thead>
