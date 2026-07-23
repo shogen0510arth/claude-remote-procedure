@@ -5,13 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
-<meta name="description" content="これまでに作成した手順書・ガイドの一覧ポータル。Claude Codeの運用・活用ガイドと、ターミナルや画面共有などの環境・基礎スキルを、タイトルと概要から探せます。">
-<title>ドキュメント一覧 — Claude Code &amp; 業務ツール手順</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-title" content="ドキュメント一覧">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="日本の美意識を、陰影・間・余白・侘び・寂び・幽玄・旬など約30の切り口で整理したリファレンス。空間・食・宿泊体験のコンセプト設計に落とすための切り口帳と、主要な参考文献をまとめる。">
+<title>日本の美意識：捉え方の切り口</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎐</text></svg>">
 <style>
 :root{
   --bg:#faf9f7;
@@ -491,11 +487,6 @@ body.nav-open nav.drawer{transform:translateX(0)}
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 }
-
-/* ---------- portal cards ---------- */
-.link-card{align-items:flex-start}
-.link-card .lc-desc{font-size:13px;color:var(--text-muted);line-height:1.7;margin:4px 0 2px}
-.link-card .lc-arrow{margin-top:2px}
 </style>
 </head>
 <body>
@@ -504,7 +495,7 @@ body.nav-open nav.drawer{transform:translateX(0)}
 
 <header>
   <div class="header-inner">
-    <div class="brand"><i class="dot"></i><span>ドキュメント一覧</span></div>
+    <div class="brand"><i class="dot"></i><span>日本の美意識：捉え方の切り口</span></div>
     <button class="menu-btn" id="menuBtn" aria-label="目次を開く" aria-expanded="false">
       <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
@@ -532,144 +523,136 @@ body.nav-open nav.drawer{transform:translateX(0)}
   <main>
 
     <div class="hero">
-      <div class="eyebrow">ポータル</div>
-      <h1>ドキュメント一覧</h1>
-      <p class="lead">これまでに作成した手順書・ガイドの一覧です。テーマごとに整理しています。各ページのタイトルと概要から、目的のドキュメントを開いてください。</p>
+      <div class="eyebrow">コンセプト設計ノート</div>
+      <h1>日本の美意識<br>捉え方の切り口</h1>
+      <p class="lead">「日本だけにある美」ではなく、<b>中国・朝鮮・仏教・禅・神道・気候風土・木造建築・茶の湯などが混ざり、日本でかなり強く“型”になった美意識</b>として見るのが安全です。一言でまとめれば——<b>自然を征服せず、少し引いて受け入れ、余白・陰影・移ろい・不完全さの中に美を見出す感覚</b>。空間・食・宿泊体験のコンセプトに落とすための切り口帳としてまとめました。</p>
       <div class="meta">
-        <span class="chip">全 <b>8</b> ドキュメント</span>
-        <span class="chip">最終更新：<b>2026-07-20</b></span>
+        <span class="chip">切り口：<b>約30</b></span>
+        <span class="chip">空間 / 精神 / 食</span>
+        <span class="chip">参考文献つき</span>
+        <span class="chip">コンセプト設計向け</span>
       </div>
     </div>
 
     <div class="toc-card">
-      <h2>テーマ</h2>
+      <h2>目次</h2>
       <ol id="tocCardList"></ol>
     </div>
 
-    <!-- ============ guide ============ -->
-    <section class="chapter" id="guide">
-      <div class="chapter-head">
-        <div class="badge">1</div>
-        <h2>Claude Code 運用・活用ガイド</h2>
+    <section class="chapter" id="intro">
+      <div class="chapter-head"><div class="badge">◎</div><h2>日本の美とは何か</h2></div>
+      <p>まず前提として、日本の美を「日本だけにある固有のもの」と捉えると、かえって外します。<b>中国・朝鮮からの影響、仏教・禅、神道、多雨多湿の気候風土、木造建築、茶の湯</b>——これらが混ざり合い、日本で強く“型”として洗練された、と見るのが安全です。</p>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>一言でまとめると</div>
+        <p><b>自然を征服せず、少し引いて受け入れ、余白・陰影・移ろい・不完全さの中に美を見出す感覚</b>。作り込んで見せつけるより、引いて・削って・省いて、見る側の想像や季節の一瞬に委ねる方向に働きます。</p>
       </div>
-      <p>Mac miniを中心に、Claude Codeでの開発・資料作成・業務自動化を継続的に回すための運用ドキュメントです。</p>
-      <div class="link-list">
-        <a class="link-card" href="/remote-control">
-          <div class="lc-body">
-            <div class="lc-title">Remote Control 運用手順</div>
-            <div class="lc-desc">Mac miniを常時稼働のClaude Code実行環境とし、MacBook Air／iPhoneから画面共有なしでアプリ開発を継続するための運用手順。</div>
-            <div class="lc-url">/remote-control</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
-        <a class="link-card" href="/platforms">
-          <div class="lc-body">
-            <div class="lc-title">プラットフォーム比較と機能ガイド</div>
-            <div class="lc-desc">Claude CodeのCLI／IDE／Macアプリ／iPhoneなど、各プラットフォームの違いと機能を比較するガイド。</div>
-            <div class="lc-url">/platforms</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
-        <a class="link-card" href="/ppt-excel">
-          <div class="lc-body">
-            <div class="lc-title">PowerPoint / Excel 作成ガイド</div>
-            <div class="lc-desc">常時稼働のMac miniを使い、テンプレート準拠のPowerPoint／Excel資料を「翌週も続きから」生成する運用ガイド。</div>
-            <div class="lc-url">/ppt-excel</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
-        <a class="link-card" href="/ota-agent">
-          <div class="lc-body">
-            <div class="lc-title">OTA設定AIエージェント 構築手順</div>
-            <div class="lc-desc">楽天トラベル・一休.comの設定変更を、担当者がチャットで依頼できる専用AIエージェントの構築・運用手順（PC初心者向け）。</div>
-            <div class="lc-url">/ota-agent</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
+      <p>以下では、まず代表的な「陰影」を一つ掘り下げ、続いて約30の切り口を一覧にし、最後に参考文献と、ホテル・旅館・レストランのコンセプトへの落とし方をまとめます。</p>
+    </section>
+
+    <hr class="rule">
+
+    <section class="chapter" id="inei">
+      <div class="chapter-head"><div class="badge">1</div><h2>陰影という切り口</h2></div>
+      <p>「陰影」はよく挙げられる切り口で、方向性としてはかなり正確です。ただし、少し補足するとより正しく捉えられます。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>項目</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td>切り口</td><td>陰影</td></tr>
+            <tr><td>代表例</td><td>軒の深い屋根による、暗めの室内と明るい庭の対比</td></tr>
+            <tr><td>なぜか</td><td>日差しを避けるためだけでなく、雨・湿気への対応が大きい。深い軒は雨を防ぎ、夏の日射を遮り、木造・土壁・障子の空間に柔らかな暗さを生んだ。</td></tr>
+            <tr><td>参考文献</td><td>谷崎潤一郎『陰翳礼讃』</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>ここで大事なのは、<b>「暗い空間を作りたくて軒を深くした」というより、気候対応として生まれた陰影を、後から美として読み替えた</b>、という点です。<a href="https://www.mlit.go.jp/common/001260985.pdf" target="_blank" rel="noopener">国土交通省の資料</a> でも、伝統的な日本家屋の深い軒は雨水から外壁を守り、夏の日差しを遮る機能として説明されています。<a href="https://livingculture.lixil.com/en/story/story2/" target="_blank" rel="noopener">LIXIL</a> の解説でも、日本は雨が多く、深い軒や縁側が雨・湿気と共存する仕組みとして発達したとされています。谷崎はそのように生まれた暗がり、とくに床の間や茶室の陰影を、日本的な美として捉え直しました。</p>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/><path d="M9 21h6"/></svg>要点</div>
+        <p>多くの切り口は、この「陰影」と同じ構造を持ちます。<b>まず気候・素材・信仰などの実用や必然があり、そこに生まれた形を、後世が美意識として言語化した</b>。順序を逆に読む（美のために不便を選んだ、と考える）と、たいてい説明を誤ります。</p>
       </div>
     </section>
 
     <hr class="rule">
 
-    <!-- ============ basics ============ -->
-    <section class="chapter" id="basics">
-      <div class="chapter-head">
-        <div class="badge">2</div>
-        <h2>環境・基礎スキル</h2>
+    <section class="chapter" id="kirikuchi">
+      <div class="chapter-head"><div class="badge">2</div><h2>美を捉える主な切り口</h2></div>
+      <p>空間・建築・庭から、侘び寂びなどの精神性、そして和食まで。代表例・背景・参考文献をまとめた一覧です。横スクロールで参考文献まで確認できます。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>切り口</th><th>代表例</th><th>なぜか・背景</th><th>参考文献</th></tr></thead>
+          <tbody>
+            <tr><td>陰影</td><td>深い軒、床の間、茶室、行灯、障子越しの光</td><td>雨・夏の日射への対応から、室内に直接光ではなく、反射光・半透明の光・暗がりが生まれた。そこに静けさや奥行きを見た。</td><td>谷崎潤一郎『陰翳礼讃』、<a href="https://plato.stanford.edu/entries/japanese-aesthetics/" target="_blank" rel="noopener">Stanford Encyclopedia “Japanese Aesthetics”</a></td></tr>
+            <tr><td>間（ま）</td><td>茶室の沈黙、能の間合い、庭と座敷の距離、余裕のある床の間</td><td>物と物の間を「空白」ではなく、関係を生む場として扱う。建築では柱間・畳割など、寸法体系にも関係する。</td><td><a href="https://kyotojournal.org/culture-arts/ma-place-space-void/" target="_blank" rel="noopener">Kyoto Journal “MA: Place, Space, Void”</a></td></tr>
+            <tr><td>余白</td><td>長谷川等伯《松林図屏風》、水墨画、白い器に少量の料理、俳句</td><td>描き切らないことで、見る側の想像が入る。説明しすぎない、満たしすぎない美。</td><td><a href="https://www.seattlejapanesegarden.org/blog/2016/03/15/yohaku-no-bi-the-beauty-of-empty-space" target="_blank" rel="noopener">Seattle Japanese Garden “Yohaku no bi”</a></td></tr>
+            <tr><td>見立て</td><td>枯山水で白砂を海、石を島や山に見立てる</td><td>本物をそのまま再現せず、最小限の要素で宇宙や自然を想像させる。</td><td>龍安寺石庭、<a href="https://www.japan.travel/en/spot/1145/" target="_blank" rel="noopener">JNTO解説</a></td></tr>
+            <tr><td>借景</td><td>円通寺の比叡山、依水園から見える東大寺南大門・若草山</td><td>庭の外にある山や建築を、庭の一部として取り込む。所有地の内外を視覚的につなぐ。</td><td><a href="https://najga.org/japanese-gardens-borrowed-scenery/" target="_blank" rel="noopener">NAJGA “Borrowed Scenery”</a></td></tr>
+            <tr><td>内外の曖昧さ</td><td>縁側、濡れ縁、障子、庭に面した座敷</td><td>家と庭、内と外を完全に分けず、縁側を緩衝帯にする。雨の多い気候にも合う。</td><td><a href="https://livingculture.lixil.com/en/story/story2/" target="_blank" rel="noopener">LIXIL「雨の国、ニッポン」</a></td></tr>
+            <tr><td>可変性</td><td>襖・障子で部屋を仕切る、畳の部屋を寝室・食事・接客に使い分ける</td><td>木造軸組・畳・建具により、固定された用途よりも、時間帯や人数で変わる空間を作る。</td><td><a href="https://www.mlit.go.jp/common/001260985.pdf" target="_blank" rel="noopener">国交省 “Wisdom of Traditional Japanese Homes”</a></td></tr>
+            <tr><td>小さな空間の濃密さ</td><td>茶室、坪庭、露地、箱庭、盆栽</td><td>限られた面積の中に、自然・季節・儀式性を凝縮する。広大さではなく、密度で勝負する。</td><td>千利休の草庵茶、<a href="https://plato.stanford.edu/entries/japanese-aesthetics/" target="_blank" rel="noopener">Stanford解説</a></td></tr>
+            <tr><td>侘び</td><td>利休の茶室、楽茶碗、粗い土壁、竹花入</td><td>豪華さではなく、質素・不足・簡素の中に精神性を見る。貧しさそのものではなく、過剰を削いだ強さ。</td><td><a href="https://www.metmuseum.org/essays/the-japanese-tea-ceremony" target="_blank" rel="noopener">Met “Japanese Tea Ceremony”</a>、<a href="https://plato.stanford.edu/entries/japanese-aesthetics/" target="_blank" rel="noopener">Stanford</a></td></tr>
+            <tr><td>寂び</td><td>銀閣寺、古材、古陶、苔、経年した器</td><td>時間の経過、古び、静かな味わいを美と見る。新品の輝きより、年月の沈着を尊ぶ。</td><td><a href="https://plato.stanford.edu/entries/japanese-aesthetics/" target="_blank" rel="noopener">Stanford “Sabi”解説</a></td></tr>
+            <tr><td>もののあはれ</td><td>桜、秋草、月、源氏物語</td><td>消えていくもの、短命なものに強く心を動かされる。桜が象徴的なのは、美しさ以上に散る早さがあるため。</td><td><a href="https://plato.stanford.edu/entries/japanese-aesthetics/" target="_blank" rel="noopener">Stanford “Mono no aware”</a></td></tr>
+            <tr><td>無常</td><td>桜、紅葉、茶会の一期一会、伊勢神宮の式年遷宮</td><td>永遠に固定するより、移ろい・更新・消滅を前提にする。伊勢神宮は20年ごとに社殿を新しくすることで継承する。</td><td><a href="https://www.isejingu.or.jp/sengu/the63rd/" target="_blank" rel="noopener">伊勢神宮公式「式年遷宮」</a></td></tr>
+            <tr><td>幽玄</td><td>能、水墨画、霧の山、月夜、遠景</td><td>はっきり見える美ではなく、奥に隠れている深さ、言葉にしにくい気配を重んじる。</td><td><a href="https://www.britannica.com/art/yugen-Japanese-art" target="_blank" rel="noopener">Britannica “Yūgen”</a>、<a href="https://plato.stanford.edu/entries/japanese-aesthetics/" target="_blank" rel="noopener">Stanford</a></td></tr>
+            <tr><td>切れ／切り継ぎ</td><td>俳句の切れ字、生け花、龍安寺石庭、小津映画のカット</td><td>切断することで、逆に関係性が強まる。花を切る、句を切る、風景を区切ることで、意味が立ち上がる。</td><td><a href="https://plato.stanford.edu/entries/japanese-aesthetics/" target="_blank" rel="noopener">Stanford “Kire”</a></td></tr>
+            <tr><td>不完全・不均整</td><td>井戸茶碗、歪んだ楽茶碗、自然釉の陶器、生け花の非対称</td><td>完璧な左右対称より、少し欠けたもの・揺らいだものに生命感を見る。</td><td><a href="https://www.metmuseum.org/essays/the-japanese-tea-ceremony" target="_blank" rel="noopener">Met 茶陶解説</a>、<a href="https://plato.stanford.edu/entries/japanese-aesthetics/" target="_blank" rel="noopener">Stanford 侘び解説</a></td></tr>
+            <tr><td>偶然性の受容</td><td>備前焼・信楽焼の窯変、水墨のにじみ、木目、石の形</td><td>人間が完全に制御せず、火・土・水・時間・素材の作用を作品の一部にする。</td><td><a href="https://www.metmuseum.org/essays/the-japanese-tea-ceremony" target="_blank" rel="noopener">Met “Japanese Tea Ceremony”</a></td></tr>
+            <tr><td>素材の素直さ</td><td>木、竹、土壁、和紙、石、漆、藁</td><td>素材を覆い隠すより、木目・繊維・土の表情を出す。茶室では粗い材料や未完成感も美になる。</td><td><a href="https://plato.stanford.edu/entries/japanese-aesthetics/" target="_blank" rel="noopener">Stanford 利休の茶室解説</a></td></tr>
+            <tr><td>用の美</td><td>民藝、普段使いの器、籠、染織、木工</td><td>鑑賞用の美術品だけでなく、日常で使う道具の中に美を見る。柳宗悦が民藝として思想化した。</td><td>柳宗悦『民藝とは何か』『手仕事の日本』、<a href="https://www.setagayaartmuseum.or.jp/en/exhibition/special/detail.php?id=sp00218" target="_blank" rel="noopener">世田谷美術館「MINGEI」</a></td></tr>
+            <tr><td>修理の美</td><td>金継ぎ、漆による器の補修</td><td>傷を隠すのではなく、履歴として見せる。壊れたことも、その物の時間として受け入れる。</td><td><a href="https://noma.org/kintsugi-reflects-beauty-in-flaws-strength-in-healing/" target="_blank" rel="noopener">NOMA解説（金継ぎ）</a></td></tr>
+            <tr><td>粋</td><td>江戸の縞、藍・鼠色、薄化粧、控えた色気</td><td>派手すぎず、野暮でなく、少し距離を置いた洗練。京都的な雅とは違う、都市町人の美。</td><td>九鬼周造『「いき」の構造』、<a href="https://plato.stanford.edu/entries/japanese-aesthetics/" target="_blank" rel="noopener">Stanford “Iki”</a></td></tr>
+            <tr><td>序破急</td><td>能、舞、茶の所作、料理コース、庭の回遊動線</td><td>ゆっくり始まり、展開し、最後に締まるリズム。空間体験や食事体験にも応用できる。</td><td><a href="https://www.nohgaku.or.jp/encyclopedia/whats/program.html" target="_blank" rel="noopener">能楽協会</a>、the-Noh.com</td></tr>
+            <tr><td>一期一会</td><td>茶会、季節の料理、宿泊体験</td><td>同じ客、同じ道具、同じ季節は二度と揃わないという感覚。体験を一回性として設計する。</td><td><a href="https://www.metmuseum.org/essays/the-japanese-tea-ceremony" target="_blank" rel="noopener">Met “Japanese Tea Ceremony”</a></td></tr>
+            <tr><td>取り合わせ</td><td>掛軸・花・茶碗・菓子・料理・器の組み合わせ</td><td>単体の豪華さではなく、季節・場・相手に合わせた組み合わせで意味を作る。</td><td><a href="https://www.metmuseum.org/essays/the-japanese-tea-ceremony" target="_blank" rel="noopener">Met “Japanese Tea Ceremony”</a></td></tr>
+            <tr><td>旬</td><td>筍、鮎、松茸、戻り鰹、名残の茄子</td><td>食材の最盛期を重んじる。日本は南北に長く、四季と地域差が大きいため、季節感が料理の中核になった。</td><td><a href="https://www.maff.go.jp/e/policies/market/washoku-world-challenge/en/learning_02.html" target="_blank" rel="noopener">農水省 “Shun / Hashiri / Nagori”</a></td></tr>
+            <tr><td>走り・盛り・名残</td><td>初物、旬の盛り、季節終盤の食材</td><td>同じ食材でも、出始め・最盛期・終わり際で味や情緒を変えて楽しむ。</td><td><a href="https://www.maff.go.jp/e/policies/market/washoku-world-challenge/en/learning_02.html" target="_blank" rel="noopener">農水省解説</a></td></tr>
+            <tr><td>自然美を食卓に移す</td><td>懐石の八寸、季節の葉・花、器替え</td><td>料理そのものだけでなく、器・葉・花・盛り付けで季節を表す。</td><td><a href="https://www.jetro.go.jp/en/jfoodo/washoku.html" target="_blank" rel="noopener">JETRO / JFOODO “Washoku”</a></td></tr>
+            <tr><td>素材の味を尊重する</td><td>出汁、刺身、焼き魚、椀物、塩だけの調理</td><td>強いソースで覆うより、素材の持ち味を引き出す方向に向かいやすい。和食の特徴として「素材の新鮮さと持ち味の尊重」が挙げられる。</td><td><a href="https://www.jetro.go.jp/en/jfoodo/washoku.html" target="_blank" rel="noopener">JETRO / JFOODO “Washoku”</a></td></tr>
+            <tr><td>発酵と湿潤な風土</td><td>味噌、醤油、酢、酒、漬物</td><td>湿潤な気候の中で発酵調味料が発達し、料理の奥行きを作った。</td><td><a href="https://www.maff.go.jp/e/policies/market/washoku-world-challenge/en/learning_02.html" target="_blank" rel="noopener">農水省解説</a></td></tr>
+            <tr><td>行事と食の結びつき</td><td>おせち、雑煮、七草粥、節分、月見団子</td><td>食が年中行事・家族・地域共同体と結びつく。UNESCO登録でも和食は料理単体ではなく文化として扱われている。</td><td><a href="https://ich.unesco.org/en/RL/washoku-traditional-dietary-cultures-of-the-japanese-notably-for-the-celebration-of-new-year-00869" target="_blank" rel="noopener">UNESCO</a> / <a href="https://www.jetro.go.jp/en/jfoodo/washoku.html" target="_blank" rel="noopener">JETRO</a></td></tr>
+            <tr><td>清め・清浄</td><td>神社の手水、白木、白砂、暖簾、料理の盛り台</td><td>汚れを落とす、場を整える、余計なものを排することが、美と礼法に接続する。</td><td>神道・茶道・和食にまたがる切り口。<a href="https://www.isejingu.or.jp/en/" target="_blank" rel="noopener">伊勢神宮</a> ほか</td></tr>
+            <tr><td>奥性</td><td>参道、露地、玄関から客室までの導線、庭の飛石</td><td>いきなり核心を見せず、段階的に奥へ進ませる。期待、静けさ、集中を作る。</td><td>茶の湯・神社建築・庭園論。Marc P. Keane『Japanese Garden Design』ほか</td></tr>
+            <tr><td>縮景・凝縮</td><td>盆栽、庭石、箱庭、弁当、根付</td><td>小さなものの中に大きな自然や物語を閉じ込める。空間・素材・時間を凝縮する感覚。</td><td>盆栽・庭園・工芸論全般</td></tr>
+            <tr><td>控えめな色彩</td><td>墨、藍、鼠色、土色、木の色、苔の緑</td><td>派手な彩色より、自然素材・陰影・経年変化に馴染む色を好む傾向。特に「粋」では鼠・茶・藍などが重要。</td><td>九鬼周造『「いき」の構造』、<a href="https://plato.stanford.edu/entries/japanese-aesthetics/" target="_blank" rel="noopener">Stanford “Iki”</a></td></tr>
+          </tbody>
+        </table>
       </div>
-      <p>ターミナルやリモート接続など、Claude Codeを使う土台となる基本操作のガイドです。</p>
-      <div class="link-list">
-        <a class="link-card" href="/terminal-basics">
-          <div class="lc-body">
-            <div class="lc-title">ターミナル入門（基本コマンドと操作のコツ）</div>
-            <div class="lc-desc">画面の見方からcd／ls、Tab補完、パイプ、安全に使うための必須知識まで。ターミナル初心者向けの入門ガイド。</div>
-            <div class="lc-url">/terminal-basics</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
-        <a class="link-card" href="/screen-sharing">
-          <div class="lc-body">
-            <div class="lc-title">画面共有 接続手順（MacBook Air → Mac mini）</div>
-            <div class="lc-desc">Tailscale経由で、MacBook AirからオフィスのMac miniにmacOS標準の「画面共有」で接続する手順。</div>
-            <div class="lc-url">/screen-sharing</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
-      </div>
-    </section>
-
-    <hr class="rule">
-
-    <!-- ============ skills ============ -->
-    <section class="chapter" id="skills">
-      <div class="chapter-head">
-        <div class="badge">3</div>
-        <h2>業務スキル・ナレッジ</h2>
-      </div>
-      <p>業務で使う専門スキルを、初心者から実務・プロ水準まで体系的に身につけるための解説資料です。</p>
-      <div class="link-list">
-        <a class="link-card" href="/excel-mastery">
-          <div class="lc-body">
-            <div class="lc-title">コンサル・投資銀行水準のExcel 完全ガイド</div>
-            <div class="lc-desc">「Excelが使える」の本当の意味を、所作・集計・分析・設計・検証・伝達から、3表連動モデル・DCF・不動産IRRまで、具体的な数式とワークト例で解説。初心者がプロ水準へ到達するための資料。</div>
-            <div class="lc-url">/excel-mastery</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
-        <a class="link-card" href="/ppt-mastery">
-          <div class="lc-body">
-            <div class="lc-title">コンサル水準のPowerPoint 完全ガイド</div>
-            <div class="lc-desc">「PowerPointが使える」の本当の意味を、所作・内容・論理・スライド設計・ストーリー・説得・検証まで、具体的なメッセージ例とビフォーアフターで解説。相手を動かし意思決定につなげる資料の作り方。</div>
-            <div class="lc-url">/ppt-mastery</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>使い方</div>
+        <p>切り口は排他的ではなく、重なり合います。侘び・寂び・不完全・偶然性・素材の素直さは同じ山の別の斜面ですし、旬・走り盛り名残・行事食は和食という一つの体系の別の側面です。<b>一つのコンセプトに2〜3個を束ねて使う</b>と、輪郭が出ます。</p>
       </div>
     </section>
 
     <hr class="rule">
 
-    <!-- ============ notes ============ -->
-    <section class="chapter" id="notes">
-      <div class="chapter-head">
-        <div class="badge">4</div>
-        <h2>参考・ナレッジノート</h2>
-      </div>
-      <p>企画・コンセプト設計の土台になる、テーマ別のリファレンスノートです。</p>
-      <div class="link-list">
-        <a class="link-card" href="/japanese-aesthetics">
-          <div class="lc-body">
-            <div class="lc-title">日本の美意識：捉え方の切り口</div>
-            <div class="lc-desc">陰影・間・余白・侘び・寂び・幽玄・旬など約30の切り口で日本の美を整理。空間・食・宿泊体験のコンセプト設計に落とすための切り口帳と、主要な参考文献をまとめたリファレンス。</div>
-            <div class="lc-url">/japanese-aesthetics</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
+    <section class="chapter" id="books">
+      <div class="chapter-head"><div class="badge">3</div><h2>特に重要な参考文献</h2></div>
+      <p>まず読むなら、このあたりがかなり強い入口です。</p>
+      <ol class="steps">
+        <li><b>谷崎潤一郎『陰翳礼讃』</b>　日本の陰影、暗さ、漆器、食、建築を考える入口として最重要。</li>
+        <li><b>九鬼周造『「いき」の構造』</b>　江戸的な洗練、渋さ、色気、距離感を考える本。</li>
+        <li><b>岡倉天心『茶の本』</b>　茶の湯を通じて、日本・東洋の美意識を西洋に説明した古典。</li>
+        <li><b>柳宗悦『民藝とは何か』『手仕事の日本』</b>　日用品、手仕事、無名性、用の美を考えるなら必読。</li>
+        <li><b>原研哉『白』『デザインのデザイン』</b>　余白、白、空っぽ。現代デザインに接続するならかなり使いやすい。</li>
+        <li><b>Graham Parkes “Japanese Aesthetics”</b>（<a href="https://plato.stanford.edu/entries/japanese-aesthetics/" target="_blank" rel="noopener">Stanford Encyclopedia of Philosophy</a>）　もののあはれ・侘び・寂び・幽玄・粋・切れを体系的に整理。</li>
+        <li><b>Marc P. Keane『Japanese Garden Design』</b>　庭園、借景、見立て、露地、石組を考えるのに良い。</li>
+        <li><b>農林水産省・JETRO・UNESCO の和食資料</b>　和食を「料理」ではなく、自然・季節・年中行事・地域性の文化として見るのに使える（<a href="https://www.maff.go.jp/e/policies/market/washoku-world-challenge/en/learning_02.html" target="_blank" rel="noopener">農水省</a> ／ <a href="https://www.jetro.go.jp/en/jfoodo/washoku.html" target="_blank" rel="noopener">JETRO</a> ／ <a href="https://ich.unesco.org/en/RL/washoku-traditional-dietary-cultures-of-the-japanese-notably-for-the-celebration-of-new-year-00869" target="_blank" rel="noopener">UNESCO</a>）。</li>
+      </ol>
+    </section>
+
+    <hr class="rule">
+
+    <section class="chapter" id="apply">
+      <div class="chapter-head"><div class="badge">4</div><h2>空間・食のコンセプトへ</h2></div>
+      <p>ホテル・旅館やレストランのコンセプトに落とすなら、特に使いやすいのは <b>陰影／間／余白／季節／借景／奥性／素材の素直さ／不完全さ／一期一会</b> あたりです。いずれも「足す」より「引く」方向で効くため、過剰な投資をかけずに density を上げられます。</p>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/><path d="M9 21h6"/></svg>「高級感」の出し方</div>
+        <p>高級感を出す場合も、金ピカにするより、<b>“見せすぎない・語りすぎない・季節が一瞬だけ現れる”</b> 方向に持っていくと、日本の美としてかなり強くなります。全部を説明せず余白を残す、素材の表情をそのまま出す、その季節にしか出さないものを一点だけ差す——これだけで質は上がります。</p>
       </div>
     </section>
 
     <footer>
-      ドキュメント一覧 ／ 最終更新：2026-07-23
+      日本の美意識ガイド ／ 作成日：2026-07-23
     </footer>
 
   </main>
@@ -685,10 +668,11 @@ body.nav-open nav.drawer{transform:translateX(0)}
 
   /* ---- build nav from headings ---- */
   var NAV = [
-    {id:"guide", label:"Claude Code 運用・活用", num:"1", children:[]},
-    {id:"basics", label:"環境・基礎スキル", num:"2", children:[]},
-    {id:"skills", label:"業務スキル・ナレッジ", num:"3", children:[]},
-    {id:"notes", label:"参考・ナレッジノート", num:"4", children:[]}
+    {id:"intro", label:"日本の美とは何か", num:"◎", children:[]},
+    {id:"inei", label:"陰影という切り口", num:"1", children:[]},
+    {id:"kirikuchi", label:"美を捉える主な切り口", num:"2", children:[]},
+    {id:"books", label:"特に重要な参考文献", num:"3", children:[]},
+    {id:"apply", label:"空間・食のコンセプトへ", num:"4", children:[]}
   ];
 
   function buildNav(host){
