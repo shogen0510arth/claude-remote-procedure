@@ -1208,6 +1208,76 @@ git status、git diff、直近のgit logを確認してください。
     <section class="chapter" id="ch12">
       <div class="chapter-head">
         <div class="badge">12</div>
+        <h2>SFTPでファイルを送受信する</h2>
+      </div>
+      <p>MacBook AirとMac miniの間でファイルやフォルダをやり取りするときは、<code>sftp</code>を使う。SSHと同じ認証で安全に転送でき、GUIを立ち上げずにターミナルだけで完結する。</p>
+
+      <h3 id="ch12-1">12-1. 接続する</h3>
+      <p><b>MacBook Airのターミナル</b>で実行する。接続に成功するとプロンプトが<code>sftp&gt;</code>に変わる。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>sftp [Mac miniのユーザー名]@[Mac miniのIPアドレスまたはホスト名]</code></pre></div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>接続例</div>
+        <p><code>sftp mini_user@192.168.1.50</code> または <code>sftp mini_user@macmini.local</code></p>
+      </div>
+
+      <h3 id="ch12-2">12-2. 場所（ディレクトリ）を指定する</h3>
+      <p>操作の前に、<b>ローカル（Air）</b>と<b>リモート（Mini）</b>それぞれの作業フォルダを決めておくとスムーズ。ローカル側のコマンドは頭に<b><code>l</code>（local）</b>が付く。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>操作</th><th>リモート（Mac mini）</th><th>ローカル（MacBook Air）</th></tr></thead>
+          <tbody>
+            <tr><td>場所の移動</td><td><code>cd [パス]</code></td><td><code>lcd [パス]</code></td></tr>
+            <tr><td>現在の場所を確認</td><td><code>pwd</code></td><td><code>lpwd</code></td></tr>
+            <tr><td>一覧表示</td><td><code>ls</code></td><td><code>lls</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="ch12-3">12-3. ダウンロードする（Mac mini → MacBook Air）</h3>
+      <p>受信は<code>get</code>。フォルダを丸ごと扱うときは<b><code>-r</code>オプション</b>を付ける。保存先を第2引数で直接指定できる。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code># ファイル（現在のローカル場所に保存）
+get [ファイル名]
+# 保存先を直接指定
+get [リモートのファイルパス] [ローカルの保存先パス]
+
+# フォルダごと（-r を付ける）
+get -r [フォルダ名]
+get -r [リモートのフォルダパス] [ローカルの保存先パス]</code></pre></div>
+      <p><b>例：</b><code>get report.pdf ~/Desktop/</code>（デスクトップに保存）／<code>get -r Project ~/Desktop/</code>（Projectフォルダごと保存）</p>
+
+      <h3 id="ch12-4">12-4. アップロードする（MacBook Air → Mac mini）</h3>
+      <p>送信は<code>put</code>。使い方は<code>get</code>と対になっており、フォルダは<code>-r</code>を付ける。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code># ファイル（現在のリモート場所に保存）
+put [ファイル名]
+# 送信先を直接指定
+put [ローカルのファイルパス] [リモートの保存先パス]
+
+# フォルダごと（-r を付ける）
+put -r [フォルダ名]
+put -r [ローカルのフォルダパス] [リモートの保存先パス]</code></pre></div>
+      <p><b>例：</b><code>put ~/Desktop/photo.jpg /Users/mini_user/Pictures/</code>／<code>put -r ~/Desktop/Data /Users/mini_user/Documents/</code></p>
+
+      <h3 id="ch12-5">12-5. おすすめの流れ（先に移動してから転送）</h3>
+      <p>コマンド内で長いパスを指定するより、<b>先に<code>cd</code>と<code>lcd</code>で移動してから</b>シンプルなコマンドで転送するのが一番ミスが少ない。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">SFTP</span><button class="copy">コピー</button></div><pre><code># 1. 保存先・移動先をセット
+sftp> lcd ~/Desktop             # ローカル（Air）をデスクトップに
+sftp> cd /Users/mini/Documents  # リモート（Mini）をDocumentsに
+
+# 2. あとはシンプルに送受信
+sftp> get -r MyFolder           # デスクトップにMyFolderを受信
+sftp> put memo.txt              # Documentsにmemo.txtを送信</code></pre></div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>終了するとき</div>
+        <p>作業が終わったら<code>exit</code>または<code>quit</code>と入力すると接続を終了できる。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 13 ============ -->
+    <section class="chapter" id="ch13">
+      <div class="chapter-head">
+        <div class="badge">13</div>
         <h2>コマンド早見表</h2>
       </div>
       <div class="table-scroll">
@@ -1227,6 +1297,11 @@ git status、git diff、直近のgit logを確認してください。
             <tr><td>現在の作業場所を確認</td><td><code>pwd</code></td></tr>
             <tr><td>ファイルの変更状況を確認</td><td><code>git status</code></td></tr>
             <tr><td>変更内容を確認</td><td><code>git diff</code></td></tr>
+            <tr><td>SFTPで接続（Airから）</td><td><code>sftp user@macmini.local</code></td></tr>
+            <tr><td>ファイルを受信</td><td><code>get report.pdf ~/Desktop/</code></td></tr>
+            <tr><td>フォルダごと受信</td><td><code>get -r Project ~/Desktop/</code></td></tr>
+            <tr><td>ファイルを送信</td><td><code>put ~/Desktop/photo.jpg</code></td></tr>
+            <tr><td>SFTPを終了</td><td><code>exit</code></td></tr>
           </tbody>
         </table>
       </div>
@@ -1350,7 +1425,14 @@ git status、git diff、直近のgit logを確認してください。
       {id:"ch11-8", label:"11-8. 緊急停止"},
       {id:"ch11-9", label:"11-9. SSHでスリープ復帰"}
     ]},
-    {id:"ch12", label:"コマンド早見表", num:"12", children:[]},
+    {id:"ch12", label:"SFTPでファイルを送受信する", num:"12", children:[
+      {id:"ch12-1", label:"12-1. 接続する"},
+      {id:"ch12-2", label:"12-2. 場所の指定"},
+      {id:"ch12-3", label:"12-3. ダウンロード"},
+      {id:"ch12-4", label:"12-4. アップロード"},
+      {id:"ch12-5", label:"12-5. おすすめの流れ"}
+    ]},
+    {id:"ch13", label:"コマンド早見表", num:"13", children:[]},
     {id:"links", label:"参考リンク", num:"＃", children:[]}
   ];
 
