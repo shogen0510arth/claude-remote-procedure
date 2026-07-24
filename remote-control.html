@@ -1173,6 +1173,33 @@ git status、git diff、直近のgit logを確認してください。
         <li><code>git status</code>と<code>git diff</code>を確認する。</li>
         <li>意図しない外部送信があれば、関連サービスの認証情報を無効化する。</li>
       </ol>
+
+      <h3 id="ch11-9">11-9. SSH経由でMac miniをスリープから復帰させる</h3>
+      <p>MacBook AirからSSHでMac miniを起こす方法は、Mac miniが<b>どこまで眠っているか</b>で変わる。まず<code>ssh</code>接続が通るかどうかで場合分けする。</p>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>前提：どのスリープ状態か</div>
+        <p><b>ネットワークスリープ</b>（SSHの待受けに応答する状態）なら下記のコマンドで起こせる。<b>ディープスリープ</b>（SSH自体がタイムアウトする状態）ではコマンドが届かないため、後述のWake on LANが必要になる。いずれもMac mini側で「システム設定 → 省エネルギー（バッテリー）→ ネットワークアクセスによるスリープ解除」が有効である必要がある。</p>
+      </div>
+
+      <h4>A. SSHが繋がる場合（推奨：caffeinate）</h4>
+      <p>接続が確立できているなら、<code>caffeinate</code>でシステムを強制的にウェイクさせるのが最も確実。<code>-u</code>はユーザー操作と同じシグナルを送り、<code>-t 2</code>はその状態を2秒維持する。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>caffeinate -u -t 2</code></pre></div>
+      <p>これで起きない場合は、いったんFinderを呼び出してからウェイクのシグナルを重ねる。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>osascript -e 'tell application "Finder" to sleep' &amp;&amp; caffeinate -u -t 5</code></pre></div>
+
+      <h4>B. ディスプレイだけを起こす場合（AppleScript）</h4>
+      <p>画面出力をONにしたいときは、SSH越しにAppleScriptで無害なキー入力（左矢印＝キーコード123。文字が入らない）をシミュレートする。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>osascript -e 'tell application "System Events" to key code 123'</code></pre></div>
+
+      <h4>C. SSHすら繋がらない場合（Wake on LAN）</h4>
+      <p>完全に沈んでいてSSHがタイムアウトするなら、MacBook AirからWake on LAN（WOL）パケットを送る。初回のみツールを導入する。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>brew install wakeonlan</code></pre></div>
+      <p>Mac miniのMACアドレスに向けてパケットを送出する。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>wakeonlan 00:11:22:33:44:55</code></pre></div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>WOLが効く条件</div>
+        <p>WOLは同一LAN内へのブロードキャストが基本。前提に挙げた「ネットワークアクセスによるスリープ解除」が有効で、かつMACアドレスが正しいことを確認する。外出先など別ネットワークからは直接届かない。</p>
+      </div>
     </section>
 
     <hr class="rule">
@@ -1246,7 +1273,7 @@ git status、git diff、直近のgit logを確認してください。
     </section>
 
     <footer>
-      Claude Code Remote Control 運用手順 ／ 更新日：2026年7月18日<br>
+      Claude Code Remote Control 運用手順 ／ 更新日：2026年7月24日<br>
       対象端末：Mac mini M4・MacBook Air M5・iPhone 15 Pro
     </footer>
 
@@ -1320,7 +1347,8 @@ git status、git diff、直近のgit logを確認してください。
       {id:"ch11-5", label:"11-5. Remote Controlが切れた"},
       {id:"ch11-6", label:"11-6. スマホだけで復旧"},
       {id:"ch11-7", label:"11-7. 変更の競合"},
-      {id:"ch11-8", label:"11-8. 緊急停止"}
+      {id:"ch11-8", label:"11-8. 緊急停止"},
+      {id:"ch11-9", label:"11-9. SSHでスリープ復帰"}
     ]},
     {id:"ch12", label:"コマンド早見表", num:"12", children:[]},
     {id:"links", label:"参考リンク", num:"＃", children:[]}
