@@ -601,8 +601,8 @@ body.nav-open nav.drawer{transform:translateX(0)}
       <a class="dl" href="/files/excel-mastery-full.xlsx" download>
         <span class="dl-icon">XLSX</span>
         <span class="dl-body">
-          <span class="dl-title">解説ファイル：全17シート一括</span>
-          <span class="dl-meta">本ガイドの全シートを1ブックに収録／ Excel 39KB</span>
+          <span class="dl-title">解説ファイル：全19シート一括</span>
+          <span class="dl-meta">本ガイドの全シートを1ブックに収録（2-2-2 スピル関数系・2-3 演算子 問題集を含む）／ Excel 37KB</span>
         </span>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
       </a>
@@ -912,6 +912,65 @@ F2（原価計）   =D2*E2</code></pre></div>
         <span class="dl-body">
           <span class="dl-title">解説ファイル：2-2 データ加工・クリーニング</span>
           <span class="dl-meta">シート「2-2_クリーニング_スピル関数」／ Excel 8KB</span>
+        </span>
+        <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      </a>
+
+      <h3 id="ch2-2-2">2-2-2. データ加工・クリーニング ― スピル関数系</h3>
+      <p>ここは 2-2 の発展編です。<b>動的配列（スピル）関数</b>を組み合わせると、「空白や不要行を除いて・重複をなくして・並べ替える」までを<b>1つの数式</b>で、しかもデータが増減しても崩れない形で作れます。中でも <code>TOCOL</code> の第2引数（<code>1</code>＝空白を無視）が要になります。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>関数</th><th>役割</th></tr></thead>
+          <tbody>
+            <tr><td><code>UNIQUE</code></td><td>重複を除いて一意の値だけにする</td></tr>
+            <tr><td><code>FILTER</code></td><td>条件に合う行/値だけを残す（空白・特定値の除外に）</td></tr>
+            <tr><td><code>SORT</code> / <code>SORTBY</code></td><td>並べ替え。<code>SORTBY</code>は<b>別のキー配列</b>で任意順に並べられる</td></tr>
+            <tr><td><code>TOCOL</code> / <code>TOROW</code></td><td>範囲を縦1列／横1行に畳む。第2引数<code>1</code>で<b>空白を無視</b></td></tr>
+            <tr><td><code>DROP</code></td><td>先頭/末尾から任意の行・列を切り落とす（前置き行の除去に）</td></tr>
+            <tr><td><code>TEXTSPLIT</code></td><td>区切り文字で文字列を分割して配列にする</td></tr>
+            <tr><td><code>SEQUENCE</code></td><td>連番の配列を生成する</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 style="margin:1.3em 0 .4em">使い方例</h4>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>組み合わせ</th><th>使い方例</th><th>数式</th></tr></thead>
+          <tbody>
+            <tr><td><code>UNIQUE + TOCOL</code></td><td>空白を集計しない</td><td><code>=UNIQUE(TOCOL(範囲,1))</code></td></tr>
+            <tr><td><code>UNIQUE + TOCOL + FILTER</code></td><td>空白＋特定セルを除外＝<b>実データのみ</b>ユニーク化</td><td><code>=UNIQUE(TOCOL(FILTER(範囲,範囲&lt;&gt;"合計"),1))</code></td></tr>
+            <tr><td><code>UNIQUE + TOCOL + DROP</code></td><td>空白＋先頭の任意行を除外＝実データのみユニーク化</td><td><code>=UNIQUE(TOCOL(DROP(範囲,3),1))</code></td></tr>
+            <tr><td><code>UNIQUE + TOCOL + DROP + SORTBY</code></td><td>さらに任意の並べ方でソートする</td><td><code>=SORTBY(UNIQUE(TOCOL(DROP(範囲,3),1)), キー, -1)</code></td></tr>
+            <tr><td><code>FILTER + SORTBY</code></td><td>ヘッダー行はのぞいてソートする</td><td><code>=SORTBY(FILTER(B8:E16,C8:C16&lt;&gt;""), E8:E16, -1)</code></td></tr>
+            <tr><td><code>TOCOL / TOROW</code></td><td>データの縦横を変換する</td><td><code>=TOCOL(範囲)</code> ／ <code>=TOROW(範囲)</code></td></tr>
+            <tr><td><code>TOCOL + TEXTSPLIT</code></td><td>カンマ区切りの文字列を縦1列のリストに（web/PDFの表を貼れない時に便利）</td><td><code>=TOCOL(TEXTSPLIT(A1,","))</code></td></tr>
+            <tr><td><code>SEQUENCE + ROWS</code></td><td>データに必要な分だけナンバリングをする</td><td><code>=SEQUENCE(ROWS(範囲))</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><b>「実データのみをユニーク化して並べ替える」までを1本で。</b>元データに空白・『合計』行・先頭の前置き行が混ざっていても、次のように積み上げれば崩れません。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">スピル関数の積み上げ</span><button class="copy">コピー</button></div><pre><code>=UNIQUE(TOCOL(C8:C17,1))                              空白を無視して重複除去
+=UNIQUE(TOCOL(FILTER(C8:C17,C8:C17&lt;&gt;"合計"),1))         「合計」も除外＝実データのみ
+=UNIQUE(TOCOL(DROP(C8:C17,3),1))                      先頭3行を飛ばして重複除去
+=SORTBY(UNIQUE(TOCOL(DROP(C8:C17,3),1)), …, -1)       さらに降順で並べ替え
+=TOCOL(TEXTSPLIT("東京,大阪,名古屋",","))               カンマ区切り→縦1列
+=SEQUENCE(ROWS(C8:C17))                               件数ぶんの連番</code></pre></div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>TOCOL の第2引数がキモ</div>
+        <p><code>TOCOL(範囲, 無視, 列方向)</code> の第2引数は <code>1</code>＝空白を無視／<code>2</code>＝エラーを無視／<code>3</code>＝両方無視。まず <code>TOCOL(範囲,1)</code> で「空白のない1列」に畳んでから <code>UNIQUE</code>・<code>SORTBY</code> をかけるのが定石です。<code>SORTBY</code> は<b>並べ替えキーを別配列で渡せる</b>ため、「表示はA列・並びはB列の売上順」といった指定が可能です。</p>
+      </div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M12 2 2 20h20L12 2z"/><path d="M12 9v5M12 17h.01"/></svg>対応バージョン</div>
+        <p><code>UNIQUE/FILTER/SORT(BY)/SEQUENCE</code> は Microsoft 365／2021 以降、<code>TOCOL/TOROW/DROP/TEXTSPLIT</code> は Microsoft 365（比較的新しい版）が必要です。古い環境では <code>#NAME?</code> になります。</p>
+      </div>
+
+      <a class="dl" href="/files/excel-mastery-2-2-2.xlsx" download>
+        <span class="dl-icon">XLSX</span>
+        <span class="dl-body">
+          <span class="dl-title">解説＋問題集：2-2-2 スピル関数系</span>
+          <span class="dl-meta">実例①〜⑧（自動spill）＋問題Q1〜Q5・解答例／ シート「2-2-2_スピル関数」／ Excel 8KB</span>
         </span>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
       </a>
@@ -1728,6 +1787,7 @@ GPは自己資金割合以上のリターンを、成功時のみ受け取る（
     {id:"ch2", label:"内容：集計・分析・予測", num:"2", children:[
       {id:"ch2-1", label:"2-1. 実績集計"},
       {id:"ch2-2", label:"2-2. データ加工・クリーニング"},
+      {id:"ch2-2-2", label:"2-2-2. スピル関数系"},
       {id:"ch2-3", label:"2-3. 演算子を使いこなす"},
       {id:"ch2-4", label:"2-4. 分析（要因分解）"},
       {id:"ch2-5", label:"2-5. 予測・シミュレーション"}
