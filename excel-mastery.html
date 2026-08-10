@@ -304,6 +304,9 @@ code:not(pre code){
 .note.tip .note-title{color:var(--accent)}
 .note p:last-child{margin-bottom:0}
 .note code:not(pre code){background:color-mix(in srgb,var(--bg-elev) 70%,transparent)}
+details.note summary{list-style:none;margin-bottom:0}
+details.note summary::-webkit-details-marker{display:none}
+details.note[open] summary{margin-bottom:7px}
 
 /* ---------- download ---------- */
 .dl{
@@ -913,7 +916,110 @@ F2（原価計）   =D2*E2</code></pre></div>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
       </a>
 
-      <h3 id="ch2-3">2-3. 分析（要因分解）</h3>
+      <h3 id="ch2-3">2-3. 演算子を使いこなす</h3>
+      <p>関数を覚える前に、まず<b>演算子</b>で差がつきます。連結・範囲指定・あいまい検索を演算子で書けると、式が短く・速く・壊れにくくなります。</p>
+
+      <h4 style="margin:1.2em 0 .4em">① 連結系：<code>&amp;</code>（アンパサンド）</h4>
+      <p>文字や式をつなぎます。用途は大きく2つ。<b>文字の連結</b>と、<b>条件式を他セル参照で組み立てる</b>ことです。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">連結</span><button class="copy">コピー</button></div><pre><code>=A2&" "&B2                     姓と名を半角スペースで連結 → 山田 太郎
+="合計 "&TEXT(C2,"#,##0")&" 円"   固定文言＋数値を整形して連結
+
+＝＝ ここが実務の肝 ＝＝
+=SUMIFS(売上, 日付, ">="&B2)    「B2以上」を"文字">= "＋セル参照で作る
+=COUNTIFS(点数, ">="&E1, 点数, "<"&E2)  E1以上 E2未満
+=SUMIF(A:A, "<>"&F1, C:C)       F1と等しくない行の合計</code></pre></div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>なぜ <code>"&gt;="&amp;B2</code> と書くのか</div>
+        <p>SUMIFS/COUNTIFS の条件は<b>文字列</b>で渡します。<code>"&gt;=80"</code> のように直接書くと基準がベタ書きになり、変えるたびに全式を直すことに。<code>"&gt;="&amp;B2</code> なら<b>基準セルを変えるだけ</b>で全式が追従します。比較記号（<code>&gt;= &lt;= &gt; &lt; &lt;&gt;</code>）は必ず引用符の内側、セル参照は <code>&amp;</code> の外側です。</p>
+      </div>
+
+      <h4 style="margin:1.4em 0 .4em">② 範囲指定を便利にする系：スピル範囲 <code>#</code> ／ トリム参照 <code>.: :. .:.</code></h4>
+      <p>動的配列（スピル）と相性のよい、範囲を<b>自動で伸縮</b>させる演算子です。行を足しても式を直す必要がなくなります。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>演算子</th><th>意味</th><th>例</th></tr></thead>
+          <tbody>
+            <tr><td><code>#</code>（スピル範囲）</td><td>こぼれた結果<b>全体</b>を指す。左上セル＋<code>#</code></td><td><code>=COUNTA(E2#)</code> / <code>=SUM(D2#)</code></td></tr>
+            <tr><td><code>.:</code>（先頭トリム）</td><td>範囲の<b>先頭側</b>の空白行・列を切り詰める</td><td><code>A1.:A</code></td></tr>
+            <tr><td><code>:.</code>（末尾トリム）</td><td>範囲の<b>末尾側</b>の空白行・列を切り詰める</td><td><code>A2:.A</code></td></tr>
+            <tr><td><code>.:.</code>（両側トリム）</td><td>先頭・末尾の<b>両方</b>を切り詰める</td><td><code>A1.:.A</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code"><div class="code-head"><span class="code-lang">スピル範囲＆トリム</span><button class="copy">コピー</button></div><pre><code>E2: =UNIQUE(A2:A1000)     A列の一意リストがE2へこぼれる（件数は可変）
+    =COUNTA(E2#)          そのリストの件数を、行が増減しても自動で数える
+
+=SUM(A2:.A)               A列を「最後のデータまで」だけ合計（末尾の空白を除外）
+                          全列参照 A:A の重さ・誤カウントを避けられる</code></pre></div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M12 2 2 20h20L12 2z"/><path d="M12 9v5M12 17h.01"/></svg>対応バージョンに注意</div>
+        <p>スピルと <code>#</code> は Microsoft 365／2021 以降。トリム参照 <code>.: :. .:.</code> はさらに新しく、<b>最新の Microsoft 365</b> でのみ動きます。古い環境では <code>#REF!</code>／エラーになるため、共有相手の環境を確認してから使ってください。</p>
+      </div>
+
+      <h4 style="margin:1.4em 0 .4em">③ ワイルドカード系：<code>*</code> ／ <code>?</code> ／ <code>~</code></h4>
+      <p>「〜を含む」「〜で始まる」といった<b>あいまい一致</b>を条件に使えます。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>記号</th><th>意味</th><th>例（条件）</th></tr></thead>
+          <tbody>
+            <tr><td><code>*</code></td><td>0文字以上の任意の文字列</td><td><code>"東京*"</code>＝東京で始まる／<code>"*ホテル*"</code>＝ホテルを含む</td></tr>
+            <tr><td><code>?</code></td><td>任意の1文字</td><td><code>"A??"</code>＝Aで始まる3文字</td></tr>
+            <tr><td><code>~</code></td><td>直後の <code>* ? ~</code> を<b>文字そのもの</b>として扱う（エスケープ）</td><td><code>"~*"</code>＝文字どおりの「*」</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code"><div class="code-head"><span class="code-lang">ワイルドカード</span><button class="copy">コピー</button></div><pre><code>=COUNTIF(A:A, "東京*")          「東京」で始まる件数
+=SUMIFS(C:C, A:A, "*ホテル*")    商品名に「ホテル」を含む売上合計
+=COUNTIF(A:A, "*~?")            「?」で終わるセルの数（~でエスケープ）</code></pre></div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>効く関数・効かない関数</div>
+        <p>効く：<code>SUMIF(S)</code> / <code>COUNTIF(S)</code> / <code>AVERAGEIF(S)</code> / <code>SEARCH</code> / <code>MATCH</code>（一致0）/ <code>VLOOKUP</code>・<code>XLOOKUP</code>（あいまい検索指定時）。<b>効かない</b>：<code>FILTER</code> や完全一致の <code>XLOOKUP</code>、比較演算子 <code>=</code> による直接比較。ここでは <code>SEARCH</code>（＝ワイルドカード可）と <code>ISNUMBER</code> の組み合わせで代用します。</p>
+      </div>
+
+      <h4 style="margin:1.4em 0 .4em">④ その他の重要記号：<code>"</code> ／ <code>'</code> ／ <code>^</code></h4>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>記号</th><th>役割</th><th>例</th></tr></thead>
+          <tbody>
+            <tr><td><code>"</code>（ダブルクオート）</td><td>文字列リテラルを囲む。空文字は <code>""</code>。文字列内に <code>"</code> を出すには2つ重ねる</td><td><code>=IF(A1=0,"","OK")</code> ／ <code>=""""&amp;A1&amp;""""</code>＝A1を「"」で囲む</td></tr>
+            <tr><td><code>'</code>（アポストロフィ）</td><td>先頭に付けると<b>文字列として扱う</b>（先頭ゼロ・式の文字表示を保持）。シート名にスペース等がある時は名前を囲む</td><td><code>'001</code>（0落ち防止）／ <code>='7月 実績'!A1</code></td></tr>
+            <tr><td><code>^</code>（キャレット）</td><td><b>べき乗</b>。<code>x^0.5</code> は平方根。演算順は <code>^</code> → <code>* /</code> → <code>+ −</code></td><td><code>=2^10</code>＝1024 ／ <code>=B2^0.5</code>＝√B2</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 style="margin:1.6em 0 .4em">◆ 問題集</h4>
+      <p>実際に式を書いてから、下の解答を開いて答え合わせをしてください（前提：見出しは1行目、データは2行目以降）。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>No.</th><th>ねらい</th><th>問題</th></tr></thead>
+          <tbody>
+            <tr><td>Q1</td><td><code>&amp;</code></td><td>基準値がセル <code>B2</code> にある。C列の売上のうち「<b>B2以上</b>」の合計を SUMIF で求めよ。</td></tr>
+            <tr><td>Q2</td><td><code>&amp;</code></td><td>姓 <code>A2</code> と名 <code>B2</code> を、間に半角スペースを入れて1つの氏名に連結せよ。</td></tr>
+            <tr><td>Q3</td><td><code>&amp;</code></td><td>点数がD列にある。<b>E1以上 E2未満</b>の件数を COUNTIFS で数えよ。</td></tr>
+            <tr><td>Q4</td><td><code>#</code></td><td>セル <code>G2</code> に <code>=UNIQUE(A2:A1000)</code> の結果がこぼれている。その<b>件数</b>を、行が増減しても正しく数えよ。</td></tr>
+            <tr><td>Q5</td><td>トリム</td><td>A列（末尾に空白セルが続く）の合計を、<b>全列参照の重さを避けて</b>「最後のデータまで」だけで求めよ。</td></tr>
+            <tr><td>Q6</td><td>ワイルドカード</td><td>A列の商品名に「<b>ホテル</b>」を含む行の、C列売上の合計を求めよ。</td></tr>
+            <tr><td>Q7</td><td><code>~</code></td><td>A列のうち、文字どおりの「<b>?</b>」で終わるセルの数を数えよ。</td></tr>
+            <tr><td>Q8</td><td><code>^</code></td><td>セル <code>B2</code> の値の<b>平方根</b>を、べき乗演算子で求めよ。</td></tr>
+            <tr><td>Q9</td><td><code>"</code></td><td>A1の中身を、前後を半角ダブルクオートで囲んだ文字列（例：<code>"OK"</code>）として表示せよ。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <details class="note tip" style="cursor:pointer">
+        <summary class="note-title" style="cursor:pointer"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>解答（クリックで開く）</summary>
+        <div class="code" style="margin-top:.6em"><div class="code-head"><span class="code-lang">解答例</span><button class="copy">コピー</button></div><pre><code>Q1  =SUMIF(C:C, ">="&B2)                 合計範囲を省略すると条件範囲を合計
+Q2  =A2&" "&B2
+Q3  =COUNTIFS(D:D, ">="&E1, D:D, "<"&E2)   比較記号は引用符内、セルは & の外
+Q4  =COUNTA(G2#)                          #でスピル範囲全体を参照
+Q5  =SUM(A2:.A)                           末尾トリムで空白を除外（最新365）
+Q6  =SUMIF(A:A, "*ホテル*", C:C)
+Q7  =COUNTIF(A:A, "*~?")                  ~? で「?」そのものを表す
+Q8  =B2^0.5                              =SQRT(B2) でも可
+Q9  =""""&A1&""""                         "" 2つで「"」1つ、計4つで前後を囲む</code></pre></div>
+      </details>
+
+      <h3 id="ch2-4">2-4. 分析（要因分解）</h3>
       <p>集計から一段進み、<b>「なぜそうなったか」を説明できる</b>状態が分析です。まず指標を掛け算・足し算に分解します。</p>
       <div class="table-scroll">
         <table>
@@ -948,7 +1054,7 @@ F2（原価計）   =D2*E2</code></pre></div>
         <p><code>損益分岐点売上高 = 固定費 ÷ 限界利益率</code>（限界利益率 = 1 − 変動費率）。固定費600万円・限界利益率40%なら、分岐点は <code>600 ÷ 0.4 = 1,500万円</code>。この1本で「あと何％売れば黒字か」を即答できます。</p>
       </div>
 
-      <h3 id="ch2-4">2-4. 予測・シミュレーション</h3>
+      <h3 id="ch2-5">2-5. 予測・シミュレーション</h3>
       <p>予測モデルの要件は、<b>入力条件を変えると結果が自動で更新される</b>ことです。事業構造をそのまま数式に落とします。</p>
       <div class="code"><div class="code-head"><span class="code-lang">事業構造の数式化</span><button class="copy">コピー</button></div><pre><code>売上     = 客室売上 + 飲食売上 + その他売上
 客室売上 = 客室数 × 営業日数 × 稼働率 × ADR
@@ -974,11 +1080,11 @@ RevPAR  = 50,000 × 65% = 32,500 円</code></pre></div>
         <p>「稼働率×ADRで営業利益がどう動くか」の一覧は、Excelの<b>What-If分析 → データテーブル</b>で自動生成できます。左上に結果セルを参照し、行に稼働率、列にADRを並べ、範囲選択して実行するだけ。1-2の複合参照と並ぶ、シミュレーションの必須技術です。</p>
       </div>
       <p>シミュレーションの目的は「数字を当てる」ことではなく、<b>「何が変わると、結果がどの程度変わるか」を見えるようにする</b>ことです。</p>
-      <a class="dl" href="/files/excel-mastery-2-4.xlsx" download>
+      <a class="dl" href="/files/excel-mastery-2-5.xlsx" download>
         <span class="dl-icon">XLSX</span>
         <span class="dl-body">
-          <span class="dl-title">解説ファイル：2-4 予測・シミュレーション</span>
-          <span class="dl-meta">2-4_PL①Input〜③Output の3シート／ Excel 10KB</span>
+          <span class="dl-title">解説ファイル：2-5 予測・シミュレーション</span>
+          <span class="dl-meta">PL①Input〜③Output の3シート／ Excel 10KB</span>
         </span>
         <svg class="dl-arrow" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
       </a>
@@ -1440,7 +1546,7 @@ TVの現在価値 = 2,020 × 0.681 = 1,375.6
 Excelなら：=NPV(8%, C2:G2) + TV/(1.08)^5</code></pre></div>
       <div class="note warn">
         <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>継続価値が価値の大半を占める</div>
-        <p>この例では企業価値1,849のうち約74%が継続価値（TV）です。DCFは<b>WACCと永久成長率gにきわめて敏感</b>で、gを1%→2%にするだけでTVが跳ね上がります。だからこそ、WACC×gの<b>感応度表</b>（2-4参照）を必ず添えます。単一の数字を信じないのがプロの流儀です。</p>
+        <p>この例では企業価値1,849のうち約74%が継続価値（TV）です。DCFは<b>WACCと永久成長率gにきわめて敏感</b>で、gを1%→2%にするだけでTVが跳ね上がります。だからこそ、WACC×gの<b>感応度表</b>（2-5参照）を必ず添えます。単一の数字を信じないのがプロの流儀です。</p>
       </div>
 
       <h3 id="ch9-3">9-3. 感度・シナリオ・LBO</h3>
@@ -1474,7 +1580,7 @@ NOI            = EGI − 運営費(OPEX)   ※減価償却・金利・税は含�
    EGI = 100×0.95 + 5 = 100
    NOI = 100 − 40 = 60
    Cap Rate 5% なら 物件価格 = 60 ÷ 0.05 = 1,200</code></pre></div>
-      <p>ホテルでは賃料の代わりに、客室・料飲・物販の売上から運営費を引いた<b>GOP（営業総利益）→NOI</b>を用います。ADR・稼働率・RevPAR（2-3, 2-4参照）がドライバーです。</p>
+      <p>ホテルでは賃料の代わりに、客室・料飲・物販の売上から運営費を引いた<b>GOP（営業総利益）→NOI</b>を用います。ADR・稼働率・RevPAR（2-4, 2-5参照）がドライバーです。</p>
 
       <h3 id="ch10-2">10-2. レバレッジとIRR</h3>
       <p>借入（レバレッジ）を使うと、自己資金あたりのリターンが変わります。健全性は<b>LTV・DSCR</b>で見ます。</p>
@@ -1615,8 +1721,9 @@ GPは自己資金割合以上のリターンを、成功時のみ受け取る（
     {id:"ch2", label:"内容：集計・分析・予測", num:"2", children:[
       {id:"ch2-1", label:"2-1. 実績集計"},
       {id:"ch2-2", label:"2-2. データ加工・クリーニング"},
-      {id:"ch2-3", label:"2-3. 分析（要因分解）"},
-      {id:"ch2-4", label:"2-4. 予測・シミュレーション"}
+      {id:"ch2-3", label:"2-3. 演算子を使いこなす"},
+      {id:"ch2-4", label:"2-4. 分析（要因分解）"},
+      {id:"ch2-5", label:"2-5. 予測・シミュレーション"}
     ]},
     {id:"ch3", label:"設計：更新できる構造", num:"3", children:[
       {id:"ch3-1", label:"3-1. シート構成"},
