@@ -178,7 +178,7 @@ main{min-width:0;padding-bottom:64px}
 }
 
 /* ---------- sections ---------- */
-.chapter{margin-bottom:52px;scroll-margin-top:calc(var(--header-h) + 20px)}
+.chapter{margin-bottom:64px;scroll-margin-top:calc(var(--header-h) + 20px)}
 .chapter-head{
   display:flex;align-items:center;gap:13px;
   padding-bottom:14px;margin-bottom:26px;
@@ -197,11 +197,15 @@ main{min-width:0;padding-bottom:64px}
 
 h3{
   font-size:clamp(17px,4.5vw,20px);font-weight:700;
-  margin:38px 0 14px;line-height:1.5;
+  margin:58px 0 16px;line-height:1.5;
   scroll-margin-top:calc(var(--header-h) + 20px);
   padding-left:13px;border-left:3.5px solid var(--accent);
 }
 h3:first-of-type{margin-top:0}
+h3:not(:first-of-type){
+  border-top:1px solid var(--border);
+  padding-top:34px;
+}
 h4{
   font-size:15px;font-weight:700;color:var(--text);
   margin:26px 0 10px;
@@ -397,7 +401,7 @@ tbody td:first-child{white-space:nowrap;font-weight:600}
 }
 
 /* ---------- divider ---------- */
-.rule{height:1px;background:var(--border);border:none;margin:44px 0}
+.rule{height:1px;background:var(--border);border:none;margin:64px 0}
 
 /* ---------- links section ---------- */
 .link-list{display:flex;flex-direction:column;gap:9px;margin-bottom:8px}
@@ -974,6 +978,11 @@ F2（原価計）   =D2*E2</code></pre></div>
       <div class="note warn">
         <div class="note-title"><svg viewBox="0 0 24 24"><path d="M12 2 2 20h20L12 2z"/><path d="M12 9v5M12 17h.01"/></svg>対応バージョン</div>
         <p><code>UNIQUE/FILTER/SORT(BY)/SEQUENCE/XLOOKUP/EOMONTH</code> は Microsoft 365／2021 以降、<code>TOCOL/TOROW/DROP/TEXTSPLIT</code> は Microsoft 365（比較的新しい版）が必要です。古い環境では <code>#NAME?</code> になります。</p>
+      </div>
+
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M12 2 2 20h20L12 2z"/><path d="M12 9v5M12 17h.01"/></svg>付属Excelを開いたら：数式の「@」を消して確定し直す</div>
+        <p>環境によっては、ダウンロードしたExcelを開いた際に数式の先頭へ自動で <code>@</code>（暗黙的交差演算子）が付くことがあります（例：<code>=@UNIQUE(D:D)</code>）。その場合は数式バーで<b>式の中の <code>@</code> をすべて削除し、Enter で確定し直して</b>ください。正しくスピルします（本来の式は <code>=UNIQUE(D:D)</code> です）。</p>
       </div>
 
       <a class="dl" href="/files/excel-mastery-2-2-2.xlsx" download>
