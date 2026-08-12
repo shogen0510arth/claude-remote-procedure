@@ -5,13 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
-<meta name="description" content="これまでに作成した手順書・ガイドの一覧ポータル。Claude Codeの運用・活用ガイドと、ターミナルや画面共有などの環境・基礎スキルを、タイトルと概要から探せます。">
-<title>ドキュメント一覧 — Claude Code &amp; 業務ツール手順</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-title" content="ドキュメント一覧">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="freee経費精算ツールの使い方。領収書を部門フォルダに入れて、最後にfreeeで申請ボタンを押すだけ。取り込み・読み取り・申請行の作成・下書き投入・検算までをツールが行う運用手順書。">
+<title>freee経費精算ツールの使い方</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧾</text></svg>">
 <style>
 :root{
   --bg:#faf9f7;
@@ -182,7 +178,7 @@ main{min-width:0;padding-bottom:64px}
 }
 
 /* ---------- sections ---------- */
-.chapter{margin-bottom:52px;scroll-margin-top:calc(var(--header-h) + 20px)}
+.chapter{margin-bottom:64px;scroll-margin-top:calc(var(--header-h) + 20px)}
 .chapter-head{
   display:flex;align-items:center;gap:13px;
   padding-bottom:14px;margin-bottom:26px;
@@ -201,11 +197,15 @@ main{min-width:0;padding-bottom:64px}
 
 h3{
   font-size:clamp(17px,4.5vw,20px);font-weight:700;
-  margin:38px 0 14px;line-height:1.5;
+  margin:58px 0 16px;line-height:1.5;
   scroll-margin-top:calc(var(--header-h) + 20px);
   padding-left:13px;border-left:3.5px solid var(--accent);
 }
 h3:first-of-type{margin-top:0}
+h3:not(:first-of-type){
+  border-top:1px solid var(--border);
+  padding-top:34px;
+}
 h4{
   font-size:15px;font-weight:700;color:var(--text);
   margin:26px 0 10px;
@@ -327,8 +327,9 @@ thead th{
 tbody td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.7}
 tbody tr:last-child td{border-bottom:none}
 tbody td:first-child{white-space:nowrap;font-weight:600}
+td.wrap-cell,td.wrap-cell:first-child{white-space:normal}
 
-/* ---------- checklist / tree ---------- */
+/* ---------- tree ---------- */
 .tree{
   background:var(--bg-sunken);border:1px solid var(--border);
   border-radius:var(--radius-sm);padding:14px 13px;margin:0 0 18px;
@@ -337,38 +338,37 @@ tbody td:first-child{white-space:nowrap;font-weight:600}
 }
 .tree b{color:var(--text);font-weight:600}
 
-.status-grid{display:flex;flex-direction:column;gap:7px;margin:0 0 18px}
-.status-item{
-  display:flex;align-items:center;gap:10px;
-  background:var(--bg-elev);border:1px solid var(--border);
-  border-radius:9px;padding:10px 12px;
-  font-family:var(--mono);font-size:12.5px;color:var(--text);
+/* ---------- 2-step highlight ---------- */
+.human-steps{display:flex;flex-direction:column;gap:10px;margin:0 0 18px}
+.human-step{
+  display:flex;align-items:flex-start;gap:12px;
+  background:var(--accent-soft);border:1px solid var(--accent-border);
+  border-radius:var(--radius-sm);padding:14px 15px;
 }
-.status-item .ok{
-  flex:none;width:16px;height:16px;border-radius:50%;
-  background:#2f9e5a;display:flex;align-items:center;justify-content:center;
+.human-step .hs-num{
+  flex:none;width:26px;height:26px;border-radius:8px;
+  background:var(--accent);color:#fff;
+  font-size:13px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
 }
-.status-item .ok svg{width:9px;height:9px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.human-step .hs-body{min-width:0;font-size:15px;line-height:1.7}
+.human-step .hs-body b{font-weight:700}
 
-/* path comparison */
-.path-cmp{display:flex;flex-direction:column;gap:8px;margin:0 0 18px}
-.path-row{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 12px;border-radius:9px;border:1px solid;
-  font-family:var(--mono);font-size:13px;
+/* write badge in tables */
+.wb{
+  display:inline-block;font-size:11px;font-weight:800;
+  padding:2px 8px;border-radius:6px;white-space:nowrap;
 }
-.path-row .tag{font-family:var(--font);font-size:11px;font-weight:800;flex:none;padding:2px 7px;border-radius:5px}
-.path-row.good{background:#eef7f0;border-color:#c6e3ce;color:#1e6b3c}
-.path-row.good .tag{background:#2f9e5a;color:#fff}
-.path-row.bad{background:#fdefee;border-color:#f2cdc9;color:#96382f}
-.path-row.bad .tag{background:#c0392b;color:#fff}
+.wb.none{background:var(--bg-sunken);border:1px solid var(--border-strong);color:var(--text-muted)}
+.wb.yes{background:#fdefee;border:1px solid #f2cdc9;color:#96382f}
+.wb.paid{background:var(--warn-soft);border:1px solid var(--warn-border);color:var(--warn)}
 @media (prefers-color-scheme:dark){
-  .path-row.good{background:#16261c;border-color:#2c4a36;color:#8ed6a6}
-  .path-row.bad{background:#2a1917;border-color:#4f2c28;color:#e59a91}
+  .wb.yes{background:#2a1917;border-color:#4f2c28;color:#e59a91}
 }
 
 /* ---------- divider ---------- */
-.rule{height:1px;background:var(--border);border:none;margin:44px 0}
+.rule{height:1px;background:var(--border);border:none;margin:64px 0}
 
 /* ---------- links section ---------- */
 .link-list{display:flex;flex-direction:column;gap:9px;margin-bottom:8px}
@@ -491,11 +491,6 @@ body.nav-open nav.drawer{transform:translateX(0)}
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 }
-
-/* ---------- portal cards ---------- */
-.link-card{align-items:flex-start}
-.link-card .lc-desc{font-size:13px;color:var(--text-muted);line-height:1.7;margin:4px 0 2px}
-.link-card .lc-arrow{margin-top:2px}
 </style>
 </head>
 <body>
@@ -504,7 +499,7 @@ body.nav-open nav.drawer{transform:translateX(0)}
 
 <header>
   <div class="header-inner">
-    <div class="brand"><i class="dot"></i><span>ドキュメント一覧</span></div>
+    <div class="brand"><i class="dot"></i><span>freee経費精算ツールの使い方</span></div>
     <button class="menu-btn" id="menuBtn" aria-label="目次を開く" aria-expanded="false">
       <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
@@ -532,152 +527,294 @@ body.nav-open nav.drawer{transform:translateX(0)}
   <main>
 
     <div class="hero">
-      <div class="eyebrow">ポータル</div>
-      <h1>ドキュメント一覧</h1>
-      <p class="lead">これまでに作成した手順書・ガイドの一覧です。テーマごとに整理しています。各ページのタイトルと概要から、目的のドキュメントを開いてください。</p>
+      <div class="eyebrow">運用手順書</div>
+      <h1>freee経費精算ツールの<br>使い方</h1>
+      <p class="lead">毎月の経費精算を回すための手順書です。人がやることは2つだけ。領収書を部門フォルダに入れて、最後に freee で「申請」ボタンを押す。その間の取り込み・読み取り・申請行の作成・投入（下書きまで）・検算はツールがやります。</p>
       <div class="meta">
-        <span class="chip">全 <b>8</b> ドキュメント</span>
-        <span class="chip">最終更新：<b>2026-07-20</b></span>
+        <span class="chip">対象：<b>freee-keihi</b></span>
+        <span class="chip">運用開始：<b>2026年9月分</b></span>
+        <span class="chip">人の作業：<b>2ステップ</b></span>
+        <span class="chip">課金：<b>read のみ</b></span>
       </div>
     </div>
 
     <div class="toc-card">
-      <h2>テーマ</h2>
+      <h2>目次</h2>
       <ol id="tocCardList"></ol>
     </div>
 
-    <!-- ============ guide ============ -->
-    <section class="chapter" id="guide">
+    <!-- ============ intro ============ -->
+    <section class="chapter" id="intro">
+      <div class="chapter-head">
+        <div class="badge">◎</div>
+        <h2>人がやることは2つだけ</h2>
+      </div>
+      <div class="human-steps">
+        <div class="human-step">
+          <div class="hs-num">1</div>
+          <div class="hs-body"><b>領収書を部門フォルダに入れる</b></div>
+        </div>
+        <div class="human-step">
+          <div class="hs-num">2</div>
+          <div class="hs-body">最後に freee で <b>「申請」ボタンを押す</b></div>
+        </div>
+      </div>
+      <p>その間の<b>取り込み・読み取り・申請行の作成・投入（下書きまで）・検算</b>をツールがやります。</p>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>ツールは絶対に申請ボタンを押さない</div>
+        <p>ツールがやるのは<b>下書きを作るところまで</b>です。申請API（<code>POST .../actions</code>）は実装していません。最終確認と申請は必ず人が行います。</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 1 ============ -->
+    <section class="chapter" id="ch1">
       <div class="chapter-head">
         <div class="badge">1</div>
-        <h2>Claude Code 運用・活用ガイド</h2>
+        <h2>毎月の手順</h2>
       </div>
-      <p>Mac miniを中心に、Claude Codeでの開発・資料作成・業務自動化を継続的に回すための運用ドキュメントです。</p>
-      <div class="link-list">
-        <a class="link-card" href="/remote-control">
-          <div class="lc-body">
-            <div class="lc-title">Remote Control 運用手順</div>
-            <div class="lc-desc">Mac miniを常時稼働のClaude Code実行環境とし、MacBook Air／iPhoneから画面共有なしでアプリ開発を継続するための運用手順。</div>
-            <div class="lc-url">/remote-control</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
-        <a class="link-card" href="/platforms">
-          <div class="lc-body">
-            <div class="lc-title">プラットフォーム比較と機能ガイド</div>
-            <div class="lc-desc">Claude CodeのCLI／IDE／Macアプリ／iPhoneなど、各プラットフォームの違いと機能を比較するガイド。</div>
-            <div class="lc-url">/platforms</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
-        <a class="link-card" href="/ppt-excel">
-          <div class="lc-body">
-            <div class="lc-title">PowerPoint / Excel 作成ガイド</div>
-            <div class="lc-desc">常時稼働のMac miniを使い、テンプレート準拠のPowerPoint／Excel資料を「翌週も続きから」生成する運用ガイド。</div>
-            <div class="lc-url">/ppt-excel</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
-        <a class="link-card" href="/ota-agent">
-          <div class="lc-body">
-            <div class="lc-title">OTA設定AIエージェント 構築手順</div>
-            <div class="lc-desc">楽天トラベル・一休.comの設定変更を、担当者がチャットで依頼できる専用AIエージェントの構築・運用手順（PC初心者向け）。</div>
-            <div class="lc-url">/ota-agent</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
-        <a class="link-card" href="/freee-keihi">
-          <div class="lc-body">
-            <div class="lc-title">freee経費精算ツールの使い方</div>
-            <div class="lc-desc">領収書を部門フォルダに入れて、最後にfreeeで申請ボタンを押すだけ。取り込み・読み取り・申請行の作成・下書き投入・検算までをツールが行う月次の運用手順書。</div>
-            <div class="lc-url">/freee-keihi</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
+
+      <h3 id="ch1-1">1-1. 領収書をフォルダに入れる</h3>
+      <div class="tree">領収書/
+└── <b>2026年09月/</b>          ← 領収書の日付月
+    ├── <b>01_ARTH/</b>
+    ├── <b>02_WEAZER/</b>
+    └── <b>03_土肥観光/</b></div>
+      <ul class="bullets">
+        <li><b>第1階層は領収書の日付月。</b> 9月フォルダに8月末の領収書が混じっていても、そのまま9月分として扱います。</li>
+        <li><b>第2階層は部門。この1フォルダにつき申請が1件できます</b>（<code>01_ARTH</code> → <code>9月分_ARTH</code>）。</li>
+        <li>ファイルは JPEG・PNG・PDF。</li>
+        <li><code>_old</code> や <code>元データ：…</code> のようなフォルダは自動で無視されます。</li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>HEICは使えない</div>
+        <p>HEIC は freee のOCRにも読み取りにも通りません。iPhoneは <b>設定 → カメラ → フォーマット → 「互換性優先」</b> にしておいてください。</p>
+      </div>
+
+      <h3 id="ch1-2">1-2. コマンドを実行する</h3>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/freee-keihi</code></pre></div>
+      <p><b>慣れるまでは1つずつ。</b> 途中で止めて確認できます。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>./.venv/bin/keihi upload 2026-09        # ① 何が送られるか見る（freeeには何もしない）
+./.venv/bin/keihi upload 2026-09 --yes  # ② ファイルボックスへ送る
+./.venv/bin/keihi read   2026-09        # ③ 証憑を取得して読み取る（★課金あり）
+./.venv/bin/keihi draft  2026-09        # ④ 申請行を組み立てる（freeeには何もしない）
+open work/2026-09/review.md             # ⑤ ここで内容を確認する（人）
+./.venv/bin/keihi submit 2026-09        # ⑥ 何が作られるか見る（作成しない）
+./.venv/bin/keihi submit 2026-09 --yes  # ⑦ 下書きを作る
+./.venv/bin/keihi verify 2026-09        # ⑧ 検算する</code></pre></div>
+      <p><b>2〜3か月まわして問題なければ</b>、①〜⑧を1発でやる <code>run</code> に切り替えてよいです。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>./.venv/bin/keihi run 2026-09 --yes</code></pre></div>
+      <ul class="bullets">
+        <li><code>run</code> はどこかで失敗したらそこで止まり、後続を実行しません。</li>
+        <li>要確認の行が残っていれば⑦の手前で止まります。</li>
+      </ul>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>呼び出し方は2通り</div>
+        <p><code>./.venv/bin/keihi</code> の代わりに <code>uv run keihi</code> でも同じです。</p>
+      </div>
+
+      <h3 id="ch1-3">1-3. freee で確認して申請する</h3>
+      <p><code>work/2026-09/review.md</code> の「要確認」を見ながら、freee の下書きを直して<b>申請ボタンを押します</b>。</p>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>ここだけは人の仕事</div>
+        <p><b>ツールは絶対に申請ボタンを押しません。</b> 下書きを作るところまでしかやりません。</p>
       </div>
     </section>
 
     <hr class="rule">
 
-    <!-- ============ basics ============ -->
-    <section class="chapter" id="basics">
+    <!-- ============ 2 ============ -->
+    <section class="chapter" id="ch2">
       <div class="chapter-head">
         <div class="badge">2</div>
-        <h2>環境・基礎スキル</h2>
+        <h2>コマンド一覧</h2>
       </div>
-      <p>ターミナルやリモート接続など、Claude Codeを使う土台となる基本操作のガイドです。</p>
-      <div class="link-list">
-        <a class="link-card" href="/terminal-basics">
-          <div class="lc-body">
-            <div class="lc-title">ターミナル入門（基本コマンドと操作のコツ）</div>
-            <div class="lc-desc">画面の見方からcd／ls、Tab補完、パイプ、安全に使うための必須知識まで。ターミナル初心者向けの入門ガイド。</div>
-            <div class="lc-url">/terminal-basics</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
-        <a class="link-card" href="/screen-sharing">
-          <div class="lc-body">
-            <div class="lc-title">画面共有 接続手順（MacBook Air → Mac mini）</div>
-            <div class="lc-desc">Tailscale経由で、MacBook AirからオフィスのMac miniにmacOS標準の「画面共有」で接続する手順。</div>
-            <div class="lc-url">/screen-sharing</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>コマンド</th><th>すること</th><th>freeeへの書き込み</th></tr></thead>
+          <tbody>
+            <tr><td><code>upload 2026-09</code></td><td class="wrap-cell">何を送るか表示</td><td><span class="wb none">なし</span></td></tr>
+            <tr><td><code>upload 2026-09 --yes</code></td><td class="wrap-cell">ファイルボックスへ取り込む</td><td><span class="wb yes">あり</span></td></tr>
+            <tr><td><code>read 2026-09</code></td><td class="wrap-cell">証憑を取得して読み取る</td><td><span class="wb none">なし</span> <span class="wb paid">★Claude API課金あり</span></td></tr>
+            <tr><td><code>read 2026-09 --refresh</code></td><td class="wrap-cell">キャッシュを無視して読み直す</td><td><span class="wb none">なし</span> <span class="wb paid">★課金あり</span></td></tr>
+            <tr><td><code>draft 2026-09</code></td><td class="wrap-cell">申請行を組み立てる</td><td><span class="wb none">なし</span></td></tr>
+            <tr><td><code>submit 2026-09</code></td><td class="wrap-cell">何を作るか表示</td><td><span class="wb none">なし</span></td></tr>
+            <tr><td><code>submit 2026-09 --yes</code></td><td class="wrap-cell">下書きを作る</td><td><span class="wb yes">あり（下書きまで）</span></td></tr>
+            <tr><td><code>verify 2026-09</code></td><td class="wrap-cell">下書きと突き合わせる</td><td><span class="wb none">なし</span></td></tr>
+            <tr><td><code>run 2026-09 --yes</code></td><td class="wrap-cell">上を順に全部</td><td><span class="wb yes">あり</span></td></tr>
+          </tbody>
+        </table>
       </div>
+      <h4>補助のオプション</h4>
+      <ul class="bullets">
+        <li><code>upload --section WEAZER</code> … 1部門だけ処理する</li>
+        <li><code>submit --allow-review-pending</code> … 要確認が残っていても投入する（既定は中断）</li>
+      </ul>
     </section>
 
     <hr class="rule">
 
-    <!-- ============ skills ============ -->
-    <section class="chapter" id="skills">
+    <!-- ============ 3 ============ -->
+    <section class="chapter" id="ch3">
       <div class="chapter-head">
         <div class="badge">3</div>
-        <h2>業務スキル・ナレッジ</h2>
+        <h2>出力されるファイル</h2>
       </div>
-      <p>業務で使う専門スキルを、初心者から実務・プロ水準まで体系的に身につけるための解説資料です。</p>
-      <div class="link-list">
-        <a class="link-card" href="/excel-mastery">
-          <div class="lc-body">
-            <div class="lc-title">コンサル・投資銀行水準のExcel 完全ガイド</div>
-            <div class="lc-desc">「Excelが使える」の本当の意味を、所作・集計・分析・設計・検証・伝達から、3表連動モデル・DCF・不動産IRRまで、具体的な数式とワークト例で解説。初心者がプロ水準へ到達するための資料。</div>
-            <div class="lc-url">/excel-mastery</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
-        <a class="link-card" href="/ppt-mastery">
-          <div class="lc-body">
-            <div class="lc-title">コンサル水準のPowerPoint 完全ガイド</div>
-            <div class="lc-desc">「PowerPointが使える」の本当の意味を、所作・内容・論理・スライド設計・ストーリー・説得・検証まで、具体的なメッセージ例とビフォーアフターで解説。相手を動かし意思決定につなげる資料の作り方。</div>
-            <div class="lc-url">/ppt-mastery</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>ファイル</th><th>中身</th></tr></thead>
+          <tbody>
+            <tr><td><code>work/2026-09/files/</code></td><td class="wrap-cell">freeeから取得した証憑の実体</td></tr>
+            <tr><td><code>work/2026-09/receipts.json</code></td><td class="wrap-cell">読み取り結果（発行者・日付・金額・品目・登録番号）</td></tr>
+            <tr><td><code>work/2026-09/draft.json</code></td><td class="wrap-cell">申請行。<code>submit</code> の入力</td></tr>
+            <tr><td><b><code>work/2026-09/review.md</code></b></td><td class="wrap-cell"><b>人が確認するのはこれ</b></td></tr>
+            <tr><td><code>work/2026-09/submitted.json</code></td><td class="wrap-cell">作った申請のid</td></tr>
+            <tr><td><code>work/2026-09/verify.md</code></td><td class="wrap-cell">検算の結果</td></tr>
+            <tr><td><code>docs/edit-history.md</code></td><td class="wrap-cell">人が内容欄を直した記録。次月の起案の材料</td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
     <hr class="rule">
 
-    <!-- ============ notes ============ -->
-    <section class="chapter" id="notes">
+    <!-- ============ 4 ============ -->
+    <section class="chapter" id="ch4">
       <div class="chapter-head">
         <div class="badge">4</div>
-        <h2>参考・ナレッジノート</h2>
+        <h2>お金の話</h2>
       </div>
-      <p>企画・コンセプト設計の土台になる、テーマ別のリファレンスノートです。</p>
-      <div class="link-list">
-        <a class="link-card" href="/japanese-aesthetics">
-          <div class="lc-body">
-            <div class="lc-title">日本の美意識：捉え方の切り口</div>
-            <div class="lc-desc">陰影・間・余白・侘び・寂び・幽玄・旬など約30の切り口で日本の美を整理。空間・食・宿泊体験のコンセプト設計に落とすための切り口帳と、主要な参考文献をまとめたリファレンス。</div>
-            <div class="lc-url">/japanese-aesthetics</div>
-          </div>
-          <span class="lc-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-        </a>
+      <p><b><code>keihi read</code> だけが課金されます。</b> 領収書1枚ごとに Claude API を呼ぶためです。7月分35件で数百円程度でした。</p>
+      <ul class="bullets">
+        <li>2回目以降の <code>read</code> は<b>キャッシュを使うので無料</b>（<code>--refresh</code> を付けなければAPIを呼びません）</li>
+        <li><code>draft</code> のやり直しは何度でも無料。ルールを直して組み立て直すのは気軽にやってよいです</li>
+        <li>読み取り自体をやり直したいときだけ <code>--refresh</code> を付けます</li>
+      </ul>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 5 ============ -->
+    <section class="chapter" id="ch5">
+      <div class="chapter-head">
+        <div class="badge">5</div>
+        <h2>Claude Code をいつ使うか</h2>
+      </div>
+      <p><b>毎月の実行に Claude は要りません。</b> 上のコマンドを打つだけでよいです。</p>
+      <p>このセッションを維持する必要もありません。プロジェクトのフォルダで Claude Code を開けば <code>CLAUDE.md</code> が自動で読まれ、部門の対応・業務ルール・API制約はすべて引き継がれます。<b>むしろ毎月新しいセッションを開くほうが正確</b>です（長いセッションは途中の文脈が要約されて曖昧になります）。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>場面</th><th>やり方</th></tr></thead>
+          <tbody>
+            <tr><td>いつもの月次</td><td class="wrap-cell">ターミナルでコマンド。Claudeは不要</td></tr>
+            <tr><td>要確認の直し方に迷う</td><td class="wrap-cell">プロジェクトで Claude Code を開いて相談</td></tr>
+            <tr><td>読み取りがおかしい</td><td class="wrap-cell">同上。<code>work/2026-09/files/</code> の該当ファイルを直接見て原因を調べられる</td></tr>
+            <tr><td>ルールを増やす・変える</td><td class="wrap-cell">同上。CLAUDE.md とコードとテストをまとめて直す</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>そのまま貼れる文例は <code>docs/PROMPTS.md</code> の末尾にあります。慎重にいきたい月はこう頼みます。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">依頼文の例</span><button class="copy">コピー</button></div><pre><code>2026-09分の経費精算を通してください。
+review.md ができたら、needs_review の行だけ私に見せて確認を取ってから submit に進んでください。</code></pre></div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 6 ============ -->
+    <section class="chapter" id="ch6">
+      <div class="chapter-head">
+        <div class="badge">6</div>
+        <h2>出てくるメッセージと対処</h2>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>メッセージ</th><th>意味と対処</th></tr></thead>
+          <tbody>
+            <tr><td class="wrap-cell"><code>フォルダがありません。</code></td><td class="wrap-cell"><code>2026年09月</code> フォルダが無い。作る</td></tr>
+            <tr><td class="wrap-cell"><code>部門フォルダがありません（第2階層を 01_ARTH 形式にしてください）</code></td><td class="wrap-cell">月フォルダの直下に部門フォルダを作る</td></tr>
+            <tr><td class="wrap-cell"><code>未振り分け: 3件（…）← 部門フォルダへ入れてください</code></td><td class="wrap-cell">月フォルダ直下に置きっぱなしのファイルがある。部門フォルダへ移す</td></tr>
+            <tr><td class="wrap-cell"><code>送るものはありません。</code></td><td class="wrap-cell">全部アップロード済み。正常</td></tr>
+            <tr><td class="wrap-cell"><code>section_id=不明。要確認</code></td><td class="wrap-cell">部門フォルダ名が freee の部門と対応していない。<code>src/keihi/sections.py</code> を直す</td></tr>
+            <tr><td class="wrap-cell"><code>ANTHROPIC_API_KEY がないため…読み取りは保留にします。</code></td><td class="wrap-cell"><code>.env</code> にキーが無い。取得までは動くが読み取りが空になる</td></tr>
+            <tr><td class="wrap-cell"><code>要確認の行が N件 残っています。中断します。</code></td><td class="wrap-cell"><b>正常な安全装置。</b> review.md を見て直すか、<code>--allow-review-pending</code> を付ける</td></tr>
+            <tr><td class="wrap-cell"><code>証憑 X は既に別の取引に添付されている</code></td><td class="wrap-cell">その領収書は別の申請で使用済み。二重計上を防いでスキップした</td></tr>
+            <tr><td class="wrap-cell"><code>新聞図書費はAPIから投入できない。web版freeeで作る</code></td><td class="wrap-cell">後述の制約。その行だけ freee の画面で作る</td></tr>
+            <tr><td class="wrap-cell"><code>設定エラー: FREEE_COMPANY_ID が未設定です。</code></td><td class="wrap-cell"><code>.env</code> が無いか壊れている。<code>cp .env.example .env</code> から</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 7 ============ -->
+    <section class="chapter" id="ch7">
+      <div class="chapter-head">
+        <div class="badge">7</div>
+        <h2>安全のための仕組み</h2>
+      </div>
+      <p>ツールが勝手にやらないこと。</p>
+      <ul class="bullets">
+        <li><b>申請ボタンは押さない。</b> 申請API（<code>POST .../actions</code>）は実装していない</li>
+        <li><b><code>--yes</code> が無ければ freee に書き込まない</b></li>
+        <li><b>要確認が残っていたら投入を中断する</b></li>
+        <li><b>使用済みの証憑はスキップする</b>（1つの証憑は1つの取引にしか添付できない）</li>
+        <li><b>作成直後の status が下書きでなければ即座に中断する</b></li>
+        <li><b>同じ内容のファイルは二度送らない</b>（SHA-256の台帳）</li>
+        <li><b>読めない項目は空のまま人に返す。推測で埋めない</b></li>
+      </ul>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 8 ============ -->
+    <section class="chapter" id="ch8">
+      <div class="chapter-head">
+        <div class="badge">8</div>
+        <h2>いまの制約（2026-08-12 時点）</h2>
+      </div>
+
+      <h3 id="ch8-1">8-1. APIから作れない経費科目が10ある</h3>
+      <p><b>カスタム申請項目が設定されている経費科目は、freeeの仕様でAPIから申請を作れません。</b></p>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>作れない経費科目</div>
+        <p>消耗品費・新聞図書費・通信費・租税公課・採用教育費・外注費・修繕費・諸会費・宿泊仕入高・料飲仕入高</p>
+      </div>
+      <p>該当する行は <code>submit</code> がスキップし、review.md に「web版freeeで作る」と出ます。<b>その行だけ freee の画面で作ります。</b></p>
+      <p>freee側の設定でこの制約を外せる可能性があり、管理者に問い合わせ中です（2026-08-12）。</p>
+
+      <h3 id="ch8-2">8-2. 手作業でアップロードした領収書は部門が分からない</h3>
+      <p>部門は <code>keihi upload</code> が freee の備考に書き込む <code>2026年09月/01_ARTH</code> から復元しています。<b>freee の画面から直接ドラッグ＆ドロップすると、この情報が失われます。</b> 必ず <code>keihi upload</code> 経由で入れてください。</p>
+
+      <h3 id="ch8-3">8-3. 7月分・8月分はこのツールで申請しない</h3>
+      <p>既に freee に手作業で入っており、証憑も別の申請に添付済みです。<b>運用開始は9月分から。</b></p>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ docs ============ -->
+    <section class="chapter" id="docs">
+      <div class="chapter-head">
+        <div class="badge">＃</div>
+        <h2>関連ドキュメント</h2>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>ファイル</th><th>中身</th></tr></thead>
+          <tbody>
+            <tr><td><code>README.md</code></td><td class="wrap-cell">初回セットアップ（OAuth・.env・フォルダ構成）</td></tr>
+            <tr><td><code>CLAUDE.md</code></td><td class="wrap-cell">Claude Code が毎回読む前提知識。業務ルール・マスタID・API制約</td></tr>
+            <tr><td><code>docs/SPEC.md</code></td><td class="wrap-cell">要件定義</td></tr>
+            <tr><td><code>docs/freee-api-notes.md</code></td><td class="wrap-cell">freee APIの実測メモ</td></tr>
+            <tr><td><code>docs/PROMPTS.md</code></td><td class="wrap-cell">開発時の指示と、運用で使う文例</td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
     <footer>
-      ドキュメント一覧 ／ 最終更新：2026-08-12
+      freee経費精算ツールの使い方 ／ 作成日：2026-08-12
     </footer>
 
   </main>
@@ -693,10 +830,24 @@ body.nav-open nav.drawer{transform:translateX(0)}
 
   /* ---- build nav from headings ---- */
   var NAV = [
-    {id:"guide", label:"Claude Code 運用・活用", num:"1", children:[]},
-    {id:"basics", label:"環境・基礎スキル", num:"2", children:[]},
-    {id:"skills", label:"業務スキル・ナレッジ", num:"3", children:[]},
-    {id:"notes", label:"参考・ナレッジノート", num:"4", children:[]}
+    {id:"intro", label:"人がやることは2つだけ", num:"◎", children:[]},
+    {id:"ch1", label:"毎月の手順", num:"1", children:[
+      {id:"ch1-1", label:"1-1. 領収書をフォルダに入れる"},
+      {id:"ch1-2", label:"1-2. コマンドを実行する"},
+      {id:"ch1-3", label:"1-3. freeeで確認して申請する"}
+    ]},
+    {id:"ch2", label:"コマンド一覧", num:"2", children:[]},
+    {id:"ch3", label:"出力されるファイル", num:"3", children:[]},
+    {id:"ch4", label:"お金の話", num:"4", children:[]},
+    {id:"ch5", label:"Claude Code をいつ使うか", num:"5", children:[]},
+    {id:"ch6", label:"出てくるメッセージと対処", num:"6", children:[]},
+    {id:"ch7", label:"安全のための仕組み", num:"7", children:[]},
+    {id:"ch8", label:"いまの制約", num:"8", children:[
+      {id:"ch8-1", label:"8-1. APIから作れない科目"},
+      {id:"ch8-2", label:"8-2. 手作業アップロードは不可"},
+      {id:"ch8-3", label:"8-3. 運用開始は9月分から"}
+    ]},
+    {id:"docs", label:"関連ドキュメント", num:"＃", children:[]}
   ];
 
   function buildNav(host){
