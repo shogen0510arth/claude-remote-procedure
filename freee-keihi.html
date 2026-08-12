@@ -620,6 +620,23 @@ open work/2026-09/review.md             # ⑤ ここで内容を確認する（�
         <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>ここだけは人の仕事</div>
         <p><b>ツールは絶対に申請ボタンを押しません。</b> 下書きを作るところまでしかやりません。</p>
       </div>
+
+      <h3 id="ch1-4">1-4. 月の途中で領収書が増えたら</h3>
+      <p><b>もう一度同じコマンドを流すだけです。</b></p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>./.venv/bin/keihi run 2026-09 --yes</code></pre></div>
+      <ul class="bullets">
+        <li><code>upload</code> … 台帳にある分はスキップ。<b>新しいファイルだけ</b>送られる</li>
+        <li><code>read</code> … <b>読み取り済みの分は使い回す。新しい証憑だけ</b>が読み取られる（＝課金も追加分だけ）</li>
+        <li><code>submit</code> … 既に下書きに入っている行はスキップされる。<b>二重計上しない</b></li>
+      </ul>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>追加分は「2つ目の申請」になる</div>
+        <p><b>freeeの既存の下書きに行を足すことはAPIではできません</b>（freeeの制約）。そのため追加分は「9月分_ARTH」という<b>2つ目の申請</b>として作られます。</p>
+      </div>
+      <p>1つにまとめたいときは、<b>freeeで先に下書きを削除してから</b> <code>run</code> します。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code># freeeの画面で 9月分_ARTH の下書きを削除 → その証憑が未使用に戻る
+./.venv/bin/keihi run 2026-09 --yes    # 全部入りで作り直される</code></pre></div>
+      <p>削除せず2つに分かれたままでも、金額の合計は変わらないので運用上の問題はありません。</p>
     </section>
 
     <hr class="rule">
@@ -782,7 +799,10 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
         <p>消耗品費・新聞図書費・通信費・租税公課・採用教育費・外注費・修繕費・諸会費・宿泊仕入高・料飲仕入高</p>
       </div>
       <p>該当する行は <code>submit</code> がスキップし、review.md に「web版freeeで作る」と出ます。<b>その行だけ freee の画面で作ります。</b></p>
-      <p>freee側の設定でこの制約を外せる可能性があり、管理者に問い合わせ中です（2026-08-12）。</p>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>判定は毎回freeeに問い合わせている</div>
+        <p>使えるかどうかは <b><code>submit</code> のたびに freee に問い合わせて判定</b>しています。freee側で設定を直せば、<b>ツールを直さなくても自動で使えるようになります</b>（管理者に問い合わせ中）。</p>
+      </div>
 
       <h3 id="ch8-2">8-2. 手作業でアップロードした領収書は部門が分からない</h3>
       <p>部門は <code>keihi upload</code> が freee の備考に書き込む <code>2026年09月/01_ARTH</code> から復元しています。<b>freee の画面から直接ドラッグ＆ドロップすると、この情報が失われます。</b> 必ず <code>keihi upload</code> 経由で入れてください。</p>
@@ -834,7 +854,8 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
     {id:"ch1", label:"毎月の手順", num:"1", children:[
       {id:"ch1-1", label:"1-1. 領収書をフォルダに入れる"},
       {id:"ch1-2", label:"1-2. コマンドを実行する"},
-      {id:"ch1-3", label:"1-3. freeeで確認して申請する"}
+      {id:"ch1-3", label:"1-3. freeeで確認して申請する"},
+      {id:"ch1-4", label:"1-4. 月の途中で増えたら"}
     ]},
     {id:"ch2", label:"コマンド一覧", num:"2", children:[]},
     {id:"ch3", label:"出力されるファイル", num:"3", children:[]},
