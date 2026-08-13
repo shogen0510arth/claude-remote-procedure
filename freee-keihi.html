@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
-<meta name="description" content="freee経費精算ツールの使い方。領収書を部門フォルダに入れて、最後にfreeeで申請ボタンを押すだけ。取り込み・読み取り・申請行の作成・下書き投入・検算までをツールが行う運用手順書。">
+<meta name="description" content="freee経費精算ツールの使い方。領収書を部門フォルダに入れて、最後にfreeeで申請ボタンを押すだけ。取り込み・読み取り・申請行の作成・下書き投入・検算をツールが行い、Amazon・スマートEXの領収書は毎月自動で収集する運用手順書。">
 <title>freee経費精算ツールの使い方</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧾</text></svg>">
 <style>
@@ -564,6 +564,10 @@ body.nav-open nav.drawer{transform:translateX(0)}
         <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>ツールは絶対に申請ボタンを押さない</div>
         <p>ツールがやるのは<b>下書きを作るところまで</b>です。申請API（<code>POST .../actions</code>）は実装していません。最終確認と申請は必ず人が行います。</p>
       </div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>AmazonとスマートEXの領収書は自動で集まる</div>
+        <p>毎月1日に前月ぶんが <code>元データ…</code> フォルダへ入り、Slackに通知が飛びます。<b>コマンドを打つ必要はありません。</b> あなたは部門フォルダへ振り分けるだけです（→ <a href="#ch2">領収書を自動で集める</a>）。</p>
+      </div>
     </section>
 
     <hr class="rule">
@@ -591,6 +595,7 @@ body.nav-open nav.drawer{transform:translateX(0)}
         <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>HEICは使えない</div>
         <p>HEIC は freee のOCRにも読み取りにも通りません。iPhoneは <b>設定 → カメラ → フォーマット → 「互換性優先」</b> にしておいてください。</p>
       </div>
+      <p><b>Amazon・スマートEXの領収書はここへ自動で入ります</b>（<code>元データ…</code> の中）。あなたはそこから部門フォルダへ移すだけです。楽天市場・楽天トラベル・Booking.comは当面手で保存します。</p>
 
       <h3 id="ch1-2">1-2. コマンドを実行する</h3>
       <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/freee-keihi</code></pre></div>
@@ -645,6 +650,128 @@ open work/2026-09/review.md             # ⑤ ここで内容を確認する（�
     <section class="chapter" id="ch2">
       <div class="chapter-head">
         <div class="badge">2</div>
+        <h2>領収書を自動で集める（Amazon・スマートEX）</h2>
+      </div>
+      <p><b>この2サイトはコマンドを打つ必要がありません。</b> 毎月 <b>1日・2日・3日 の 9:00</b> に自動で前月ぶんを集め、結果をSlackに通知します。</p>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>なぜ3日に分けるのか</div>
+        <p><b>適格請求書が注文の翌日以降に発行される</b>ためです（実測：Amazonの注文日 8/11 → 請求書発行日 8/12）。月末の注文は1日だけでは取り切れません。2日目・3日目は取得済みのものに触らず、新しいものが無ければ通知もしません。</p>
+      </div>
+
+      <h3 id="ch2-1">2-1. 定常時にあなたがやること — 振り分けだけ</h3>
+      <p>Slackにこう届きます。</p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">Slack通知</span><button class="copy">コピー</button></div><pre><code>📥 経費精算クローラ 2026-08
+領収書を 5件 保存しました（対象 5件 / 取得済み 0件）
+`元データ…` フォルダから部門フォルダへ振り分けてください。</code></pre></div>
+      <p><code>2026年08月/元データ：AMAZON, 楽天…</code> に入ったファイルを、<code>01_ARTH</code>・<code>02_WEAZER</code>・<code>03_土肥観光</code> のどれかに移します。<b>Finderの作業でコマンドは要りません。</b></p>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>置いたままでは送られない</div>
+        <p><b>部門は機械では判断できない</b>のでここは人がやります。ツールは <code>元データ…</code> を走査しないので、置いたままでは freee に送られません。</p>
+      </div>
+      <p>ファイル名で中身が分かるようにしてあります。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">ファイル名の例</span><button class="copy">コピー</button></div><pre><code>[amazon]開発効率をアップする！ Claude Code 実用入門.pdf
+[smartex]2026-08-17_三島-東京_2463.pdf</code></pre></div>
+      <p>振り分けたあとの freee への申請（<code>upload</code>→<code>read</code>→<code>draft</code>→<code>submit</code>→<code>verify</code>）はコマンド実行のままです。<b>そこは自動化していません。</b></p>
+
+      <h3 id="ch2-2">2-2. 非定常時 — Slackに通知が来たときだけ</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Slackの通知</th><th>原因</th><th>やること</th></tr></thead>
+          <tbody>
+            <tr><td class="wrap-cell"><code>Amazonのログインが切れました</code></td><td class="wrap-cell">確認コードを要求された</td><td class="wrap-cell"><code>uv run --extra crawl keihi crawl amazon --login</code></td></tr>
+            <tr><td class="wrap-cell"><code>SMSワンタイムパスワードを求められました</code></td><td class="wrap-cell">スマートEXが端末を忘れた</td><td class="wrap-cell"><code>uv run --extra crawl keihi crawl smartex --login</code>（SMSを人が入力）</td></tr>
+            <tr><td class="wrap-cell"><code>会員IDまたはパスワードが違います</code></td><td class="wrap-cell">スマートEXのパスワードを変えた</td><td class="wrap-cell"><code>./scripts/store-credential.sh smartex &lt;会員ID&gt;</code></td></tr>
+            <tr><td class="wrap-cell"><code>注文を1件も読み取れませんでした</code></td><td class="wrap-cell"><b>サイトの画面が変わった</b></td><td class="wrap-cell">Claude Code に「クローラが壊れた」と伝える。<code>work/crawl/</code> のHTMLを見て直す</td></tr>
+            <tr><td class="wrap-cell"><code>確認してください</code> の箇条書き</td><td class="wrap-cell">下の「要確認になるもの」</td><td class="wrap-cell">内容を見て判断する</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Macが1日〜3日に電源オフだった場合、launchdは起動時に実行します。完全に逃した月だけ手で1回。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/freee-keihi &amp;&amp; ./scripts/schedule.sh test</code></pre></div>
+
+      <h3 id="ch2-3">2-3. 要確認になるもの</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>出力</th><th>意味</th><th>判断すること</th></tr></thead>
+          <tbody>
+            <tr><td class="wrap-cell"><code>適格請求書がまだ無い。「印刷可能な注文概要」で代替した</code></td><td class="wrap-cell">出品者が適格請求書を出していない／発行が翌日以降</td><td class="wrap-cell">仕入税額控除の可否。翌日以降の実行で取り直すこともある</td></tr>
+            <tr><td class="wrap-cell"><code>適格請求書が発行されたので取り直した</code></td><td class="wrap-cell">代替で保存したものが本物に置き換わった</td><td class="wrap-cell">代替のファイルを消す</td></tr>
+            <tr><td class="wrap-cell">取消・払戻の明細（スマートEX）</td><td class="wrap-cell">返金。<b>領収書が付いていることがある</b></td><td class="wrap-cell">経費として戻すか。<b>自動では取得しない</b></td></tr>
+            <tr><td class="wrap-cell"><code>_1.pdf</code> <code>_2.pdf</code> の枝番（Amazon）</td><td class="wrap-cell">分割配送で適格請求書が2枚</td><td class="wrap-cell">両方とも同じ注文。<b>両方アップロードする</b></td></tr>
+            <tr><td class="wrap-cell"><code>キャンセル済みなので対象外</code>（Amazon）</td><td class="wrap-cell">請求が発生していない</td><td class="wrap-cell">何もしなくてよい</td></tr>
+            <tr><td class="wrap-cell"><code>乗車日を読めない</code> <code>日付を読めない</code></td><td class="wrap-cell">どの月か決められない</td><td class="wrap-cell">画面を見て手で保存する</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="ch2-4">2-4. 手で動かすとき</h3>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code># 確認だけ（保存しない）
+uv run --extra crawl keihi crawl amazon  2026-09
+uv run --extra crawl keihi crawl smartex 2026-09
+
+# 実際に保存する
+uv run --extra crawl keihi crawl amazon  2026-09 --yes
+uv run --extra crawl keihi crawl smartex 2026-09 --yes</code></pre></div>
+      <p>自動実行の管理：</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>make schedule-status   # 動く状態か見る
+make schedule-test     # 今すぐ1回動かす（前月が対象）
+make unschedule        # 止める
+make schedule          # 登録し直す</code></pre></div>
+      <p>ログは <code>work/logs/crawl-2026-08.log</code> に月ごとに残ります。Slackが落ちていても領収書の取得は止まりません。</p>
+
+      <h3 id="ch2-5">2-5. 対象月の決め方</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>サイト</th><th>基準</th></tr></thead>
+          <tbody>
+            <tr><td>Amazon</td><td class="wrap-cell"><b>注文日</b>（サブスクは課金日）</td></tr>
+            <tr><td>スマートEX</td><td class="wrap-cell"><b>乗車日</b>（購入日ではない）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>「月を決める基準」と「申請に載せる日付」は別物</div>
+        <p>上の表は<b>どの月フォルダに入れるか</b>を決めるだけです。申請の日付は領収書の中身から読みます（Amazonなら請求書発行日）。</p>
+      </div>
+      <p>スマートEXは8月に買って9月に乗る切符が9月分になります。照会は請求書記載日でしかできないので、対象月の2か月前まで遡って取り、乗車日で絞っています。</p>
+
+      <h3 id="ch2-6">2-6. 初回だけの準備（もう済んでいる）</h3>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>uv sync --extra crawl
+uv run playwright install chromium
+
+# Amazon: Cookieを保存する
+uv run --extra crawl keihi crawl amazon --login
+
+# スマートEX: パスワードをキーチェーンへ入れ、SMS認証を一度通す
+./scripts/store-credential.sh smartex &lt;会員ID&gt;
+uv run --extra crawl keihi crawl smartex --login
+uv run --extra crawl keihi crawl smartex --probe   # 2回目にSMSが要らないか確認
+
+make schedule    # 毎月1日の自動実行を登録</code></pre></div>
+      <p><code>.env</code> に <code>SLACK_WEBHOOK_URL</code>（通知先）と <code>SMARTEX_LOGIN_URL</code>（簡単ログイン画面）を書きます。</p>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>パスワードの置き場所</div>
+        <p><b>スマートEXのパスワードは <code>.env</code> に書きません。</b> macOSキーチェーンに入れます。</p>
+      </div>
+
+      <h3 id="ch2-7">2-7. 制約</h3>
+      <ul class="bullets">
+        <li><b>完全な無人運用にはならない。</b> Amazonもスマートも、ときどき人がログインし直す必要がある。切れたらSlackに通知が飛ぶ</li>
+        <li><b>Macの電源が入っていて、人がログインしている必要がある。</b> LaunchAgentはログインセッションの中で動く</li>
+        <li><b>画面の作りが変わると壊れる。</b> 取得したHTMLは <code>work/crawl/</code> に残るので、それを見て直す</li>
+        <li><b>Amazonの注文履歴は1ページ10件。</b> 対象月より古いページに届くまで自動で送る（2026年は138件・14ページ）。40ページで打ち切り、その場合は「遡れていません」と出る</li>
+        <li><b>スマートEXのSMS認証の記憶がいつまで保たれるかは分からない。</b> 切れたら通知が飛ぶ</li>
+        <li><b>利用規約上のリスクがある。</b> 自分のアカウント・自分のデータでも、自動アクセスは各社の規約で制限されているのが通常。承知の上で使うこと</li>
+        <li><b>楽天市場・楽天トラベル・Booking.comは未対応。</b> 当面これらは手で保存する（2026-08-13に人が決定）</li>
+      </ul>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ============ 3 ============ -->
+    <section class="chapter" id="ch3">
+      <div class="chapter-head">
+        <div class="badge">3</div>
         <h2>コマンド一覧</h2>
       </div>
       <div class="table-scroll">
@@ -663,6 +790,26 @@ open work/2026-09/review.md             # ⑤ ここで内容を確認する（�
           </tbody>
         </table>
       </div>
+      <h4>領収書を集めるほう（<b>freeeには一切触らない</b>）</h4>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>コマンド</th><th>すること</th></tr></thead>
+          <tbody>
+            <tr><td><code>crawl amazon 2026-09</code></td><td class="wrap-cell">何を保存するか表示</td></tr>
+            <tr><td><code>crawl amazon 2026-09 --yes</code></td><td class="wrap-cell">Amazonの適格請求書を保存する</td></tr>
+            <tr><td><code>crawl amazon --login</code></td><td class="wrap-cell">Amazonにログインし直す（Cookieを保存）</td></tr>
+            <tr><td><code>crawl smartex 2026-09</code></td><td class="wrap-cell">何を保存するか表示</td></tr>
+            <tr><td><code>crawl smartex 2026-09 --yes</code></td><td class="wrap-cell">スマートEXの領収書を保存する</td></tr>
+            <tr><td><code>crawl smartex --login</code></td><td class="wrap-cell">スマートEXにログインし直す（SMS認証を人が通す）</td></tr>
+            <tr><td><code>crawl smartex --probe</code></td><td class="wrap-cell">次回SMS認証が要るか確かめる（SMSは送らない）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>通常はどれも打たなくてよい</div>
+        <p>毎月1日〜3日に自動で動きます。</p>
+      </div>
+
       <h4>補助のオプション</h4>
       <ul class="bullets">
         <li><code>upload --section WEAZER</code> … 1部門だけ処理する</li>
@@ -673,9 +820,9 @@ open work/2026-09/review.md             # ⑤ ここで内容を確認する（�
     <hr class="rule">
 
     <!-- ============ 3 ============ -->
-    <section class="chapter" id="ch3">
+    <section class="chapter" id="ch4">
       <div class="chapter-head">
-        <div class="badge">3</div>
+        <div class="badge">4</div>
         <h2>出力されるファイル</h2>
       </div>
       <div class="table-scroll">
@@ -697,9 +844,9 @@ open work/2026-09/review.md             # ⑤ ここで内容を確認する（�
     <hr class="rule">
 
     <!-- ============ 4 ============ -->
-    <section class="chapter" id="ch4">
+    <section class="chapter" id="ch5">
       <div class="chapter-head">
-        <div class="badge">4</div>
+        <div class="badge">5</div>
         <h2>お金の話</h2>
       </div>
       <p><b><code>keihi read</code> だけが課金されます。</b> 領収書1枚ごとに Claude API を呼ぶためです。7月分35件で数百円程度でした。</p>
@@ -713,9 +860,9 @@ open work/2026-09/review.md             # ⑤ ここで内容を確認する（�
     <hr class="rule">
 
     <!-- ============ 5 ============ -->
-    <section class="chapter" id="ch5">
+    <section class="chapter" id="ch6">
       <div class="chapter-head">
-        <div class="badge">5</div>
+        <div class="badge">6</div>
         <h2>Claude Code をいつ使うか</h2>
       </div>
       <p><b>毎月の実行に Claude は要りません。</b> 上のコマンドを打つだけでよいです。</p>
@@ -739,9 +886,9 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
     <hr class="rule">
 
     <!-- ============ 6 ============ -->
-    <section class="chapter" id="ch6">
+    <section class="chapter" id="ch7">
       <div class="chapter-head">
-        <div class="badge">6</div>
+        <div class="badge">7</div>
         <h2>出てくるメッセージと対処</h2>
       </div>
       <div class="table-scroll">
@@ -757,6 +904,8 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
             <tr><td class="wrap-cell"><code>要確認の行が N件 残っています。中断します。</code></td><td class="wrap-cell"><b>正常な安全装置。</b> review.md を見て直すか、<code>--allow-review-pending</code> を付ける</td></tr>
             <tr><td class="wrap-cell"><code>証憑 X は既に別の取引に添付されている</code></td><td class="wrap-cell">その領収書は別の申請で使用済み。二重計上を防いでスキップした</td></tr>
             <tr><td class="wrap-cell"><code>新聞図書費はAPIから投入できない。web版freeeで作る</code></td><td class="wrap-cell">後述の制約。その行だけ freee の画面で作る</td></tr>
+            <tr><td class="wrap-cell"><code>SMSワンタイムパスワードを求められました</code></td><td class="wrap-cell">スマートEXが端末を忘れた。<code>crawl smartex --login</code> をやり直す</td></tr>
+            <tr><td class="wrap-cell"><code>注文を1件も読み取れませんでした</code></td><td class="wrap-cell">サイトの画面が変わった。Claude Code に直してもらう</td></tr>
             <tr><td class="wrap-cell"><code>設定エラー: FREEE_COMPANY_ID が未設定です。</code></td><td class="wrap-cell"><code>.env</code> が無いか壊れている。<code>cp .env.example .env</code> から</td></tr>
           </tbody>
         </table>
@@ -766,9 +915,9 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
     <hr class="rule">
 
     <!-- ============ 7 ============ -->
-    <section class="chapter" id="ch7">
+    <section class="chapter" id="ch8">
       <div class="chapter-head">
-        <div class="badge">7</div>
+        <div class="badge">8</div>
         <h2>安全のための仕組み</h2>
       </div>
       <p>ツールが勝手にやらないこと。</p>
@@ -786,13 +935,13 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
     <hr class="rule">
 
     <!-- ============ 8 ============ -->
-    <section class="chapter" id="ch8">
+    <section class="chapter" id="ch9">
       <div class="chapter-head">
-        <div class="badge">8</div>
+        <div class="badge">9</div>
         <h2>いまの制約（2026-08-12 時点）</h2>
       </div>
 
-      <h3 id="ch8-1">8-1. APIから作れない経費科目が10ある</h3>
+      <h3 id="ch9-1">9-1. APIから作れない経費科目が10ある</h3>
       <p><b>カスタム申請項目が設定されている経費科目は、freeeの仕様でAPIから申請を作れません。</b></p>
       <div class="note warn">
         <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>作れない経費科目</div>
@@ -804,10 +953,10 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
         <p>使えるかどうかは <b><code>submit</code> のたびに freee に問い合わせて判定</b>しています。freee側で設定を直せば、<b>ツールを直さなくても自動で使えるようになります</b>（管理者に問い合わせ中）。</p>
       </div>
 
-      <h3 id="ch8-2">8-2. 手作業でアップロードした領収書は部門が分からない</h3>
+      <h3 id="ch9-2">9-2. 手作業でアップロードした領収書は部門が分からない</h3>
       <p>部門は <code>keihi upload</code> が freee の備考に書き込む <code>2026年09月/01_ARTH</code> から復元しています。<b>freee の画面から直接ドラッグ＆ドロップすると、この情報が失われます。</b> 必ず <code>keihi upload</code> 経由で入れてください。</p>
 
-      <h3 id="ch8-3">8-3. 7月分・8月分はこのツールで申請しない</h3>
+      <h3 id="ch9-3">9-3. 7月分・8月分はこのツールで申請しない</h3>
       <p>既に freee に手作業で入っており、証憑も別の申請に添付済みです。<b>運用開始は9月分から。</b></p>
     </section>
 
@@ -857,16 +1006,25 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
       {id:"ch1-3", label:"1-3. freeeで確認して申請する"},
       {id:"ch1-4", label:"1-4. 月の途中で増えたら"}
     ]},
-    {id:"ch2", label:"コマンド一覧", num:"2", children:[]},
-    {id:"ch3", label:"出力されるファイル", num:"3", children:[]},
-    {id:"ch4", label:"お金の話", num:"4", children:[]},
-    {id:"ch5", label:"Claude Code をいつ使うか", num:"5", children:[]},
-    {id:"ch6", label:"出てくるメッセージと対処", num:"6", children:[]},
-    {id:"ch7", label:"安全のための仕組み", num:"7", children:[]},
-    {id:"ch8", label:"いまの制約", num:"8", children:[
-      {id:"ch8-1", label:"8-1. APIから作れない科目"},
-      {id:"ch8-2", label:"8-2. 手作業アップロードは不可"},
-      {id:"ch8-3", label:"8-3. 運用開始は9月分から"}
+    {id:"ch2", label:"領収書を自動で集める", num:"2", children:[
+      {id:"ch2-1", label:"2-1. 定常時は振り分けだけ"},
+      {id:"ch2-2", label:"2-2. 非定常時（Slack通知）"},
+      {id:"ch2-3", label:"2-3. 要確認になるもの"},
+      {id:"ch2-4", label:"2-4. 手で動かすとき"},
+      {id:"ch2-5", label:"2-5. 対象月の決め方"},
+      {id:"ch2-6", label:"2-6. 初回だけの準備"},
+      {id:"ch2-7", label:"2-7. 制約"}
+    ]},
+    {id:"ch3", label:"コマンド一覧", num:"3", children:[]},
+    {id:"ch4", label:"出力されるファイル", num:"4", children:[]},
+    {id:"ch5", label:"お金の話", num:"5", children:[]},
+    {id:"ch6", label:"Claude Code をいつ使うか", num:"6", children:[]},
+    {id:"ch7", label:"出てくるメッセージと対処", num:"7", children:[]},
+    {id:"ch8", label:"安全のための仕組み", num:"8", children:[]},
+    {id:"ch9", label:"いまの制約", num:"9", children:[
+      {id:"ch9-1", label:"9-1. APIから作れない科目"},
+      {id:"ch9-2", label:"9-2. 手作業アップロードは不可"},
+      {id:"ch9-3", label:"9-3. 運用開始は9月分から"}
     ]},
     {id:"docs", label:"関連ドキュメント", num:"＃", children:[]}
   ];
