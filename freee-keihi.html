@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
-<meta name="description" content="freee経費精算ツールの使い方。領収書を部門フォルダに入れて、最後にfreeeで申請ボタンを押すだけ。取り込み・読み取り・申請行の作成・下書き投入・検算をツールが行い、Amazon・スマートEXの領収書は毎月自動で収集する運用手順書。">
+<meta name="description" content="freee経費精算ツールの使い方。領収書を部門フォルダに入れて、最後にfreeeで申請ボタンを押すだけ。取り込み・読み取り・申請行の作成・下書き投入・検算をツールが行い、Amazon・スマートEX・メールの領収書を自動で収集する運用手順書。">
 <title>freee経費精算ツールの使い方</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧾</text></svg>">
 <style>
@@ -565,9 +565,30 @@ body.nav-open nav.drawer{transform:translateX(0)}
         <p>ツールがやるのは<b>下書きを作るところまで</b>です。申請API（<code>POST .../actions</code>）は実装していません。最終確認と申請は必ず人が行います。</p>
       </div>
       <div class="note tip">
-        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>AmazonとスマートEXの領収書は自動で集まる</div>
-        <p>毎月1日に前月ぶんが <code>元データ…</code> フォルダへ入り、Slackに通知が飛びます。<b>コマンドを打つ必要はありません。</b> あなたは部門フォルダへ振り分けるだけです（→ <a href="#ch2">領収書を自動で集める</a>）。</p>
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Amazon・スマートEX・メールの領収書は自動で集まる</div>
+        <p><code>元データ…</code> フォルダへ入り、Slackの <code>#notification-bot</code> に通知が飛びます。<b>コマンドを打つ必要はありません。</b> あなたは部門フォルダへ振り分けるだけです（→ <a href="#ch2">領収書を自動で集める</a>）。</p>
       </div>
+
+      <h3 id="overview">全体像</h3>
+      <div class="tree">          ┌─ Amazon      ┐                                    ┌─ 01_ARTH ─┐
+自動収集 ─┼─ スマートEX  ┼→ 2026年09月/元データ… → 人が振り分け ┼─ 02_WEAZER ┤
+          └─ メール      ┘                                    └─ 03_土肥観光┘
+                                                                    │
+                                    upload → read → draft → submit → verify
+                                                                    │
+                                                          freeeの下書き → 人が申請</div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>工程</th><th>やるもの</th><th>あなたの作業</th></tr></thead>
+          <tbody>
+            <tr><td>① 集める</td><td class="wrap-cell"><b>自動</b>（launchd。月3回＋15分ごと）</td><td class="wrap-cell">なし。Slackを見るだけ</td></tr>
+            <tr><td>② 振り分け</td><td class="wrap-cell">—</td><td class="wrap-cell"><b><code>元データ…</code> から部門フォルダへ移す</b>（Finder作業）</td></tr>
+            <tr><td>③ freeeへ</td><td class="wrap-cell">コマンド（<code>upload</code>〜<code>verify</code>）</td><td class="wrap-cell">コマンドを打つ</td></tr>
+            <tr><td>④ 申請</td><td class="wrap-cell">—</td><td class="wrap-cell"><b>freeeで申請ボタンを押す</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><b>ツールは絶対に申請ボタンを押しません。</b> ③は下書きを作るところまでです。</p>
     </section>
 
     <hr class="rule">
@@ -595,7 +616,8 @@ body.nav-open nav.drawer{transform:translateX(0)}
         <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>HEICは使えない</div>
         <p>HEIC は freee のOCRにも読み取りにも通りません。iPhoneは <b>設定 → カメラ → フォーマット → 「互換性優先」</b> にしておいてください。</p>
       </div>
-      <p><b>Amazon・スマートEXの領収書はここへ自動で入ります</b>（<code>元データ…</code> の中）。あなたはそこから部門フォルダへ移すだけです。楽天市場・楽天トラベル・Booking.comは当面手で保存します。</p>
+      <p><b>Amazon・スマートEX・メールの領収書はここへ自動で入ります</b>（<code>元データ…</code> の中）。あなたはそこから部門フォルダへ移すだけです。</p>
+      <p>楽天市場・楽天トラベル・Booking.com・じゃらん・JAL・ANA は<b>サイトからの取得が未対応</b>で、手で保存します。ただし<b>予約メールが届いたことはSlackで知らせる</b>ので、取り忘れは防げます。</p>
 
       <h3 id="ch1-2">1-2. コマンドを実行する</h3>
       <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>cd ~/Developer/freee-keihi</code></pre></div>
@@ -650,11 +672,25 @@ open work/2026-09/review.md             # ⑤ ここで内容を確認する（�
     <section class="chapter" id="ch2">
       <div class="chapter-head">
         <div class="badge">2</div>
-        <h2>領収書を自動で集める（Amazon・スマートEX）</h2>
+        <h2>領収書を自動で集める（Amazon・スマートEX・メール）</h2>
       </div>
-      <p><b>この2サイトはコマンドを打つ必要がありません。</b> 毎月 <b>1日・2日・3日 の 9:00</b> に自動で前月ぶんを集め、結果をSlackに通知します。</p>
+      <p><b>この3つはコマンドを打つ必要がありません。</b> 結果はSlackの <code>#notification-bot</code> に届きます。</p>
+      <p><b>自動実行は独立した2つがあります。</b> 片方が動かない日でももう片方は動きます。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>ジョブ</th><th>いつ動くか</th><th>何をするか</th></tr></thead>
+          <tbody>
+            <tr><td><code>jp.arth.keihi.crawl</code></td><td class="wrap-cell"><b>毎月 1日・2日・3日 の 9:00</b>（月3回）</td><td class="wrap-cell">前月ぶんを Amazon → スマートEX → メール の順にまとめて集める</td></tr>
+            <tr><td><code>jp.arth.keihi.watch-mail</code></td><td class="wrap-cell"><b>15分ごと。毎日・24時間</b>（日付の条件なし）</td><td class="wrap-cell">直近7日のメールを見て、届いた請求書を受信月のフォルダへ落とす</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>メール監視は月初の3日間に限らない</div>
+        <p><b>いつでも動いています。</b> 4日でも20日でも15分ごとに見に行きます。</p>
+      </div>
       <div class="note info">
-        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>なぜ3日に分けるのか</div>
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>月次のほうを3日に分ける理由</div>
         <p><b>適格請求書が注文の翌日以降に発行される</b>ためです（実測：Amazonの注文日 8/11 → 請求書発行日 8/12）。月末の注文は1日だけでは取り切れません。2日目・3日目は取得済みのものに触らず、新しいものが無ければ通知もしません。</p>
       </div>
 
@@ -669,8 +705,9 @@ open work/2026-09/review.md             # ⑤ ここで内容を確認する（�
         <p><b>部門は機械では判断できない</b>のでここは人がやります。ツールは <code>元データ…</code> を走査しないので、置いたままでは freee に送られません。</p>
       </div>
       <p>ファイル名で中身が分かるようにしてあります。</p>
-      <div class="code"><div class="code-head"><span class="code-lang">ファイル名の例</span><button class="copy">コピー</button></div><pre><code>[amazon]開発効率をアップする！ Claude Code 実用入門.pdf
-[smartex]2026-08-17_三島-東京_2463.pdf</code></pre></div>
+      <div class="code"><div class="code-head"><span class="code-lang">ファイル名の例</span><button class="copy">コピー</button></div><pre><code>[amazon]開発効率をアップする！ Claude Code 実用入門.pdf   ← 商品名
+[smartex]2026-08-17_三島-東京_2463.pdf                  ← 乗車日・区間・お預かり番号
+[anthropic]2026-07-12_Receipt-2412-4594-8754.pdf        ← 受信日・添付名</code></pre></div>
       <p>振り分けたあとの freee への申請（<code>upload</code>→<code>read</code>→<code>draft</code>→<code>submit</code>→<code>verify</code>）はコマンド実行のままです。<b>そこは自動化していません。</b></p>
 
       <h3 id="ch2-2">2-2. 非定常時 — Slackに通知が来たときだけ</h3>
@@ -708,24 +745,82 @@ open work/2026-09/review.md             # ⑤ ここで内容を確認する（�
       <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code># 確認だけ（保存しない）
 uv run --extra crawl keihi crawl amazon  2026-09
 uv run --extra crawl keihi crawl smartex 2026-09
+uv run keihi crawl mail 2026-09
 
 # 実際に保存する
 uv run --extra crawl keihi crawl amazon  2026-09 --yes
-uv run --extra crawl keihi crawl smartex 2026-09 --yes</code></pre></div>
-      <p>自動実行の管理：</p>
-      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>make schedule-status   # 動く状態か見る
-make schedule-test     # 今すぐ1回動かす（前月が対象）
-make unschedule        # 止める
-make schedule          # 登録し直す</code></pre></div>
-      <p>ログは <code>work/logs/crawl-2026-08.log</code> に月ごとに残ります。Slackが落ちていても領収書の取得は止まりません。</p>
+uv run --extra crawl keihi crawl smartex 2026-09 --yes
+uv run keihi crawl mail 2026-09 --yes
 
-      <h3 id="ch2-5">2-5. 対象月の決め方</h3>
+# 直近7日のメールだけ見る（15分ごとの自動実行と同じ。月の指定は要らない）
+uv run keihi crawl mail --since-days 7</code></pre></div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>メールは <code>--extra crawl</code> が要らない</div>
+        <p>ブラウザを使わないためです。</p>
+      </div>
+      <p>自動実行の管理：</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>make schedule-status   # 動く状態か見る（月次・メール監視の両方）
+make schedule-test     # 今すぐ1回動かす（前月が対象）
+make unschedule        # 止める（両方）
+make schedule          # 登録し直す（両方）</code></pre></div>
+      <p>ログは月次が <code>work/logs/crawl-2026-08.log</code>、メール監視が <code>work/logs/watch-mail.log</code>。Slackが落ちていても領収書の取得は止まりません。</p>
+      <p><b>メール監視の間隔を変える</b>には <code>scripts/schedule.sh</code> の <code>WATCH_SECONDS</code>（秒）を書き換えて登録し直します。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>sed -i '' 's/^WATCH_SECONDS=.*/WATCH_SECONDS=300/' scripts/schedule.sh   # 5分にする
+make schedule</code></pre></div>
+      <p>60秒未満は勧めません（GmailのIMAP接続レートに触れる可能性があり、実益もありません）。</p>
+
+      <h3 id="ch2-5">2-5. メールの請求書（Anthropic・Vercel・Railway・GitHub ほか）</h3>
+      <p><code>shogen0510@gmail.com</code> をIMAPで読み、請求書の添付PDFを保存します。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>種別</th><th>会社</th><th>やること</th></tr></thead>
+          <tbody>
+            <tr><td><b>SaaS</b></td><td class="wrap-cell">Anthropic・Vercel・Railway・GitHub</td><td class="wrap-cell"><b>添付PDFを保存する</b></td></tr>
+            <tr><td><b>旅行</b></td><td class="wrap-cell">Booking.com・楽天トラベル・じゃらん・JAL・ANA</td><td class="wrap-cell"><b>保存しない。「メールがあった」と知らせるだけ</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>旅行系のメールは予約確認であって領収書ではないことが多く、適格請求書の要件を満たしません。<b>サイトから領収書を落とすのは人がやります。</b></p>
+      <div class="code prompt"><div class="code-head"><span class="code-lang">Slack通知</span><button class="copy">コピー</button></div><pre><code>📮 Booking.comのメールあり（2026-08-11）「🛄 Residence Hotel Kamoikeの予約が確定しました！」
+   ← サイトから領収書を落としてください</code></pre></div>
+      <p><b>会社アドレス（shogen-ko@arth-inc.jp）の請求書は、会社Gmailの転送フィルタで個人アドレスへ集約しています。</b> Google Workspaceはアプリパスワードを作れないためです（2026-08-13に人が決定）。転送設定はこれ。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">Gmailの転送フィルタ</span><button class="copy">コピー</button></div><pre><code>From: anthropic.com OR vercel.com OR railway.app OR railway.com OR github.com
+      OR booking.com OR rakuten.co.jp OR jalan.net OR jal.com OR jal.co.jp OR ana.co.jp
+→ 次のアドレスに転送する: shogen0510@gmail.com</code></pre></div>
+      <div class="note warn">
+        <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>転送は設定後に届くメールにだけ効く</div>
+        <p>過去のメールは対象外です。過去分が必要なら、会社Gmailで該当メールを検索して手で転送します（添付ごと転送されます）。Anthropicのメールに載っているStripeのリンクは期限切れ（HTTP 410）で使えません。</p>
+      </div>
+      <p><b>手で転送したメールも拾えます。</b> ただし手動転送は差出人が転送した人に書き換わり、日付も転送日になります。件名の <code>Fwd:</code> を手がかりに本文から会社を判別し、<b>「日付は転送日なので月が正しいか確認してください」と申し送ります</b>（フィルタによる自動転送は元の差出人・日付を保つので、この問題は起きません）。</p>
+      <p>初回だけ準備が要ります。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code># 個人Gmailでアプリパスワードを作る（myaccount.google.com/apppasswords）
+./scripts/store-credential.sh mail-gmail shogen0510@gmail.com</code></pre></div>
+      <p>読み取り専用で開くので、<b>既読にすることもラベルを変えることもしません。</b>「すべてのメール」を見るのでアーカイブ済みも拾います。</p>
+
+      <h4>届いたらすぐ拾う（15分ごと・常時）</h4>
+      <p>月次実行を待たずに、<b>15分ごと（毎日・24時間）に直近7日のメールを見て手元へ落とします。</b> 人がメールを消してしまう前に確保するためです（2026-08-14に人が指定）。<b>月初の3日間だけではなく、月内ずっと動いています。</b></p>
+      <ul class="bullets">
+        <li>保存先は<b>メールごとの受信月</b>のフォルダ。月次実行と台帳を共有するので二度保存しない</li>
+        <li><b>新しいものが無ければ何も出さない。</b> ログにも書かない。15分ごとに動くので、毎回通知すると読まれなくなる</li>
+        <li>旅行系のメールは<b>一度だけ</b>「あった」と知らせる（毎回言わない）</li>
+      </ul>
+      <p>手で動かすとき：</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>uv run keihi crawl mail --since-days 7     # 直近7日を見る。月の指定は要らない
+./scripts/watch-mail.sh                    # launchd と同じもの</code></pre></div>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>参考：取りこぼしてもゴミ箱から戻せる</div>
+        <p>Gmailで消してもゴミ箱に30日間残ります（完全消去しない限り）。15分の取りこぼしがあっても、ゴミ箱から戻せば拾い直せます。ただし「すべてのメール」にゴミ箱は含まれないので、戻す操作は人がやります。</p>
+      </div>
+
+      <h3 id="ch2-6">2-6. 対象月の決め方</h3>
       <div class="table-scroll">
         <table>
           <thead><tr><th>サイト</th><th>基準</th></tr></thead>
           <tbody>
             <tr><td>Amazon</td><td class="wrap-cell"><b>注文日</b>（サブスクは課金日）</td></tr>
             <tr><td>スマートEX</td><td class="wrap-cell"><b>乗車日</b>（購入日ではない）</td></tr>
+            <tr><td>メール（SaaS）</td><td class="wrap-cell">メールの受信日（＝請求日）</td></tr>
+            <tr><td>メール（旅行）</td><td class="wrap-cell">判定しない。保存もしない</td></tr>
           </tbody>
         </table>
       </div>
@@ -735,7 +830,7 @@ make schedule          # 登録し直す</code></pre></div>
       </div>
       <p>スマートEXは8月に買って9月に乗る切符が9月分になります。照会は請求書記載日でしかできないので、対象月の2か月前まで遡って取り、乗車日で絞っています。</p>
 
-      <h3 id="ch2-6">2-6. 初回だけの準備（もう済んでいる）</h3>
+      <h3 id="ch2-7">2-7. 初回だけの準備（もう済んでいる）</h3>
       <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>uv sync --extra crawl
 uv run playwright install chromium
 
@@ -747,14 +842,28 @@ uv run --extra crawl keihi crawl amazon --login
 uv run --extra crawl keihi crawl smartex --login
 uv run --extra crawl keihi crawl smartex --probe   # 2回目にSMSが要らないか確認
 
-make schedule    # 毎月1日の自動実行を登録</code></pre></div>
-      <p><code>.env</code> に <code>SLACK_WEBHOOK_URL</code>（通知先）と <code>SMARTEX_LOGIN_URL</code>（簡単ログイン画面）を書きます。</p>
+# メール: 個人Gmailのアプリパスワードをキーチェーンへ入れる
+./scripts/store-credential.sh mail-gmail shogen0510@gmail.com
+
+make schedule    # 自動実行を2つとも登録（月次・メール監視）</code></pre></div>
+      <p><code>.env</code> に書くもの：</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>変数</th><th>中身</th></tr></thead>
+          <tbody>
+            <tr><td><code>SLACK_WEBHOOK_URL</code></td><td class="wrap-cell">通知先（<code>#notification-bot</code> 宛のIncoming Webhook）</td></tr>
+            <tr><td><code>SMARTEX_LOGIN_URL</code></td><td class="wrap-cell">スマートEXの簡単ログイン画面</td></tr>
+            <tr><td><code>MAIL_ACCOUNT</code></td><td class="wrap-cell">メールを見るアカウントのラベル（既定 <code>gmail</code>）</td></tr>
+            <tr><td><code>ANTHROPIC_API_KEY</code></td><td class="wrap-cell">領収書の読み取りに使う</td></tr>
+          </tbody>
+        </table>
+      </div>
       <div class="note warn">
         <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>パスワードの置き場所</div>
-        <p><b>スマートEXのパスワードは <code>.env</code> に書きません。</b> macOSキーチェーンに入れます。</p>
+        <p><b>パスワード類は <code>.env</code> に書きません。</b> macOSキーチェーンに入れます（<code>scripts/store-credential.sh</code>）。会社Gmailの請求書は転送で個人アドレスへ集約します。</p>
       </div>
 
-      <h3 id="ch2-7">2-7. 制約</h3>
+      <h3 id="ch2-8">2-8. 制約</h3>
       <ul class="bullets">
         <li><b>完全な無人運用にはならない。</b> Amazonもスマートも、ときどき人がログインし直す必要がある。切れたらSlackに通知が飛ぶ</li>
         <li><b>Macの電源が入っていて、人がログインしている必要がある。</b> LaunchAgentはログインセッションの中で動く</li>
@@ -762,7 +871,7 @@ make schedule    # 毎月1日の自動実行を登録</code></pre></div>
         <li><b>Amazonの注文履歴は1ページ10件。</b> 対象月より古いページに届くまで自動で送る（2026年は138件・14ページ）。40ページで打ち切り、その場合は「遡れていません」と出る</li>
         <li><b>スマートEXのSMS認証の記憶がいつまで保たれるかは分からない。</b> 切れたら通知が飛ぶ</li>
         <li><b>利用規約上のリスクがある。</b> 自分のアカウント・自分のデータでも、自動アクセスは各社の規約で制限されているのが通常。承知の上で使うこと</li>
-        <li><b>楽天市場・楽天トラベル・Booking.comは未対応。</b> 当面これらは手で保存する（2026-08-13に人が決定）</li>
+        <li><b>楽天市場・楽天トラベル・Booking.comのサイトからの取得は未対応。</b> 当面手で保存する（2026-08-13に人が決定）。メールの検知だけは <a href="#ch2-5">2-5 メールの請求書</a> で行う</li>
       </ul>
     </section>
 
@@ -802,6 +911,9 @@ make schedule    # 毎月1日の自動実行を登録</code></pre></div>
             <tr><td><code>crawl smartex 2026-09 --yes</code></td><td class="wrap-cell">スマートEXの領収書を保存する</td></tr>
             <tr><td><code>crawl smartex --login</code></td><td class="wrap-cell">スマートEXにログインし直す（SMS認証を人が通す）</td></tr>
             <tr><td><code>crawl smartex --probe</code></td><td class="wrap-cell">次回SMS認証が要るか確かめる（SMSは送らない）</td></tr>
+            <tr><td><code>crawl mail 2026-09</code></td><td class="wrap-cell">何を保存するか表示</td></tr>
+            <tr><td><code>crawl mail 2026-09 --yes</code></td><td class="wrap-cell">メールの請求書PDFを保存する</td></tr>
+            <tr><td><code>crawl mail --since-days 7</code></td><td class="wrap-cell">直近7日を見て受信月のフォルダへ入れる（15分ごとの自動実行と同じ）</td></tr>
           </tbody>
         </table>
       </div>
@@ -906,6 +1018,8 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
             <tr><td class="wrap-cell"><code>新聞図書費はAPIから投入できない。web版freeeで作る</code></td><td class="wrap-cell">後述の制約。その行だけ freee の画面で作る</td></tr>
             <tr><td class="wrap-cell"><code>SMSワンタイムパスワードを求められました</code></td><td class="wrap-cell">スマートEXが端末を忘れた。<code>crawl smartex --login</code> をやり直す</td></tr>
             <tr><td class="wrap-cell"><code>注文を1件も読み取れませんでした</code></td><td class="wrap-cell">サイトの画面が変わった。Claude Code に直してもらう</td></tr>
+            <tr><td class="wrap-cell"><code>にログインできません</code>（メール）</td><td class="wrap-cell">Gmailのアプリパスワードが失効した。<code>./scripts/store-credential.sh mail-gmail &lt;アドレス&gt;</code></td></tr>
+            <tr><td class="wrap-cell"><code>添付が無い（https://…）</code></td><td class="wrap-cell">請求書がリンクだけ。リンクを開いて手で保存する</td></tr>
             <tr><td class="wrap-cell"><code>設定エラー: FREEE_COMPANY_ID が未設定です。</code></td><td class="wrap-cell"><code>.env</code> が無いか壊れている。<code>cp .env.example .env</code> から</td></tr>
           </tbody>
         </table>
@@ -938,7 +1052,7 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
     <section class="chapter" id="ch9">
       <div class="chapter-head">
         <div class="badge">9</div>
-        <h2>いまの制約（2026-08-12 時点）</h2>
+        <h2>いまの制約（2026-08-14 時点）</h2>
       </div>
 
       <h3 id="ch9-1">9-1. APIから作れない経費科目が10ある</h3>
@@ -958,6 +1072,12 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
 
       <h3 id="ch9-3">9-3. 7月分・8月分はこのツールで申請しない</h3>
       <p>既に freee に手作業で入っており、証憑も別の申請に添付済みです。<b>運用開始は9月分から。</b></p>
+
+      <h3 id="ch9-4">9-4. 楽天市場・楽天トラベル・Booking.com・じゃらん・JAL・ANA は手で保存する</h3>
+      <p>サイトからの自動取得は未対応です（2026-08-13に人が決定）。ただし<b>予約メールが届いたことはSlackで一度だけ知らせる</b>ので、取り忘れは防げます。</p>
+
+      <h3 id="ch9-5">9-5. 会社アドレスの請求書は転送で集める</h3>
+      <p>Google Workspace（arth-inc.jp）は<b>アプリパスワードを作れない</b>ため、IMAPで直接読めません。会社Gmailのフィルタで個人アドレスへ転送して集約しています。<b>転送設定より前に届いたメールは対象外です。</b> 必要なら手で転送します。</p>
     </section>
 
     <hr class="rule">
@@ -983,7 +1103,7 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
     </section>
 
     <footer>
-      freee経費精算ツールの使い方 ／ 作成日：2026-08-12
+      freee経費精算ツールの使い方 ／ 作成日：2026-08-12 ／ 更新日：2026-08-14
     </footer>
 
   </main>
@@ -999,7 +1119,9 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
 
   /* ---- build nav from headings ---- */
   var NAV = [
-    {id:"intro", label:"人がやることは2つだけ", num:"◎", children:[]},
+    {id:"intro", label:"人がやることは2つだけ", num:"◎", children:[
+      {id:"overview", label:"全体像"}
+    ]},
     {id:"ch1", label:"毎月の手順", num:"1", children:[
       {id:"ch1-1", label:"1-1. 領収書をフォルダに入れる"},
       {id:"ch1-2", label:"1-2. コマンドを実行する"},
@@ -1011,9 +1133,10 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
       {id:"ch2-2", label:"2-2. 非定常時（Slack通知）"},
       {id:"ch2-3", label:"2-3. 要確認になるもの"},
       {id:"ch2-4", label:"2-4. 手で動かすとき"},
-      {id:"ch2-5", label:"2-5. 対象月の決め方"},
-      {id:"ch2-6", label:"2-6. 初回だけの準備"},
-      {id:"ch2-7", label:"2-7. 制約"}
+      {id:"ch2-5", label:"2-5. メールの請求書"},
+      {id:"ch2-6", label:"2-6. 対象月の決め方"},
+      {id:"ch2-7", label:"2-7. 初回だけの準備"},
+      {id:"ch2-8", label:"2-8. 制約"}
     ]},
     {id:"ch3", label:"コマンド一覧", num:"3", children:[]},
     {id:"ch4", label:"出力されるファイル", num:"4", children:[]},
@@ -1024,7 +1147,9 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
     {id:"ch9", label:"いまの制約", num:"9", children:[
       {id:"ch9-1", label:"9-1. APIから作れない科目"},
       {id:"ch9-2", label:"9-2. 手作業アップロードは不可"},
-      {id:"ch9-3", label:"9-3. 運用開始は9月分から"}
+      {id:"ch9-3", label:"9-3. 運用開始は9月分から"},
+      {id:"ch9-4", label:"9-4. 旅行系は手で保存"},
+      {id:"ch9-5", label:"9-5. 会社アドレスは転送"}
     ]},
     {id:"docs", label:"関連ドキュメント", num:"＃", children:[]}
   ];
