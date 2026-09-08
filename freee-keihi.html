@@ -642,14 +642,46 @@ open work/2026-09/review.md             # ⑤ ここで内容を確認する（�
         <p><code>./.venv/bin/keihi</code> の代わりに <code>uv run keihi</code> でも同じです。</p>
       </div>
 
-      <h3 id="ch1-3">1-3. freee で確認して申請する</h3>
+      <h3 id="ch1-2b">1-3. 要確認が残っていても下書きを作る</h3>
+      <p><code>submit</code> は <b>要確認の行が1件でも残っていると手前で止まります。</b> これは既定の安全装置です。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>要確認の行が 16件 残っています。中断します。
+  work/2026-08/review.md を確認してください。
+  そのまま投入するなら --allow-review-pending を付けてください。</code></pre></div>
+      <p>ただし要確認には、<b>手を入れられないもの</b>が混ざります。区間の印字がないタクシー・駐車場のレシート、外貨建ての申し送り、登録番号なしの通知などです。これらを待っていると先に進めないので、<b>先に下書きを作ってしまい、freeeの画面を見ながら直す</b>ほうが早いことがあります。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>./.venv/bin/keihi submit 2026-08 --allow-review-pending --yes</code></pre></div>
+      <ul class="bullets">
+        <li><code>--allow-review-pending</code> … 要確認が残っていても止まらない</li>
+        <li><code>--yes</code> … 実際に投入する。<b>付けないとdry-run</b>（何を作るか表示するだけ）</li>
+        <li><b>2つとも必要です。</b> <code>--yes</code> だけだと要確認で止まり、<code>--allow-review-pending</code> だけだとdry-runで終わります</li>
+      </ul>
+      <div class="note info">
+        <div class="note-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>やり直せます</div>
+        <p>作られるのは<b>下書きだけ</b>です。気に入らなければ freee で下書きごと削除し、直してから入れ直せます。<b>申請ボタンは仕組みとして押しません。</b></p>
+      </div>
+      <p>投入したら必ず検算します。<b>freeeの画面で内容欄を手で直した分は差分として出て、<code>docs/edit-history.md</code> に記録されます。</b></p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>./.venv/bin/keihi verify 2026-08</code></pre></div>
+
+      <h4>要確認を減らす2つの手</h4>
+      <p><b>用途をまとめて省く</b> … 物品やSaaSの内容欄は既定で「用途」を求めます。今回は書かないと決めたなら <code>--no-purpose</code> を付けて <code>draft</code> し直します。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>./.venv/bin/keihi draft 2026-08 --no-purpose</code></pre></div>
+      <p><b>科目を人が決める</b> … ルールで当てられず「その他」になった行は、<code>work/2026-08/overrides.json</code> に書けば要確認から外れます。<b>科目だけ指定すると内容欄が科目に引きずられる</b>ことがあるので、内容欄も一緒に書くのが安全です。</p>
+      <div class="code"><div class="code-head"><span class="code-lang">JSON</span><button class="copy">コピー</button></div><pre><code>{
+  "500691816": {
+    "template_id": 399393,
+    "note": "会議費（人の指定 2026-09-08）",
+    "description": "あんみつ(※軽減税率対象) ×60、送料 ×1"
+  }
+}</code></pre></div>
+      <p>キーは <code>receipt_id</code>（<code>review.md</code> に出ています）。<code>template_id</code> は<a href="#ch5">経費科目の一覧</a>のIDです。<b>書いたものはルールより強く効きます。</b></p>
+
+      <h3 id="ch1-3">1-4. freee で確認して申請する</h3>
       <p><code>work/2026-09/review.md</code> の「要確認」を見ながら、freee の下書きを直して<b>申請ボタンを押します</b>。</p>
       <div class="note warn">
         <div class="note-title"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>ここだけは人の仕事</div>
         <p><b>ツールは絶対に申請ボタンを押しません。</b> 下書きを作るところまでしかやりません。</p>
       </div>
 
-      <h3 id="ch1-4">1-4. 月の途中で領収書が増えたら</h3>
+      <h3 id="ch1-4">1-5. 月の途中で領収書が増えたら</h3>
       <p><b>もう一度同じコマンドを流すだけです。</b></p>
       <div class="code"><div class="code-head"><span class="code-lang">BASH</span><button class="copy">コピー</button></div><pre><code>./.venv/bin/keihi run 2026-09 --yes</code></pre></div>
       <ul class="bullets">
@@ -959,8 +991,10 @@ make schedule                        # 自動実行を2つとも登録（月次�
             <tr><td><code>read 2026-09</code></td><td class="wrap-cell">証憑を取得して読み取る</td><td><span class="wb none">なし</span> <span class="wb paid">★Claude API課金あり</span></td></tr>
             <tr><td><code>read 2026-09 --refresh</code></td><td class="wrap-cell">キャッシュを無視して読み直す</td><td><span class="wb none">なし</span> <span class="wb paid">★課金あり</span></td></tr>
             <tr><td><code>draft 2026-09</code></td><td class="wrap-cell">申請行を組み立てる</td><td><span class="wb none">なし</span></td></tr>
+            <tr><td><code>draft 2026-09 --no-purpose</code></td><td class="wrap-cell">用途を空欄のまま組み立てる</td><td><span class="wb none">なし</span></td></tr>
             <tr><td><code>submit 2026-09</code></td><td class="wrap-cell">何を作るか表示</td><td><span class="wb none">なし</span></td></tr>
             <tr><td><code>submit 2026-09 --yes</code></td><td class="wrap-cell">下書きを作る</td><td><span class="wb yes">あり（下書きまで）</span></td></tr>
+            <tr><td><code>submit 2026-09 --allow-review-pending --yes</code></td><td class="wrap-cell">要確認が残っていても下書きを作る</td><td><span class="wb yes">あり（下書きまで）</span></td></tr>
             <tr><td><code>verify 2026-09</code></td><td class="wrap-cell">下書きと突き合わせる</td><td><span class="wb none">なし</span></td></tr>
             <tr><td><code>run 2026-09 --yes</code></td><td class="wrap-cell">上を順に全部</td><td><span class="wb yes">あり</span></td></tr>
           </tbody>
@@ -993,7 +1027,8 @@ make schedule                        # 自動実行を2つとも登録（月次�
       <h4>補助のオプション</h4>
       <ul class="bullets">
         <li><code>upload --section WEAZER</code> … 1部門だけ処理する</li>
-        <li><code>submit --allow-review-pending</code> … 要確認が残っていても投入する（既定は中断）</li>
+        <li><code>submit --allow-review-pending</code> … 要確認が残っていても投入する（既定は中断）。<code>--yes</code> と<b>併せて</b>付ける</li>
+        <li><code>draft --no-purpose</code> … 内容欄に用途を求めない（既定は求めて要確認にする）</li>
       </ul>
     </section>
 
@@ -1205,8 +1240,9 @@ review.md ができたら、needs_review の行だけ私に見せて確認を取
     {id:"ch1", label:"毎月の手順", num:"1", children:[
       {id:"ch1-1", label:"1-1. 領収書をフォルダに入れる"},
       {id:"ch1-2", label:"1-2. コマンドを実行する"},
-      {id:"ch1-3", label:"1-3. freeeで確認して申請する"},
-      {id:"ch1-4", label:"1-4. 月の途中で増えたら"}
+      {id:"ch1-2b", label:"1-3. 要確認が残っていても作る"},
+      {id:"ch1-3", label:"1-4. freeeで確認して申請する"},
+      {id:"ch1-4", label:"1-5. 月の途中で増えたら"}
     ]},
     {id:"ch2", label:"領収書を自動で集める", num:"2", children:[
       {id:"ch2-1", label:"2-1. 定常時は振り分けだけ"},
